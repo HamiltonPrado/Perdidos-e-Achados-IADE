@@ -1,0 +1,22 @@
+# Dependências
+node_modules/
+vendor/
+
+# Builds
+dist/
+build/
+
+# Variáveis de ambiente (nunca enviar para o GitHub!)
+.env
+.env.local
+
+# Fotos enviadas pelos utilizadores
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

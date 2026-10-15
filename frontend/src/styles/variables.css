@@ -1,0 +1,13 @@
+/* Cores e fontes da app. Ajustar aos valores oficiais do IADE. */
+:root {
+  --cor-preto: #111111;
+  --cor-texto: #1a1a1a;
+  --cor-texto-secundario: #5a5a5a;
+  --cor-fundo: #f4f4f2;
+  --cor-superficie: #ffffff;
+  --cor-borda: #dcdcd8;
+  --cor-destaque: #1f4fd8; /* provisória */
+
+  --fonte-titulos: 'Archivo', sans-serif;
+  --fonte-texto: 'Public Sans', sans-serif;
+}
