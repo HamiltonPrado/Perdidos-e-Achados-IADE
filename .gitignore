@@ -20,3 +20,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+tatus --short
+
+/backend/config/credenciais.php
