@@ -90,11 +90,46 @@ if ($metodo === 'POST' && $caminho === '/api/login') {
         ], 401);
     }
 
+ try {
+    require_once __DIR__ . '/../helpers/sessao.php';
+
+    iniciarSessao($pdo);
+
+    if (!session_regenerate_id(true)) {
+        throw new RuntimeException(
+            'Não foi possível renovar o identificador da sessão.'
+        );
+    }
+
+    $_SESSION = [
+        'user_id' => $utilizador['id'],
+        'csrf_token' => bin2hex(random_bytes(32)),
+    ];
+
+    $csrfToken = $_SESSION['csrf_token'];
+
+    if (!session_write_close()) {
+        throw new RuntimeException('Não foi possível guardar a sessão.');
+    }
+
+} catch (Throwable $erro) {
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_abort();
+    }
+
+    error_log($erro->getMessage());
+
     responderJson([
-        'estado' => 'ok',
-        'mensagem' => 'Credenciais válidas.',
-        'utilizador' => $utilizador
-    ]);
+        'erro' => 'Não foi possível criar a sessão.'
+    ], 503);
+}
+
+responderJson([
+    'estado' => 'ok',
+    'mensagem' => 'Login efetuado.',
+    'utilizador' => $utilizador,
+    'csrf_token' => $csrfToken,
+]);
 }
 
 
@@ -121,7 +156,72 @@ if ($metodo === 'GET' && $caminho === '/api/health/database') {
     }
 
     exit;
+    }
+    
+    if ($metodo === 'GET' && $caminho === '/api/me') {
+    try {
+        $pdo = require __DIR__ . '/../config/database.php';
+
+        require_once __DIR__ . '/../helpers/sessao.php';
+        require_once __DIR__ . '/../models/User.php';
+
+        iniciarSessao($pdo);
+
+        $userId = $_SESSION['user_id'] ?? null;
+
+        if (!is_int($userId) || $userId <= 0) {
+            session_abort();
+
+            responderJson([
+                'erro' => 'Não existe uma sessão autenticada.'
+            ], 401);
+        }
+
+        $model = new User($pdo);
+
+        $utilizador = $model->procurarPorId($userId);
+
+        if (
+            $utilizador === null
+            || (int) $utilizador['ativo'] !== 1
+        ) {
+            $_SESSION = [];
+            session_destroy();
+
+            responderJson([
+                'erro' => 'A sessão deixou de ser válida.'
+            ], 401);
+        }
+
+        if (!session_write_close()) {
+            throw new RuntimeException(
+                'Não foi possível atualizar a sessão.'
+            );
+        }
+
+        responderJson([
+            'estado' => 'ok',
+            'utilizador' => [
+                'id' => (int) $utilizador['id'],
+                'nome' => $utilizador['nome'],
+                'email' => $utilizador['email'],
+                'role' => $utilizador['role'],
+            ]
+        ]);
+
+    } catch (Throwable $erro) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_abort();
+        }
+
+        error_log($erro->getMessage());
+
+        responderJson([
+            'erro' => 'Não foi possível verificar a sessão.'
+        ], 503);
+    }
 }
+
 http_response_code(404);
 
 echo json_encode([
