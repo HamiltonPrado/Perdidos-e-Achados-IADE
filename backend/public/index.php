@@ -16,6 +16,30 @@ if ($metodo === 'GET' && $caminho === '/api/health') {
     exit;
 }
 
+if ($metodo === 'GET' && $caminho === '/api/health/database') {
+    try {
+        $pdo = require __DIR__ . '/../config/database.php';
+
+        $pdo->query('SELECT 1')->fetchColumn();
+
+        echo json_encode([
+            'estado' => 'ok',
+            'mensagem' => 'Ligação à base de dados estabelecida.'
+        ], JSON_UNESCAPED_UNICODE);
+
+    } catch (PDOException $erro) {
+        error_log($erro->getMessage());
+
+        http_response_code(503);
+
+        echo json_encode([
+            'estado' => 'erro',
+            'mensagem' => 'Não foi possível ligar à base de dados.'
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
+    exit;
+}
 http_response_code(404);
 
 echo json_encode([
