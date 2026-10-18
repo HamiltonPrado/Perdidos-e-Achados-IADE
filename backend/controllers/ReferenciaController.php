@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../models/Category.php';
 require_once __DIR__ . '/../models/Location.php';
+require_once __DIR__ . '/../models/pontorecolha.php';
 require_once __DIR__ . '/../helpers/resposta.php';
 
 class ReferenciaController
 {
     private Category $categorias;
     private Location $locais;
+    private PontoRecolha $pontosRecolha;
 
     public function __construct(PDO $pdo)
     {
         $this->categorias = new Category($pdo);
         $this->locais = new Location($pdo);
+       $this->pontosRecolha = new PontoRecolha($pdo);
     }
 
     public function listarCategorias(): void
@@ -34,6 +37,16 @@ class ReferenciaController
         responderJson([
             'estado' => 'ok',
             'locais' => $locais
+        ]);
+    }
+
+     public function listarPontosRecolha(): void
+    {
+        $pontosRecolha = $this->pontosRecolha->listar();
+
+        responderJson([
+            'estado' => 'ok',
+            'pontos_recolha' => $pontosRecolha
         ]);
     }
 }

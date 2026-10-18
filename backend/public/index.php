@@ -13,4 +13,28 @@ $caminho = parse_url(
     PHP_URL_PATH
 );
 
-require __DIR__ . '/../routes/api.php';
+try {
+    require_once __DIR__ . '/../helpers/ligacao.php';
+
+    require __DIR__ . '/../routes/api.php';
+
+} catch (Throwable $erro) {
+    // Cancela alterações pendentes na sessão se o pedido falhar.
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_abort();
+    }
+
+    // Guarda o detalhe no terminal/log do servidor.
+    error_log($erro->getMessage());
+
+    // Envia uma resposta comum, sem expor detalhes internos.
+    if ($erro instanceof PDOException) {
+        responderJson([
+            'erro' => 'Não foi possível aceder à base de dados.'
+        ], 503);
+    }
+
+    responderJson([
+        'erro' => 'Erro interno do servidor.'
+    ], 500);
+}

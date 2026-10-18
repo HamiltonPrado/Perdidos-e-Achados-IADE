@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../helpers/resposta.php';
 require_once __DIR__ . '/../helpers/sessao.php';
+require_once __DIR__ . '/../middleware/autenticacao.php';
 
 class AuthController
 {
@@ -73,6 +74,7 @@ class AuthController
             responderJson([
                 'erro' => 'Email ou password incorretos.'
             ], 401);
+            
         }
 
         try {
@@ -117,6 +119,84 @@ class AuthController
         ]);
     }
 
+    // Devolve os dados da conta associada à sessão atual.
+    public function me(): void
+    {
+        $utilizador = exigirAutenticacao($this->pdo);
+
+        responderJson([
+            'estado' => 'ok',
+            'utilizador' => $utilizador
+        ]);
+    }
+
+
+        // Valida o token CSRF e termina a sessão atual.
+    public function logout(): void
+    {
+        iniciarSessao($this->pdo);
+
+        $userId = $_SESSION['user_id'] ?? null;
+
+        if (!is_int($userId) || $userId <= 0) {
+            session_abort();
+
+            responderJson([
+                'erro' => 'Não existe uma sessão autenticada.'
+            ], 401);
+        }
+
+        // Compara o token recebido com o token guardado na sessão.
+        $tokenSessao = $_SESSION['csrf_token'] ?? '';
+        $tokenPedido = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+
+        if (
+            !is_string($tokenSessao)
+            || $tokenSessao === ''
+            || !hash_equals($tokenSessao, $tokenPedido)
+        ) {
+            session_abort();
+
+            responderJson([
+                'erro' => 'Token CSRF inválido.'
+            ], 403);
+        }
+
+        $parametros = session_get_cookie_params();
+        $nomeCookie = session_name();
+
+        // Limpa os dados em memória e elimina a sessão na BD.
+        $_SESSION = [];
+
+        if (!session_destroy()) {
+            throw new RuntimeException(
+                'Não foi possível eliminar a sessão.'
+            );
+        }
+
+        // Remove o cookie usando os mesmos parâmetros da sua criação.
+        $cookieRemovido = setcookie($nomeCookie, '', [
+            'expires' => time() - 3600,
+            'path' => $parametros['path'],
+            'domain' => $parametros['domain'],
+            'secure' => $parametros['secure'],
+            'httponly' => $parametros['httponly'],
+            'samesite' => $parametros['samesite'],
+        ]);
+
+        if (!$cookieRemovido) {
+            throw new RuntimeException(
+                'Não foi possível remover o cookie.'
+            );
+        }
+
+        responderJson([
+            'estado' => 'ok',
+            'mensagem' => 'Sessão terminada.'
+        ]);
+    }
+
+    
     public function autenticar(string $email, string $password): ?array
     {
         $email = strtolower(trim($email));
