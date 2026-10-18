@@ -130,6 +130,7 @@ responderJson([
     'utilizador' => $utilizador,
     'csrf_token' => $csrfToken,
 ]);
+
 }
 
 
@@ -157,13 +158,40 @@ if ($metodo === 'GET' && $caminho === '/api/health/database') {
 
     exit;
     }
+
     
-    if ($metodo === 'GET' && $caminho === '/api/me') {
+  if ($metodo === 'GET' && $caminho === '/api/me') {
+    try {
+        $pdo = require __DIR__ . '/../config/database.php';
+
+        require_once __DIR__ . '/../middleware/autenticacao.php';
+
+        $utilizador = exigirAutenticacao($pdo);
+
+        responderJson([
+            'estado' => 'ok',
+            'utilizador' => $utilizador
+        ]);
+
+    } catch (Throwable $erro) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_abort();
+        }
+
+        error_log($erro->getMessage());
+
+        responderJson([
+            'erro' => 'Não foi possível verificar a sessão.'
+        ], 503);
+    }
+}
+    
+    
+    if ($metodo === 'POST' && $caminho === '/api/logout') {
     try {
         $pdo = require __DIR__ . '/../config/database.php';
 
         require_once __DIR__ . '/../helpers/sessao.php';
-        require_once __DIR__ . '/../models/User.php';
 
         iniciarSessao($pdo);
 
@@ -177,36 +205,50 @@ if ($metodo === 'GET' && $caminho === '/api/health/database') {
             ], 401);
         }
 
-        $model = new User($pdo);
-
-        $utilizador = $model->procurarPorId($userId);
+        $tokenSessao = $_SESSION['csrf_token'] ?? '';
+        $tokenPedido = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
 
         if (
-            $utilizador === null
-            || (int) $utilizador['ativo'] !== 1
+            !is_string($tokenSessao)
+            || $tokenSessao === ''
+            || !hash_equals($tokenSessao, $tokenPedido)
         ) {
-            $_SESSION = [];
-            session_destroy();
+            session_abort();
 
             responderJson([
-                'erro' => 'A sessão deixou de ser válida.'
-            ], 401);
+                'erro' => 'Token CSRF inválido.'
+            ], 403);
         }
 
-        if (!session_write_close()) {
+        $parametros = session_get_cookie_params();
+        $nomeCookie = session_name();
+
+        $_SESSION = [];
+
+        if (!session_destroy()) {
             throw new RuntimeException(
-                'Não foi possível atualizar a sessão.'
+                'Não foi possível eliminar a sessão.'
+            );
+        }
+
+        $cookieRemovido = setcookie($nomeCookie, '', [
+            'expires' => time() - 3600,
+            'path' => $parametros['path'],
+            'domain' => $parametros['domain'],
+            'secure' => $parametros['secure'],
+            'httponly' => $parametros['httponly'],
+            'samesite' => $parametros['samesite'],
+        ]);
+
+        if (!$cookieRemovido) {
+            throw new RuntimeException(
+                'Não foi possível remover o cookie.'
             );
         }
 
         responderJson([
             'estado' => 'ok',
-            'utilizador' => [
-                'id' => (int) $utilizador['id'],
-                'nome' => $utilizador['nome'],
-                'email' => $utilizador['email'],
-                'role' => $utilizador['role'],
-            ]
+            'mensagem' => 'Sessão terminada.'
         ]);
 
     } catch (Throwable $erro) {
@@ -217,7 +259,34 @@ if ($metodo === 'GET' && $caminho === '/api/health/database') {
         error_log($erro->getMessage());
 
         responderJson([
-            'erro' => 'Não foi possível verificar a sessão.'
+            'erro' => 'Não foi possível terminar a sessão.'
+        ], 503);
+    }
+}
+
+if ($metodo === 'GET' && $caminho === '/api/admin/teste') {
+    try {
+        $pdo = require __DIR__ . '/../config/database.php';
+
+        require_once __DIR__ . '/../middleware/administrador.php';
+
+        $utilizador = exigirAdministrador($pdo);
+
+        responderJson([
+            'estado' => 'ok',
+            'mensagem' => 'Acesso da equipa autorizado.',
+            'utilizador' => $utilizador
+        ]);
+
+    } catch (Throwable $erro) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_abort();
+        }
+
+        error_log($erro->getMessage());
+
+        responderJson([
+            'erro' => 'Não foi possível verificar as permissões.'
         ], 503);
     }
 }
