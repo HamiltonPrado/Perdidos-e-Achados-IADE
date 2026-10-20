@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../controllers/AuthController.php';
 require_once __DIR__ . '/../controllers/ReferenciaController.php';
 require_once __DIR__ . '/../middleware/administrador.php';
+require_once __DIR__ . '/../controllers/ItemController.php';
 
 // Verifica se o PHP está a responder, sem abrir ligação à BD.
 if ($metodo === 'GET' && $caminho === '/api/health') {
@@ -68,6 +69,61 @@ if ($metodo === 'GET' && $caminho === '/api/collection-points') {
     $controller = new ReferenciaController(obterLigacao());
 
     $controller->listarPontosRecolha();
+}
+
+// Regista um objeto perdido associado ao utilizador autenticado.
+if ($metodo === 'POST' && $caminho === '/api/items/lost') {
+    $controller = new ItemController(obterLigacao());
+
+    $controller->criarPerdido();
+}
+
+
+// Lista os artigos do utilizador autenticado.
+if ($metodo === 'GET' && $caminho === '/api/items/mine') {
+    $controller = new ItemController(obterLigacao());
+
+    $controller->listarMeus();
+}
+
+// Lista todos os artigos, com acesso reservado à equipa administradora.
+if ($metodo === 'GET' && $caminho === '/api/admin/items') {
+    $controller = new ItemController(obterLigacao());
+
+    $controller->listarTodos();
+}
+
+// Regista um objeto achado, com acesso reservado à equipa administradora.
+if ($metodo === 'POST' && $caminho === '/api/admin/items/found') {
+    $controller = new ItemController(obterLigacao());
+
+    $controller->criarAchado();
+}
+
+// Consulta o detalhe de um artigo através do seu identificador.
+if (
+    $metodo === 'GET'
+    && preg_match(
+        '#\A/api/items/([1-9][0-9]*)\z#',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.'
+        ], 404);
+    }
+
+    $controller = new ItemController(obterLigacao());
+
+    $controller->mostrar($id);
 }
 
 // Responde quando nenhuma rota corresponde ao pedido.
