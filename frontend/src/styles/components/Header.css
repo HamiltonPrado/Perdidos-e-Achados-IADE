@@ -1,0 +1,161 @@
+/*
+ * Header.css — estilos da barra de topo
+ * Usado por: src/components/Header.jsx
+ *
+ * Nomes das classes: header__parte  e  header__parte--variante
+ * (assim percebe-se logo a que componente pertence cada classe)
+ */
+
+
+/* ---------- Barra ---------- */
+
+.header {
+  background: var(--cor-preto);
+  color: #fff;
+}
+
+/* Linha com logótipo à esquerda e menu à direita */
+.header__barra {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap; /* deixa o menu passar para baixo no telemóvel */
+}
+
+
+/* ---------- Logótipo ---------- */
+
+.header__marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Caixa com "IADE" */
+.header__logo {
+  border: 2px solid #fff;
+  padding: 4px 10px;
+  font-family: var(--fonte-titulos);
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-size: 18px;
+}
+
+.header__nome {
+  font-family: var(--fonte-titulos);
+  font-weight: 500;
+  font-size: 16px;
+}
+
+
+/* ---------- Menu ---------- */
+
+.header__nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto; /* empurra o menu para a direita */
+  flex-wrap: wrap;
+}
+
+/* Cada link do menu (também usado no botão "Terminar sessão") */
+.header__link {
+  color: #d6d6d6;
+  text-decoration: none;
+  padding: 12px 14px;
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent; /* espaço para o sublinhado azul */
+  cursor: pointer;
+}
+
+.header__link:hover {
+  color: #fff;
+}
+
+/* O NavLink junta a classe "active" na página atual → sublinhado azul */
+.header__link.active {
+  color: #fff;
+  border-bottom-color: var(--cor-destaque);
+}
+
+/* Círculo com as iniciais do utilizador */
+.header__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #3a3a3a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+
+/* ---------- Botão ☰ (escondido no computador) ---------- */
+
+.header__menu-botao {
+  display: none;
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+}
+
+
+/* ============================================================
+ * TELEMÓVEL (ecrãs até 760px)
+ * O menu fica escondido e só aparece com a classe --aberto
+ * ============================================================ */
+@media (max-width: 760px) {
+  .header__barra {
+    min-height: 60px;
+    gap: 0;
+  }
+
+  /* Mostra o botão ☰ */
+  .header__menu-botao {
+    display: inline-flex;
+  }
+
+  /* Menu em coluna e escondido por defeito */
+  .header__nav {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin: 0;
+    padding-bottom: 12px;
+  }
+
+  /* Quando o Header.jsx junta esta classe, o menu aparece */
+  .header__nav--aberto {
+    display: flex;
+  }
+
+  /* No telemóvel o indicador azul fica à esquerda, não em baixo */
+  .header__link {
+    text-align: left;
+    border-bottom: 0;
+    border-left: 3px solid transparent;
+  }
+
+  .header__link.active {
+    border-left-color: var(--cor-destaque);
+  }
+
+  .header__nav .header__avatar {
+    display: none;
+  }
+}
