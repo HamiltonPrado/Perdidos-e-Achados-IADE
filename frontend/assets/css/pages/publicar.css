@@ -1,0 +1,39 @@
+/*
+ * publicar.css — estilos da página "Encontrei um objeto"
+ * Usado por: publicar.html + js/pages/publicar.js
+ *
+ * Quase tudo vem do style.css (formulário, campos, upload).
+ * Aqui só fica o que é desta página.
+ */
+
+/* Barra de 3 passos por cima do formulário */
+.passos {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  font-size: 14px;
+}
+
+/* Cada passo: uma linha grossa cinzenta em cima */
+.passos li {
+  border-top: 4px solid var(--cor-borda-forte);
+  padding-top: 8px;
+  color: var(--cor-texto-secundario);
+}
+
+/* Passo atual: linha preta e texto a negrito.
+   O publicar.js muda o aria-current conforme se preenche. */
+.passos li[aria-current="step"] {
+  border-top-color: var(--cor-preto);
+  color: var(--cor-texto);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .passos {
+    font-size: 13px;
+  }
+}

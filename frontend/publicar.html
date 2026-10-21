@@ -1,0 +1,132 @@
+<!doctype html>
+<!--
+  publicar.html — PUBLICAR UM OBJETO ENCONTRADO   🔒 precisa de sessão
+  Mockup: "3 · Publicar objeto encontrado"
+  JavaScript: js/pages/publicar.js · Estilos: assets/css/pages/publicar.css
+-->
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publicar objeto · Achados e Perdidos IADE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Public+Sans:wght@400;500;600&display=swap">
+
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/components/navbar.css">
+  <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/pages/publicar.css">
+</head>
+<body>
+  <header class="navbar" id="navbar"></header>
+
+  <main class="contentor contentor--estreito pagina">
+    <a href="index.html" class="voltar">← Voltar aos achados</a>
+    <h1 class="titulo-pagina">Encontrei um objeto</h1>
+    <p class="intro">Publica o que encontraste para que o dono o possa reclamar. Não mostres dados pessoais, como nomes em cartões ou números de documentos.</p>
+
+    <!-- Passos: o publicar.js muda o aria-current conforme se preenche -->
+    <ol class="passos" aria-label="Passos">
+      <li aria-current="step">1. Foto e descrição</li>
+      <li>2. Onde e quando</li>
+      <li>3. Verificação</li>
+    </ol>
+
+    <!-- novalidate: os erros são mostrados pelo nosso JavaScript, não pelo browser -->
+    <form class="formulario" id="form-publicar" novalidate>
+
+      <!-- Fotografias -->
+      <div class="grupo">
+        <span class="rotulo">Fotografias <span class="rotulo__opcional">(até 5)</span></span>
+        <label for="fotos" class="upload">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v13H4z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          <span class="upload__titulo">Tirar foto ou carregar imagem</span>
+          <span class="ajuda">JPG ou PNG · máx. 10 MB</span>
+          <input id="fotos" type="file" accept="image/*" multiple class="so-leitor">
+        </label>
+        <div class="miniaturas-upload" id="miniaturas-fotos" aria-live="polite"></div>
+        <span class="erro" id="erro-fotos" hidden>Só podes juntar até 5 fotos.</span>
+      </div>
+
+      <!-- Título -->
+      <div class="grupo">
+        <label for="titulo" class="rotulo">Título</label>
+        <input id="titulo" type="text" class="campo" maxlength="80" placeholder="Ex.: Carteira de pele castanha">
+        <span class="erro" id="erro-titulo" hidden>Dá um título ao objeto.</span>
+      </div>
+
+      <!-- Categoria + cor -->
+      <div class="duas-colunas">
+        <div class="grupo">
+          <label for="categoria" class="rotulo">Categoria</label>
+          <select id="categoria" class="campo">
+            <option value="">Escolher…</option>
+            <!-- opções vêm do categoriasService -->
+          </select>
+          <span class="erro" id="erro-categoria" hidden>Escolhe uma categoria.</span>
+        </div>
+        <div class="grupo">
+          <label for="cor" class="rotulo">Cor principal <span class="rotulo__opcional">(opcional)</span></label>
+          <input id="cor" type="text" class="campo" placeholder="Ex.: castanho">
+        </div>
+      </div>
+
+      <!-- Descrição -->
+      <div class="grupo">
+        <label for="descricao" class="rotulo">Descrição</label>
+        <textarea id="descricao" class="campo" rows="4" maxlength="500" placeholder="Descreve o objeto sem revelar detalhes que só o dono saberia."></textarea>
+        <span class="ajuda" id="contador">0 / 500 caracteres</span>
+      </div>
+
+      <!-- Local + data -->
+      <div class="duas-colunas">
+        <div class="grupo">
+          <label for="local" class="rotulo">Onde encontraste</label>
+          <select id="local" class="campo">
+            <option value="">Escolher local…</option>
+            <!-- opções vêm do locaisService -->
+          </select>
+          <span class="erro" id="erro-local" hidden>Escolhe o local.</span>
+        </div>
+        <div class="grupo">
+          <label for="data" class="rotulo">Quando</label>
+          <input id="data" type="datetime-local" class="campo">
+        </div>
+      </div>
+
+      <!-- Onde está agora -->
+      <fieldset>
+        <legend>Onde está o objeto agora?</legend>
+        <label class="opcao"><input type="radio" name="onde" value="secretaria" checked> Entreguei na secretaria</label>
+        <label class="opcao"><input type="radio" name="onde" value="com_quem_encontrou"> Fica comigo, combino a entrega pela app</label>
+      </fieldset>
+
+      <!-- Pergunta de verificação -->
+      <div class="grupo">
+        <label for="pergunta" class="rotulo">Pergunta de verificação</label>
+        <input id="pergunta" type="text" class="campo" placeholder="Ex.: O que estava dentro da carteira?">
+        <span class="ajuda">Só quem souber responder pode reclamar o objeto. A resposta nunca é mostrada no anúncio.</span>
+        <span class="erro" id="erro-pergunta" hidden>Escreve uma pergunta que só o dono saiba responder.</span>
+      </div>
+
+      <label class="confirmar"><input type="checkbox" id="confirmo"> Confirmo que as fotos não mostram dados pessoais do dono.</label>
+      <span class="erro" id="erro-confirmo" hidden>Confirma antes de publicar.</span>
+
+      <!-- Erro do servidor (se houver) -->
+      <p class="erro" id="erro-geral" role="alert" hidden></p>
+
+      <div class="acoes">
+        <a href="index.html" class="botao botao--contorno">Cancelar</a>
+        <button type="submit" class="botao botao--destaque" id="botao-publicar">Publicar anúncio</button>
+      </div>
+    </form>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script type="module" src="js/pages/publicar.js"></script>
+</body>
+</html>

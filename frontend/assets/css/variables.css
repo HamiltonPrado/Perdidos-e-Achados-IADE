@@ -1,0 +1,43 @@
+/*
+ * variables.css — CORES E FONTES DA APP
+ * ------------------------------------------------------------
+ * Todas as cores e fontes estão aqui, num só sítio.
+ * Nos outros ficheiros CSS usa-se var(--nome), por exemplo:
+ *     color: var(--cor-texto);
+ *
+ * Para mudar a cor de destaque da app toda, basta mudar
+ * --cor-destaque aqui. Ajustar aos valores oficiais do IADE.
+ *
+ * Este ficheiro tem de ser o PRIMEIRO CSS de cada página .html.
+ */
+
+:root {
+  /* --- Cores base --- */
+  --cor-preto: #111111;             /* navbar, footer, botões pretos */
+  --cor-texto: #1a1a1a;             /* texto principal */
+  --cor-texto-secundario: #5a5a5a;  /* textos de apoio (datas, legendas) */
+
+  /* --- Fundos --- */
+  --cor-fundo: #f4f4f2;             /* fundo cinzento-claro da página */
+  --cor-superficie: #ffffff;        /* cartões, faixa do topo, formulários */
+  --cor-placeholder: #e6e6e2;       /* fundo das fotos que ainda não existem */
+  --cor-placeholder-linha: #c4c4bf; /* o X dentro das fotos vazias */
+
+  /* --- Bordas --- */
+  --cor-borda: #dcdcd8;             /* bordas suaves (cartões) */
+  --cor-borda-forte: #9a9a9a;       /* bordas de campos e botões brancos */
+
+  /* --- Cor de ação --- */
+  --cor-destaque: #1f4fd8;          /* PROVISÓRIA — botões azuis, links, menu ativo */
+
+  /* --- Mensagens --- */
+  --cor-ok-fundo: #eaf2ea;          /* "Pedido enviado", "Perfil guardado" */
+  --cor-ok-borda: #8fb38f;
+  --cor-aviso-fundo: #fbf1dc;       /* "pedido por responder", avisos */
+  --cor-aviso-borda: #d9b25c;
+  --cor-erro: #b3261e;              /* mensagens de erro nos formulários */
+
+  /* --- Fontes (carregadas no <head> de cada página, Google Fonts) --- */
+  --fonte-titulos: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --fonte-texto: 'Public Sans', 'Segoe UI', Helvetica, Arial, sans-serif;
+}

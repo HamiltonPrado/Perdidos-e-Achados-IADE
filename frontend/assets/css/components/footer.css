@@ -1,0 +1,33 @@
+/*
+ * footer.css — estilos do rodapé
+ * Usado por: js/components/footer.js
+ */
+
+.footer {
+  background: var(--cor-preto);
+  color: #bdbdbd;
+  font-size: 13px;
+}
+
+/* Logótipo à esquerda, texto à direita (passa para baixo se não couber) */
+.footer__barra {
+  padding-top: 28px;
+  padding-bottom: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+/* "IADE" — é um link para o Início */
+.footer__logo {
+  color: #fff;
+  font-family: var(--fonte-titulos);
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-decoration: none;
+}
+
+.footer__logo:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,117 @@
+<!doctype html>
+<!--
+  detalhe.html — DETALHE DE UM OBJETO
+  Endereço: detalhe.html?id=3   (o id diz qual objeto mostrar)
+  Mockup: "2 · Detalhe do objeto"
+  JavaScript: js/pages/detalhe.js · Estilos: assets/css/pages/detalhe.css
+-->
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhe do objeto · Achados e Perdidos IADE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Public+Sans:wght@400;500;600&display=swap">
+
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/components/navbar.css">
+  <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/pages/detalhe.css">
+</head>
+<body>
+  <header class="navbar" id="navbar"></header>
+
+  <main class="contentor">
+    <!-- Se o id não existir, mostra-se isto -->
+    <div class="vazio" id="nao-encontrado" style="margin-top: 40px" hidden>
+      <p>Este objeto não existe ou já foi removido.</p>
+      <a href="index.html" class="botao botao--preto botao--pequeno">Voltar aos achados</a>
+    </div>
+
+    <div id="conteudo" hidden>
+      <!-- Achados / Categoria / Título -->
+      <nav class="migalhas" aria-label="Caminho">
+        <a href="index.html">Achados</a>
+        <span aria-hidden="true">/</span>
+        <span id="migalha-categoria"></span>
+        <span aria-hidden="true">/</span>
+        <span class="migalhas__atual" id="migalha-titulo"></span>
+      </nav>
+
+      <div class="detalhe">
+        <!-- ---------- GALERIA ---------- -->
+        <div class="galeria">
+          <div class="galeria__principal" id="foto-principal"></div>
+          <div class="galeria__miniaturas" id="miniaturas"></div>
+        </div>
+
+        <!-- ---------- INFORMAÇÃO ---------- -->
+        <aside class="lado">
+          <div class="lado__etiquetas">
+            <span class="etiqueta" id="etiqueta-categoria"></span>
+            <span class="etiqueta etiqueta--escura" id="etiqueta-estado"></span>
+          </div>
+
+          <h1 class="lado__titulo" id="titulo"></h1>
+
+          <dl class="ficha">
+            <dt>Encontrado em</dt><dd id="info-local"></dd>
+            <dt>Data</dt><dd id="info-data"></dd>
+            <dt>Onde está</dt><dd id="info-onde"></dd>
+            <dt>Publicado por</dt><dd id="info-autor"></dd>
+          </dl>
+
+          <div class="descricao">
+            <h2>Descrição</h2>
+            <p id="descricao"></p>
+          </div>
+
+          <!-- ---------- "É TEU?" ---------- -->
+          <div class="reclamar" id="bloco-reclamar" hidden>
+            <h2>É teu?</h2>
+            <p class="ajuda">Responde à pergunta de verificação. Quem encontrou o objeto vai confirmar se a resposta está certa.</p>
+
+            <form class="grupo" id="form-reclamar" novalidate>
+              <label for="resposta" class="rotulo" id="pergunta"></label>
+              <textarea id="resposta" class="campo" rows="3" placeholder="Descreve um detalhe que só o dono saberia"></textarea>
+              <span class="erro" id="erro-resposta" hidden>Escreve a tua resposta antes de enviar.</span>
+
+              <span class="rotulo reclamar__fotos">Fotos de prova <span class="rotulo__opcional">(opcional, até 3)</span></span>
+              <span class="ajuda">Por exemplo: uma foto tua com o objeto, a fatura ou a caixa original. Tapa dados pessoais que não sejam necessários.</span>
+              <label for="fotos-prova" class="upload upload--compacto">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v13H4z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                <span><span class="upload__titulo">Adicionar foto</span><span class="ajuda">JPG ou PNG · máx. 10 MB</span></span>
+                <input id="fotos-prova" type="file" accept="image/*" multiple class="so-leitor">
+              </label>
+              <div class="miniaturas-upload" id="miniaturas-prova" aria-live="polite"></div>
+              <span class="erro" id="erro-fotos" hidden>Só podes juntar até 3 fotos.</span>
+
+              <button type="submit" class="botao botao--destaque" id="botao-reclamar">Reclamar objeto</button>
+            </form>
+
+            <p class="mensagem" id="pedido-enviado" role="status" hidden></p>
+            <a href="#" class="reclamar__denunciar">Denunciar anúncio</a>
+          </div>
+
+          <!-- Se o anúncio é meu -->
+          <p class="mensagem mensagem--aviso" id="aviso-meu" hidden>
+            Este anúncio é teu. Acompanha os pedidos em <a href="meus-anuncios.html">Os meus anúncios</a>.
+          </p>
+
+          <!-- Se já não está por reclamar -->
+          <p class="mensagem mensagem--aviso" id="aviso-fechado" hidden>
+            Este objeto já foi reclamado pelo dono.
+          </p>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script type="module" src="js/pages/detalhe.js"></script>
+</body>
+</html>

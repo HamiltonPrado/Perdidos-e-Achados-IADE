@@ -1,0 +1,118 @@
+/*
+ * meus-anuncios.css — estilos da página "Os meus anúncios"
+ * Usado por: meus-anuncios.html + js/pages/meusAnuncios.js
+ */
+
+/* Lista de anúncios, um por baixo do outro */
+.anuncios {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Um anúncio: foto | informação | botões */
+.anuncio {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  padding: 12px;
+}
+
+.anuncio__foto {
+  position: relative;
+  width: 96px;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  background: var(--cor-placeholder);
+  overflow: hidden;
+}
+
+.anuncio__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.anuncio__info {
+  flex: 1 1 240px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.anuncio__info h2 {
+  font-size: 17px;
+}
+
+.anuncio__acoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Um pedido "É meu" dentro do anúncio (ocupa a linha toda) */
+.pedido {
+  width: 100%;
+  border-top: 1px dashed var(--cor-borda);
+  padding-top: 10px;
+  margin-top: 4px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.pedido__resposta {
+  margin: 0;
+  font-size: 14px;
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+/* Fotos de prova enviadas por quem reclamou */
+.pedido__fotos {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pedido__fotos-lista {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pedido__foto {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  background: var(--cor-placeholder);
+  border: 1px solid var(--cor-borda);
+  overflow: hidden;
+}
+
+.pedido__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Legenda por baixo de uma foto de exemplo ("Fatura") */
+.pedido__foto-legenda {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--cor-superficie);
+  font-size: 11px;
+  padding: 2px 4px;
+  text-align: center;
+}

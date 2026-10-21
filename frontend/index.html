@@ -1,18 +1,101 @@
 <!doctype html>
+<!--
+  index.html — PÁGINA INICIAL (lista de objetos encontrados)
+  Mockup: "1 · Início — lista de achados"
+  JavaScript: js/pages/home.js · Estilos: assets/css/pages/home.css
+
+  A estrutura está toda aqui em HTML. O JavaScript só preenche
+  as partes que dependem dos dados (botões de categoria, locais,
+  contagem e cartões).
+-->
 <html lang="pt-PT">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Achados e Perdidos · IADE</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Public+Sans:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Achados e Perdidos · IADE</title>
+
+  <!-- Fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Public+Sans:wght@400;500;600&display=swap">
+
+  <!-- Estilos: primeiro os globais, depois os componentes, por fim os da página -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/components/navbar.css">
+  <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/components/item-card.css">
+  <link rel="stylesheet" href="assets/css/components/filtro-categorias.css">
+  <link rel="stylesheet" href="assets/css/pages/home.css">
+</head>
+<body>
+  <!-- Barra de topo — preenchida pelo js/components/navbar.js -->
+  <header class="navbar" id="navbar"></header>
+
+  <main>
+    <!-- ---------- FAIXA BRANCA DO TOPO ---------- -->
+    <section class="destaque">
+      <div class="contentor destaque__conteudo">
+        <div class="destaque__texto">
+          <p class="destaque__sobretitulo">Portal do Estudante · Serviços</p>
+          <h1 class="destaque__titulo">Perdeste alguma coisa no campus?</h1>
+
+          <form class="pesquisa" role="search" id="form-pesquisa">
+            <label for="pesquisa" class="so-leitor">Pesquisar objetos</label>
+            <input id="pesquisa" type="search" class="campo pesquisa__campo" placeholder="Ex.: carteira, chaves, auriculares…">
+            <button type="submit" class="botao botao--preto">Pesquisar</button>
+          </form>
+        </div>
+
+        <a href="publicar.html" class="botao botao--destaque">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+          Encontrei um objeto
+        </a>
+      </div>
+    </section>
+
+    <!-- ---------- FILTROS + LISTA ---------- -->
+    <div class="contentor lista">
+      <div class="lista__filtros">
+        <!-- Botões de categoria — preenchidos pelo filtroCategorias.js -->
+        <div id="filtro-categorias"></div>
+
+        <div class="lista__selects">
+          <label class="seletor">
+            Local
+            <select id="filtro-local">
+              <option value="">Todo o campus</option>
+              <!-- as outras opções vêm do locaisService -->
+            </select>
+          </label>
+          <label class="seletor">
+            Ordenar
+            <select id="filtro-ordem">
+              <option value="recentes">Mais recentes</option>
+              <option value="antigos">Mais antigos</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <!-- "6 objetos por reclamar" / "A carregar…" / erro -->
+      <p class="lista__contagem" id="contagem" aria-live="polite">A carregar…</p>
+
+      <!-- Aparece só quando não há resultados -->
+      <div class="lista__vazia" id="lista-vazia" hidden>
+        <p>Nenhum objeto encontrado com estes filtros.</p>
+        <button type="button" class="botao botao--preto" id="limpar-filtros">Limpar filtros</button>
+      </div>
+
+      <!-- Cartões — preenchidos pelo home.js -->
+      <div class="grelha" id="grelha"></div>
+    </div>
+  </main>
+
+  <!-- Rodapé — preenchido pelo js/components/footer.js -->
+  <footer class="footer" id="footer"></footer>
+
+  <!-- type="module" permite usar import/export entre os ficheiros .js -->
+  <script type="module" src="js/pages/home.js"></script>
+</body>
 </html>

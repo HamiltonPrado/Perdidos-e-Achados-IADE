@@ -1,0 +1,206 @@
+/*
+ * detalhe.css — estilos da página de um objeto
+ * Usado por: detalhe.html + js/pages/detalhe.js
+ *
+ * Partes:
+ *   1. Migalhas (Achados / Categoria / Título)
+ *   2. Galeria de fotos (à esquerda)
+ *   3. Informação e "É teu?" (à direita)
+ */
+
+
+/* ---------- 1. Migalhas ---------- */
+
+.migalhas {
+  font-size: 14px;
+  color: var(--cor-texto-secundario);
+  padding-top: 24px;
+  padding-bottom: 24px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.migalhas a {
+  color: var(--cor-texto-secundario);
+}
+
+.migalhas__atual {
+  color: var(--cor-texto);
+}
+
+
+/* ---------- Layout: galeria + lado direito ---------- */
+
+/* Lado a lado no computador; um por cima do outro no telemóvel */
+.detalhe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: flex-start;
+  padding-bottom: 64px;
+}
+
+
+/* ---------- 2. Galeria ---------- */
+
+.galeria {
+  flex: 999 1 520px; /* ocupa o máximo de espaço possível */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Foto grande (proporção 4:3) */
+.galeria__principal {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  max-width: 100%;
+  background: var(--cor-placeholder);
+  border: 1px solid var(--cor-borda);
+  overflow: hidden;
+}
+
+.galeria__principal img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Texto "Foto 1 de 3" ao centro quando não há imagem */
+.galeria__legenda {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--cor-fundo);
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--cor-texto-secundario);
+  white-space: nowrap;
+}
+
+/* Fila de miniaturas por baixo */
+.galeria__miniaturas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.galeria__miniatura {
+  position: relative;
+  aspect-ratio: 1;
+  max-width: 100%;
+  background: var(--cor-placeholder);
+  border: 1px solid var(--cor-borda);
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.galeria__miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Miniatura da foto que está a ser vista */
+.galeria__miniatura[aria-pressed="true"] {
+  border: 2px solid var(--cor-preto);
+}
+
+
+/* ---------- 3. Lado direito ---------- */
+
+.lado {
+  flex: 1 1 360px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lado__etiquetas {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lado__titulo {
+  font-weight: 800;
+  font-size: clamp(26px, 3.4vw, 34px);
+  line-height: 1.15;
+}
+
+/* Tabela de informação: "Encontrado em | Biblioteca" */
+.ficha {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  row-gap: 12px;
+  column-gap: 16px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  padding: 20px;
+}
+
+.ficha dt {
+  color: var(--cor-texto-secundario);
+}
+
+.ficha dd {
+  margin: 0;
+}
+
+.descricao h2 {
+  font-size: 18px;
+}
+
+.descricao p {
+  margin: 8px 0 0;
+  line-height: 1.6;
+  max-width: 65ch;
+}
+
+/* Caixa "É teu?" */
+.reclamar {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reclamar h2 {
+  font-size: 18px;
+}
+
+.reclamar p {
+  margin: 0;
+}
+
+.reclamar__fotos {
+  margin-top: 8px;
+}
+
+.reclamar__denunciar {
+  font-size: 14px;
+}
+
+
+/* ---------- Telemóvel ---------- */
+@media (max-width: 600px) {
+  .ficha {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2px;
+  }
+
+  .ficha dd {
+    margin-bottom: 10px;
+  }
+}

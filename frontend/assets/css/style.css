@@ -1,0 +1,493 @@
+/*
+ * style.css — ESTILOS QUE VALEM PARA A APP TODA
+ * ------------------------------------------------------------
+ * Ligado em TODAS as páginas .html (logo a seguir ao variables.css).
+ *
+ *   1. Base (body, títulos, links)
+ *   2. Estrutura (.contentor, cabeçalho das páginas)
+ *   3. Utilitários (.so-leitor, [hidden])
+ *   4. Botões (.botao)
+ *   5. Formulários (campos, labels, erros, upload de fotos)
+ *   6. Mensagens e etiquetas
+ *   7. Foto vazia (placeholder com X)
+ *
+ * Estilos de UM componente ou UMA página ficam nas pastas:
+ *   assets/css/components/  e  assets/css/pages/
+ */
+
+
+/* ============================================================
+ * 1. BASE
+ * ============================================================ */
+
+/* padding e border passam a contar dentro da largura definida */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: var(--fonte-texto);
+  font-size: 15px;
+  line-height: 1.45;
+  /* coluna: navbar em cima, conteúdo a esticar, footer em baixo */
+  display: flex;
+  flex-direction: column;
+}
+
+body > main {
+  flex: 1;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fonte-titulos);
+  margin: 0;
+}
+
+a {
+  color: var(--cor-preto);
+}
+
+/* Por defeito, botões e campos não herdam a fonte — isto corrige */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Contorno azul visível quando se navega com o teclado (Tab) */
+:focus-visible {
+  outline: 3px solid var(--cor-destaque);
+  outline-offset: 2px;
+}
+
+
+/* ============================================================
+ * 2. ESTRUTURA
+ * ============================================================ */
+
+/* Centra o conteúdo com largura máxima, como nos mockups */
+.contentor {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* Versão mais estreita, para formulários (Publicar, Perfil…) */
+.contentor--estreito {
+  max-width: 860px;
+}
+
+/* Cabeçalho simples das páginas: sobretítulo + título + texto */
+.pagina {
+  padding-top: 40px;
+  padding-bottom: 64px;
+}
+
+.sobretitulo {
+  margin: 0 0 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--cor-texto-secundario);
+}
+
+.titulo-pagina {
+  font-weight: 800;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.1;
+  margin: 0 0 8px;
+}
+
+.intro {
+  margin: 0 0 28px;
+  color: var(--cor-texto-secundario);
+  max-width: 65ch;
+}
+
+.voltar {
+  display: inline-block;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+
+/* ============================================================
+ * 3. UTILITÁRIOS
+ * ============================================================ */
+
+/* Qualquer elemento com o atributo hidden fica escondido.
+   No JavaScript: elemento.hidden = true / false */
+[hidden] {
+  display: none !important;
+}
+
+/* Esconde visualmente, mas leitores de ecrã continuam a ler */
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+ * 4. BOTÕES
+ * Uso: <button class="botao botao--preto">…</button>
+ * ============================================================ */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;              /* espaço entre ícone e texto */
+  min-height: 48px;
+  padding: 0 24px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  text-decoration: none;  /* para quando o botão é um <a> */
+  cursor: pointer;
+}
+
+/* Preto (ex.: "Pesquisar") */
+.botao--preto {
+  background: var(--cor-preto);
+  color: #fff;
+}
+
+/* Azul, um pouco mais alto (ex.: "Encontrei um objeto") */
+.botao--destaque {
+  background: var(--cor-destaque);
+  color: #fff;
+  min-height: 52px;
+}
+
+/* Branco com contorno preto (ex.: "Cancelar", "Recusar") */
+.botao--contorno {
+  background: transparent;
+  border-color: var(--cor-preto);
+  color: var(--cor-texto);
+}
+
+/* Mais pequeno (ex.: botões dentro de listas) */
+.botao--pequeno {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.botao:hover {
+  filter: brightness(1.12);
+}
+
+
+/* ============================================================
+ * 5. FORMULÁRIOS
+ * ============================================================ */
+
+/* Caixa branca que envolve um formulário */
+.formulario {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Um campo: label + input + ajuda/erro, em coluna */
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Dois campos lado a lado (passa a um por linha no telemóvel) */
+.duas-colunas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.rotulo {
+  font-weight: 600;
+}
+
+.rotulo__opcional {
+  font-weight: 400;
+  color: var(--cor-texto-secundario);
+}
+
+/* Caixas de texto, selects e textareas */
+.campo {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--cor-borda-forte);
+  background: #fff;
+}
+
+textarea.campo {
+  padding: 12px 14px;
+  resize: vertical;
+  min-height: 96px;
+}
+
+select.campo {
+  padding: 0 10px;
+}
+
+/* Texto pequeno de ajuda por baixo de um campo */
+.ajuda {
+  font-size: 13px;
+  color: var(--cor-texto-secundario);
+}
+
+/* Mensagem de erro de um campo (começa com hidden no HTML) */
+.erro {
+  font-size: 13px;
+  color: var(--cor-erro);
+}
+
+/* Grupo de opções (radio buttons) */
+fieldset {
+  border: 1px solid var(--cor-borda);
+  padding: 16px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+legend {
+  font-weight: 600;
+  padding: 0 6px;
+}
+
+.opcao {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 32px;
+}
+
+/* Checkbox com texto ao lado */
+.confirmar {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+}
+
+.confirmar input {
+  margin-top: 3px;
+}
+
+/* Linha de botões no fim do formulário */
+.acoes {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--cor-borda);
+  padding-top: 24px;
+}
+
+/* --- Upload de fotos (Publicar e reclamar) --- */
+
+/* A <label> tracejada onde se clica para escolher fotos.
+   O <input type="file"> fica escondido lá dentro (.so-leitor). */
+.upload {
+  border: 2px dashed var(--cor-borda-forte);
+  background: var(--cor-fundo);
+  padding: 36px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.upload:hover {
+  border-color: var(--cor-preto);
+}
+
+/* Versão baixinha (ícone à esquerda, texto à direita) */
+.upload--compacto {
+  flex-direction: row;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 14px 16px;
+  gap: 12px;
+}
+
+.upload__titulo {
+  font-weight: 600;
+  display: block;
+}
+
+/* Miniaturas das fotos escolhidas */
+.miniaturas-upload {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.miniatura-upload {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  background: var(--cor-placeholder);
+  border: 1px solid var(--cor-borda);
+  overflow: hidden;
+}
+
+.miniatura-upload img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Botão ✕ no canto da miniatura, para remover a foto */
+.miniatura-upload__remover {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: var(--cor-preto);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+
+/* ============================================================
+ * 6. MENSAGENS E ETIQUETAS
+ * ============================================================ */
+
+/* Caixa verde de sucesso */
+.mensagem {
+  margin: 0;
+  padding: 12px 14px;
+  font-size: 14px;
+  border: 1px solid var(--cor-ok-borda);
+  background: var(--cor-ok-fundo);
+}
+
+/* Variante amarela de aviso */
+.mensagem--aviso {
+  border-color: var(--cor-aviso-borda);
+  background: var(--cor-aviso-fundo);
+}
+
+/* Etiqueta pequena (estado de um anúncio, categoria…) */
+.etiqueta {
+  display: inline-block;
+  width: fit-content;
+  border: 1px solid var(--cor-borda-forte);
+  background: var(--cor-superficie);
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.etiqueta--escura {
+  background: var(--cor-preto);
+  border-color: var(--cor-preto);
+  color: #fff;
+}
+
+.etiqueta--aviso {
+  background: var(--cor-aviso-fundo);
+  border-color: var(--cor-aviso-borda);
+}
+
+.etiqueta--ok {
+  background: var(--cor-ok-fundo);
+  border-color: var(--cor-ok-borda);
+}
+
+/* Caixa tracejada para listas vazias */
+.vazio {
+  background: var(--cor-superficie);
+  border: 1px dashed var(--cor-borda-forte);
+  padding: 40px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.vazio p {
+  margin: 0;
+}
+
+
+/* ============================================================
+ * 7. FOTO VAZIA (placeholder com X)
+ * Gerada pela função fotoVazia() em js/utilities/tools.js
+ * ============================================================ */
+
+.foto-vazia {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.foto-vazia line {
+  stroke: var(--cor-placeholder-linha);
+}
+
+
+/* ============================================================
+ * TELEMÓVEL (ecrãs até 600px)
+ * ============================================================ */
+@media (max-width: 600px) {
+  .contentor {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .duas-colunas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .formulario {
+    padding: 20px;
+  }
+
+  .acoes .botao {
+    flex: 1 1 auto;
+  }
+}
