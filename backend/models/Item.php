@@ -163,7 +163,29 @@ class Item
         return $artigo === false ? null : $artigo;
     }
 
-        // Lista os artigos de um utilizador, começando pelos mais recentes.
+        // Marca um perdido ativo como resolvido pelo próprio utilizador.
+    public function marcarResolvido(int $id, int $userId): bool
+    {
+        $sql = "
+            UPDATE items
+            SET estado = 'resolvido'
+            WHERE id = :id
+              AND user_id = :user_id
+              AND tipo = 'lost'
+              AND estado = 'ativo'
+        ";
+
+        $consulta = $this->pdo->prepare($sql);
+
+        $consulta->execute([
+            'id' => $id,
+            'user_id' => $userId
+        ]);
+
+        return $consulta->rowCount() === 1;
+    }
+    
+        // Lista os artigos de um utilizador, começando pelos mais recentes.    
     public function listarPorUtilizador(int $userId): array
     {
         $sql = '

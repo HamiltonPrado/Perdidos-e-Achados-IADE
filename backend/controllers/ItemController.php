@@ -249,6 +249,63 @@ class ItemController
         ], 201);
     }
 
+        // Permite ao autor marcar o seu objeto perdido como resolvido.
+    public function resolver(int $id): void
+    {
+        $utilizador = exigirAutenticacao($this->pdo);
+        exigirCsrf();
+
+        $artigo = $this->artigos->procurarPorId($id);
+
+        // Apenas o autor pode executar esta operação.
+        if (
+            $artigo === null
+            || (int) $artigo['user_id'] !== $utilizador['id']
+        ) {
+            responderJson([
+                'erro' => 'Artigo não encontrado.'
+            ], 404);
+        }
+
+        // A opção "Já encontrei" aplica-se apenas aos perdidos.
+        if ($artigo['tipo'] !== 'lost') {
+            responderJson([
+                'erro' => 'Esta operação aplica-se apenas a objetos perdidos.'
+            ], 409);
+        }
+
+        // Uma repetição do pedido mantém o resultado já alcançado.
+        if ($artigo['estado'] !== 'resolvido') {
+            if ($artigo['estado'] !== 'ativo') {
+                responderJson([
+                    'erro' => 'Só podes resolver um objeto perdido ativo.'
+                ], 409);
+            }
+
+            $alterado = $this->artigos->marcarResolvido(
+                $id,
+                $utilizador['id']
+            );
+
+            // O estado pode ter mudado entre a consulta e a atualização.
+            if (!$alterado) {
+                responderJson([
+                    'erro' => 'O artigo foi alterado entretanto. '
+                        . 'Atualiza os dados antes de tentar novamente.'
+                ], 409);
+            }
+        }
+
+        responderJson([
+            'estado' => 'ok',
+            'mensagem' => 'Objeto perdido marcado como resolvido.',
+            'item' => [
+                'id' => $id,
+                'estado' => 'resolvido',
+            ]
+        ]);
+    }
+
         // Devolve um artigo ao seu autor ou à equipa administradora.
     public function mostrar(int $id): void
     {

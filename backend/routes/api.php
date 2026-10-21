@@ -126,6 +126,33 @@ if (
     $controller->mostrar($id);
 }
 
+// Permite ao autor marcar o seu perdido como resolvido.
+if (
+    $metodo === 'PATCH'
+    && preg_match(
+        '#\A/api/items/([1-9][0-9]*)/resolve\z#',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.'
+        ], 404);
+    }
+
+    $controller = new ItemController(obterLigacao());
+
+    $controller->resolver($id);
+}
+
+
 // Responde quando nenhuma rota corresponde ao pedido.
 responderJson([
     'erro' => 'Rota não encontrada.'
