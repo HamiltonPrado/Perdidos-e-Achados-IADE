@@ -6,6 +6,7 @@ require_once __DIR__ . '/../controllers/AuthController.php';
 require_once __DIR__ . '/../controllers/ReferenciaController.php';
 require_once __DIR__ . '/../middleware/administrador.php';
 require_once __DIR__ . '/../controllers/ItemController.php';
+require_once __DIR__ . '/../controllers/AdminItemController.php';
 
 // Verifica se o PHP está a responder, sem abrir ligação à BD.
 if ($metodo === 'GET' && $caminho === '/api/health') {
@@ -86,16 +87,16 @@ if ($metodo === 'GET' && $caminho === '/api/items/mine') {
     $controller->listarMeus();
 }
 
-// Lista todos os artigos, com acesso reservado à equipa administradora.
+// Encaminha a listagem global para o controller da equipa.
 if ($metodo === 'GET' && $caminho === '/api/admin/items') {
-    $controller = new ItemController(obterLigacao());
+    $controller = new AdminItemController(obterLigacao());
 
     $controller->listarTodos();
 }
 
-// Regista um objeto achado, com acesso reservado à equipa administradora.
+// Encaminha o registo de achados para o controller da equipa.
 if ($metodo === 'POST' && $caminho === '/api/admin/items/found') {
-    $controller = new ItemController(obterLigacao());
+    $controller = new AdminItemController(obterLigacao());
 
     $controller->criarAchado();
 }
