@@ -68,5 +68,47 @@ public function criarAchado(): void
     ], 201);
 }
 
+// Permite à equipa arquivar um artigo ativo.
+public function arquivar(int $id): void
+{
+    $utilizador = exigirAdministrador($this->pdo);
+    exigirCsrf();
+
+    $artigo = $this->artigos->procurarPorId($id);
+
+    if ($artigo === null) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.'
+        ], 404);
+    }
+
+    // Repetir o pedido para um artigo já arquivado mantém o resultado.
+    if ($artigo['estado'] !== 'arquivado') {
+        if ($artigo['estado'] !== 'ativo') {
+            responderJson([
+                'erro' => 'Só é possível arquivar artigos ativos.'
+            ], 409);
+        }
+
+        $alterado = $this->artigos->arquivar($id);
+
+        // Outra operação pode ter alterado o artigo entretanto.
+        if (!$alterado) {
+            responderJson([
+                'erro' => 'O artigo foi alterado entretanto. '
+                    . 'Atualiza os dados antes de tentar novamente.'
+            ], 409);
+        }
+    }
+
+    responderJson([
+        'estado' => 'ok',
+        'mensagem' => 'Artigo arquivado.',
+        'item' => [
+            'id' => $id,
+            'estado' => 'arquivado',
+        ]
+    ]);
+}
 
 }

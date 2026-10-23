@@ -153,6 +153,32 @@ if (
     $controller->resolver($id);
 }
 
+// Encaminha o arquivo de um artigo para o controller da equipa.
+if (
+    $metodo === 'PATCH'
+    && preg_match(
+        '#\A/api/admin/items/([1-9][0-9]*)/archive\z#',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.'
+        ], 404);
+    }
+
+    $controller = new AdminItemController(obterLigacao());
+
+    $controller->arquivar($id);
+}
+
 
 // Responde quando nenhuma rota corresponde ao pedido.
 responderJson([

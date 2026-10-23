@@ -185,6 +185,25 @@ class Item
         return $consulta->rowCount() === 1;
     }
     
+
+    // Arquiva um artigo apenas se ainda estiver ativo.
+public function arquivar(int $id): bool
+{
+    $consulta = $this->pdo->prepare(
+        "UPDATE items
+         SET estado = 'arquivado'
+         WHERE id = :id
+           AND estado = 'ativo'"
+    );
+
+    $consulta->execute([
+        'id' => $id
+    ]);
+
+    return $consulta->rowCount() === 1;
+}
+
+
         // Lista os artigos de um utilizador, começando pelos mais recentes.    
     public function listarPorUtilizador(int $userId): array
     {
