@@ -68,6 +68,72 @@ public function criarAchado(): void
     ], 201);
 }
 
+// Permite à equipa editar os dados de um artigo ativo.
+public function atualizar(int $id): void
+{
+    exigirAdministrador($this->pdo);
+    exigirCsrf();
+
+    $artigo = $this->artigos->procurarPorId($id);
+
+    if ($artigo === null) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.'
+        ], 404);
+    }
+
+    if ($artigo['estado'] !== 'ativo') {
+        responderJson([
+            'erro' => 'Só é possível editar artigos ativos.'
+        ], 409);
+    }
+
+    // Exige ponto de recolha apenas se o artigo for um achado.
+    $dados = ItemValidator::lerDadosArtigo(
+        $artigo['tipo'] === 'found'
+    );
+
+    try {
+        $alterados = $this->artigos->atualizar($id, $dados);
+    } catch (PDOException $erro) {
+        if ((int) ($erro->errorInfo[1] ?? 0) === 1452) {
+            responderJson([
+                'erro' => 'Não foi possível associar o registo. '
+                    . 'Confirma a categoria, o local e o ponto de recolha.'
+            ], 422);
+        }
+
+        throw $erro;
+    }
+
+    // Os dados podem já ser iguais aos guardados.
+    // Confirma que o artigo continua a existir e está ativo.
+    if ($alterados === 0) {
+        $artigoAtual = $this->artigos->procurarPorId($id);
+
+        if ($artigoAtual === null) {
+            responderJson([
+                'erro' => 'Artigo não encontrado.'
+            ], 404);
+        }
+
+        if ($artigoAtual['estado'] !== 'ativo') {
+            responderJson([
+                'erro' => 'O artigo deixou de estar ativo. '
+                    . 'Atualiza os dados antes de tentar novamente.'
+            ], 409);
+        }
+    }
+
+    responderJson([
+        'estado' => 'ok',
+        'mensagem' => 'Artigo atualizado.',
+        'item' => [
+            'id' => $id,
+        ]
+    ]);
+}
+
 // Permite à equipa arquivar um artigo ativo.
 public function arquivar(int $id): void
 {

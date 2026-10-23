@@ -179,6 +179,32 @@ if (
     $controller->arquivar($id);
 }
 
+// Encaminha a edição de um artigo para o controller da equipa.
+if (
+    $metodo === 'PUT'
+    && preg_match(
+        '#\A/api/admin/items/([1-9][0-9]*)\z#',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.'
+        ], 404);
+    }
+
+    $controller = new AdminItemController(obterLigacao());
+
+    $controller->atualizar($id);
+}
+
 
 // Responde quando nenhuma rota corresponde ao pedido.
 responderJson([

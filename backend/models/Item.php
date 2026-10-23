@@ -203,6 +203,38 @@ public function arquivar(int $id): bool
     return $consulta->rowCount() === 1;
 }
 
+// Atualiza os dados de um artigo que ainda esteja ativo.
+public function atualizar(int $id, array $dados): int
+{
+    $sql = "
+        UPDATE items
+        SET titulo = :titulo,
+            descricao = :descricao,
+            category_id = :category_id,
+            location_id = :location_id,
+            ponto_recolha_id = :ponto_recolha_id,
+            data_ocorrencia = :data_ocorrencia,
+            ia_estado = 'pendente',
+            ia_erro = NULL
+        WHERE id = :id
+          AND estado = 'ativo'
+    ";
+
+    $consulta = $this->pdo->prepare($sql);
+
+    $consulta->execute([
+        'id' => $id,
+        'titulo' => $dados['titulo'],
+        'descricao' => $dados['descricao'],
+        'category_id' => $dados['category_id'],
+        'location_id' => $dados['location_id'],
+        'ponto_recolha_id' => $dados['ponto_recolha_id'],
+        'data_ocorrencia' => $dados['data_ocorrencia'],
+    ]);
+
+    return $consulta->rowCount();
+}
+
 
         // Lista os artigos de um utilizador, começando pelos mais recentes.    
     public function listarPorUtilizador(int $userId): array
