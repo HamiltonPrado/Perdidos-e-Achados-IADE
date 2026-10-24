@@ -7,17 +7,20 @@ require_once __DIR__ . '/../helpers/resposta.php';
 require_once __DIR__ . '/../middleware/administrador.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../validators/ItemValidator.php';
+require_once __DIR__ . '/../models/IaJob.php';
 class AdminItemController
 {
     private PDO $pdo;
     private Item $artigos;
 
-    public function __construct(PDO $pdo)
-    {
-        $this->pdo = $pdo;
-        $this->artigos = new Item($pdo);
-    }
+    private IaJob $filaIa;
 
+  public function __construct(PDO $pdo)
+{
+    $this->pdo = $pdo;
+    $this->artigos = new Item($pdo);
+    $this->filaIa = new IaJob($pdo);
+}
     // Permite à equipa administradora consultar todos os artigos.
     public function listarTodos(): void
     {
@@ -31,22 +34,36 @@ class AdminItemController
         ]);
     }
 
-    // Regista um objeto achado, com acesso reservado à equipa.
+    // Guarda o achado e agenda a sua análise na mesma transação.
 public function criarAchado(): void
 {
     $utilizador = exigirAdministrador($this->pdo);
     exigirCsrf();
 
-    // Valida os dados e exige um ponto de recolha.
     $dados = ItemValidator::lerDadosArtigo(true);
 
     try {
+        $this->pdo->beginTransaction();
+
         $id = $this->artigos->criarAchado(
             $utilizador['id'],
             $dados
         );
-    } catch (PDOException $erro) {
-        if ((int) ($erro->errorInfo[1] ?? 0) === 1452) {
+
+        // Os novos artigos começam na versão 1.
+        $this->filaIa->agendar($id, 1);
+
+        $this->pdo->commit();
+
+    } catch (Throwable $erro) {
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+
+        if (
+            $erro instanceof PDOException
+            && (int) ($erro->errorInfo[1] ?? 0) === 1452
+        ) {
             responderJson([
                 'erro' => 'Não foi possível associar o registo. '
                     . 'Confirma a categoria, o local e o ponto de recolha.'
@@ -68,7 +85,7 @@ public function criarAchado(): void
     ], 201);
 }
 
-// Permite à equipa editar os dados de um artigo ativo.
+// Guarda a edição e agenda a análise da nova versão.
 public function atualizar(int $id): void
 {
     exigirAdministrador($this->pdo);
@@ -82,21 +99,71 @@ public function atualizar(int $id): void
         ], 404);
     }
 
-    if ($artigo['estado'] !== 'ativo') {
-        responderJson([
-            'erro' => 'Só é possível editar artigos ativos.'
-        ], 409);
-    }
-
-    // Exige ponto de recolha apenas se o artigo for um achado.
+    // Valida o pedido antes de abrir a transação.
     $dados = ItemValidator::lerDadosArtigo(
         $artigo['tipo'] === 'found'
     );
 
     try {
+        $this->pdo->beginTransaction();
+
+        $bloqueado = $this->artigos->procurarParaAtualizacao($id);
+
+        if ($bloqueado === null) {
+            throw new DomainException(
+                'Artigo não encontrado.',
+                404
+            );
+        }
+
+        if ($bloqueado['estado'] !== 'ativo') {
+            throw new DomainException(
+                'Só é possível editar artigos ativos.',
+                409
+            );
+        }
+
+        if ($bloqueado['tipo'] !== $artigo['tipo']) {
+            throw new DomainException(
+                'O artigo foi alterado entretanto. Atualiza os dados.',
+                409
+            );
+        }
+
         $alterados = $this->artigos->atualizar($id, $dados);
-    } catch (PDOException $erro) {
-        if ((int) ($erro->errorInfo[1] ?? 0) === 1452) {
+
+        if ($alterados !== 1) {
+            throw new DomainException(
+                'Não foi possível atualizar o artigo.',
+                409
+            );
+        }
+
+        // O modelo incrementou a versão enquanto mantemos o bloqueio.
+        $novaVersao = (int) $bloqueado['versao'] + 1;
+
+        $this->filaIa->agendar($id, $novaVersao);
+
+        $this->pdo->commit();
+
+    } catch (DomainException $erro) {
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+
+        responderJson([
+            'erro' => $erro->getMessage()
+        ], $erro->getCode());
+
+    } catch (Throwable $erro) {
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+
+        if (
+            $erro instanceof PDOException
+            && (int) ($erro->errorInfo[1] ?? 0) === 1452
+        ) {
             responderJson([
                 'erro' => 'Não foi possível associar o registo. '
                     . 'Confirma a categoria, o local e o ponto de recolha.'
@@ -106,30 +173,13 @@ public function atualizar(int $id): void
         throw $erro;
     }
 
-    // Os dados podem já ser iguais aos guardados.
-    // Confirma que o artigo continua a existir e está ativo.
-    if ($alterados === 0) {
-        $artigoAtual = $this->artigos->procurarPorId($id);
-
-        if ($artigoAtual === null) {
-            responderJson([
-                'erro' => 'Artigo não encontrado.'
-            ], 404);
-        }
-
-        if ($artigoAtual['estado'] !== 'ativo') {
-            responderJson([
-                'erro' => 'O artigo deixou de estar ativo. '
-                    . 'Atualiza os dados antes de tentar novamente.'
-            ], 409);
-        }
-    }
-
     responderJson([
         'estado' => 'ok',
         'mensagem' => 'Artigo atualizado.',
         'item' => [
             'id' => $id,
+            'versao' => $novaVersao,
+            'ia_estado' => 'pendente',
         ]
     ]);
 }

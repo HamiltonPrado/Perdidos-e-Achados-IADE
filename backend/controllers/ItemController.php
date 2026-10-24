@@ -8,19 +8,22 @@ require_once __DIR__ . '/../middleware/autenticacao.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../middleware/administrador.php';
 require_once __DIR__ . '/../validators/ItemValidator.php';
+require_once __DIR__ . '/../models/IaJob.php';
 class ItemController
 {
     private PDO $pdo;
     private Item $artigos;
 
-    public function __construct(PDO $pdo)
+     private IaJob $filaIa;
+
+     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
         $this->artigos = new Item($pdo);
+        $this->filaIa = new IaJob($pdo);
     }
-
-
-    // Devolve os artigos pertencentes ao utilizador autenticado.
+   
+   // Devolve os artigos pertencentes ao utilizador autenticado.
     public function listarMeus(): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -36,41 +39,56 @@ class ItemController
     }
 
         // Regista um objeto perdido associado ao utilizador autenticado.
-    public function criarPerdido(): void
-    {
-        $utilizador = exigirAutenticacao($this->pdo);
-        exigirCsrf();
+    // Guarda o perdido e agenda a sua análise na mesma transação.
+public function criarPerdido(): void
+{
+    $utilizador = exigirAutenticacao($this->pdo);
+    exigirCsrf();
 
-        $dados = ItemValidator::lerDadosArtigo();
+    $dados = ItemValidator::lerDadosArtigo();
 
-        try {
-            $id = $this->artigos->criarPerdido(
-                $utilizador['id'],
-                $dados
-            );
-        } catch (PDOException $erro) {
-            if ((int) ($erro->errorInfo[1] ?? 0) === 1452) {
-                responderJson([
-                    'erro' => 'Não foi possível associar o registo. '
-                        . 'Confirma a categoria e o local selecionados.'
-                ], 422);
-            }
+    try {
+        $this->pdo->beginTransaction();
 
-            throw $erro;
+        $id = $this->artigos->criarPerdido(
+            $utilizador['id'],
+            $dados
+        );
+
+        // Os novos artigos começam na versão 1.
+        $this->filaIa->agendar($id, 1);
+
+        $this->pdo->commit();
+
+    } catch (Throwable $erro) {
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
         }
 
-        responderJson([
-            'estado' => 'ok',
-            'mensagem' => 'Objeto perdido registado.',
-            'item' => [
-                'id' => $id,
-                'tipo' => 'lost',
-                'estado' => 'ativo',
-                'ia_estado' => 'pendente',
-            ]
-        ], 201);
+        if (
+            $erro instanceof PDOException
+            && (int) ($erro->errorInfo[1] ?? 0) === 1452
+        ) {
+            responderJson([
+                'erro' => 'Não foi possível associar o registo. '
+                    . 'Confirma a categoria e o local selecionados.'
+            ], 422);
+        }
+
+        throw $erro;
     }
 
+    responderJson([
+        'estado' => 'ok',
+        'mensagem' => 'Objeto perdido registado.',
+        'item' => [
+            'id' => $id,
+            'tipo' => 'lost',
+            'estado' => 'ativo',
+            'ia_estado' => 'pendente',
+        ]
+    ], 201);
+}
         // Regista um objeto achado, com acesso reservado à equipa.
 
         // Permite ao autor marcar o seu objeto perdido como resolvido.

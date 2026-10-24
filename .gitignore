@@ -23,3 +23,6 @@ Thumbs.db
 tatus --short
 
 /backend/config/credenciais.php
+/ia/.venv/
+/ia/__pycache__/
+/ia/config.local.json

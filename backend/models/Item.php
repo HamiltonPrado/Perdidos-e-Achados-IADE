@@ -207,18 +207,21 @@ public function arquivar(int $id): bool
 public function atualizar(int $id, array $dados): int
 {
     $sql = "
-        UPDATE items
-        SET titulo = :titulo,
-            descricao = :descricao,
-            category_id = :category_id,
-            location_id = :location_id,
-            ponto_recolha_id = :ponto_recolha_id,
-            data_ocorrencia = :data_ocorrencia,
-            ia_estado = 'pendente',
-            ia_erro = NULL
-        WHERE id = :id
-          AND estado = 'ativo'
-    ";
+    UPDATE items
+    SET titulo = :titulo,
+        descricao = :descricao,
+        category_id = :category_id,
+        location_id = :location_id,
+        ponto_recolha_id = :ponto_recolha_id,
+        data_ocorrencia = :data_ocorrencia,
+        versao = versao + 1,
+        ia_estado = 'pendente',
+        ia_erro = NULL,
+        embedding_texto = NULL,
+        embedding_modelo = NULL
+    WHERE id = :id
+      AND estado = 'ativo'
+";
 
     $consulta = $this->pdo->prepare($sql);
 
@@ -240,7 +243,7 @@ public function atualizar(int $id, array $dados): int
 public function procurarParaAtualizacao(int $id): ?array
 {
     $consulta = $this->pdo->prepare(
-        'SELECT id, user_id, tipo, estado, ponto_recolha_id
+        'SELECT id, user_id, tipo, estado, ponto_recolha_id, versao
          FROM items
          WHERE id = :id
          LIMIT 1
@@ -256,53 +259,31 @@ public function procurarParaAtualizacao(int $id): ?array
     return $artigo === false ? null : $artigo;
 }
 
-// Solicita uma nova análise após alterar as fotografias.
+// Invalida a análise anterior após alterar as fotografias.
+// Deve ser chamado numa transação, com o artigo bloqueado.
 public function marcarAnalisePendente(int $id): void
 {
     $consulta = $this->pdo->prepare(
         "UPDATE items
-         SET ia_estado = 'pendente',
-             ia_erro = NULL
-         WHERE id = :id"
+         SET versao = versao + 1,
+             ia_estado = 'pendente',
+             ia_erro = NULL,
+             embedding_texto = NULL,
+             embedding_modelo = NULL
+         WHERE id = :id
+           AND estado = 'ativo'"
     );
 
     $consulta->execute([
         'id' => $id
     ]);
-}
 
-        // Lista os artigos de um utilizador, começando pelos mais recentes.    
-    public function listarPorUtilizador(int $userId): array
-    {
-        $sql = '
-            SELECT
-                i.id,
-                i.tipo,
-                i.titulo,
-                i.descricao,
-                i.category_id,
-                c.nome AS categoria,
-                i.location_id,
-                l.nome AS local,
-                i.data_ocorrencia,
-                i.estado,
-                i.ia_estado,
-                i.criado_em
-            FROM items AS i
-            INNER JOIN categories AS c ON c.id = i.category_id
-            INNER JOIN locations AS l ON l.id = i.location_id
-            WHERE i.user_id = :user_id
-            ORDER BY i.criado_em DESC, i.id DESC
-        ';
-
-        $consulta = $this->pdo->prepare($sql);
-
-        $consulta->execute([
-            'user_id' => $userId
-        ]);
-
-        return $consulta->fetchAll();
+    if ($consulta->rowCount() !== 1) {
+        throw new RuntimeException(
+            'Não foi possível preparar a nova análise do artigo.'
+        );
     }
+}
 
     // Marca um artigo como devolvido apenas se ainda estiver ativo.
 public function marcarDevolvido(int $id): bool

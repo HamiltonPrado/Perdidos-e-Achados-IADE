@@ -8,19 +8,22 @@ require_once __DIR__ . '/../validators/PhotoValidator.php';
 require_once __DIR__ . '/../middleware/autenticacao.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../helpers/resposta.php';
+require_once __DIR__ . '/../models/IaJob.php';
 
 class PhotoController
 {
     private PDO $pdo;
     private Item $artigos;
     private ItemPhoto $fotografias;
+    private IaJob $filaIa;
 
-    public function __construct(PDO $pdo)
-    {
-        $this->pdo = $pdo;
-        $this->artigos = new Item($pdo);
-        $this->fotografias = new ItemPhoto($pdo);
-    }
+   public function __construct(PDO $pdo)
+{
+    $this->pdo = $pdo;
+    $this->artigos = new Item($pdo);
+    $this->fotografias = new ItemPhoto($pdo);
+    $this->filaIa = new IaJob($pdo);
+}
 
     // Adiciona uma fotografia a um artigo ativo.
     public function adicionar(int $itemId): void
@@ -80,6 +83,11 @@ class PhotoController
             );
 
             $this->artigos->marcarAnalisePendente($itemId);
+
+// O artigo continua bloqueado desde a consulta inicial.
+$novaVersao = (int) $artigo['versao'] + 1;
+
+$this->filaIa->agendar($itemId, $novaVersao);
 
             $this->pdo->commit();
 
@@ -238,6 +246,11 @@ public function apagar(int $id): void
 
         // Solicita uma nova análise com as fotografias restantes.
         $this->artigos->marcarAnalisePendente($itemId);
+
+// O artigo continua bloqueado desde a consulta inicial.
+$novaVersao = (int) $artigo['versao'] + 1;
+
+$this->filaIa->agendar($itemId, $novaVersao);
 
         $this->pdo->commit();
 
