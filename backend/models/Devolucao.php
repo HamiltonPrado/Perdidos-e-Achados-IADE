@@ -43,4 +43,40 @@ class Devolucao
 
         return (int) $this->pdo->lastInsertId();
     }
+
+    // Lista as devoluções, começando pelas mais recentes.
+public function listarTodos(): array
+{
+    $consulta = $this->pdo->query(
+        'SELECT
+            d.id,
+            d.match_id,
+            d.item_achado_id,
+            achado.titulo AS achado_titulo,
+            d.item_perdido_id,
+            perdido.titulo AS perdido_titulo,
+            d.recebido_por,
+            recebedor.nome AS recebido_por_nome,
+            d.confirmado_por,
+            administrador.nome AS confirmado_por_nome,
+            d.ponto_recolha_id,
+            ponto.nome AS ponto_recolha,
+            d.devolvido_em
+         FROM devolucoes AS d
+         INNER JOIN items AS achado
+            ON achado.id = d.item_achado_id
+         LEFT JOIN items AS perdido
+            ON perdido.id = d.item_perdido_id
+         INNER JOIN users AS recebedor
+            ON recebedor.id = d.recebido_por
+         INNER JOIN users AS administrador
+            ON administrador.id = d.confirmado_por
+         INNER JOIN pontos_recolha AS ponto
+            ON ponto.id = d.ponto_recolha_id
+         ORDER BY d.devolvido_em DESC, d.id DESC'
+    );
+
+    return $consulta->fetchAll();
+}
+
 }

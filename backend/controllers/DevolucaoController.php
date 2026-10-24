@@ -271,4 +271,18 @@ public function criar(int $achadoId): void
 
         return $artigos;
     }
+
+    // Permite à equipa consultar o histórico de devoluções.
+public function listarTodos(): void
+{
+    exigirAdministrador($this->pdo);
+
+    $devolucoes = $this->devolucoes->listarTodos();
+
+    responderJson([
+        'estado' => 'ok',
+        'devolucoes' => $devolucoes
+    ]);
+}
+
 }

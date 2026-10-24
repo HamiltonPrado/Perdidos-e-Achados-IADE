@@ -336,6 +336,15 @@ if (
 
     $controller->criar($id);
 }
+// Devolve o histórico de devoluções à equipa.
+if (
+    $metodo === 'GET'
+    && $caminho === '/api/admin/returns'
+) {
+    $controller = new DevolucaoController(obterLigacao());
+
+    $controller->listarTodos();
+}
 
 // Responde quando nenhuma rota corresponde ao pedido.
 responderJson([
