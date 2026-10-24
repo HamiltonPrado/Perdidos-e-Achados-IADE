@@ -88,4 +88,21 @@ public function procurarPorId(int $id): ?array
     return $foto === false ? null : $foto;
 }
 
+// Remove uma fotografia associada ao artigo indicado.
+public function apagar(int $id, int $itemId): bool
+{
+    $consulta = $this->pdo->prepare(
+        'DELETE FROM item_photos
+         WHERE id = :id
+           AND item_id = :item_id'
+    );
+
+    $consulta->execute([
+        'id' => $id,
+        'item_id' => $itemId,
+    ]);
+
+    return $consulta->rowCount() === 1;
+}
+
 }

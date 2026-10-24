@@ -169,4 +169,94 @@ public function mostrar(int $id): void
     exit;
 }
 
+// Remove uma fotografia de um artigo ativo.
+public function apagar(int $id): void
+{
+    $utilizador = exigirAutenticacao($this->pdo);
+    exigirCsrf();
+
+    $foto = $this->fotografias->procurarPorId($id);
+
+    if ($foto === null) {
+        responderJson([
+            'erro' => 'Fotografia não encontrada.'
+        ], 404);
+    }
+
+    $itemId = (int) $foto['item_id'];
+
+    try {
+        $this->pdo->beginTransaction();
+
+        // Bloqueia o artigo enquanto verifica e executa a remoção.
+        $artigo = $this->artigos->procurarParaAtualizacao(
+            $itemId
+        );
+
+        if ($artigo === null) {
+            $this->pdo->rollBack();
+
+            responderJson([
+                'erro' => 'Fotografia não encontrada.'
+            ], 404);
+        }
+
+        // Aplica as mesmas permissões usadas no upload.
+        $eAdministrador = $utilizador['role'] === 'admin';
+
+        $ePerdidoDoUtilizador =
+            $artigo['tipo'] === 'lost'
+            && (int) $artigo['user_id'] === $utilizador['id'];
+
+        if (!$eAdministrador && !$ePerdidoDoUtilizador) {
+            $this->pdo->rollBack();
+
+            responderJson([
+                'erro' => 'Fotografia não encontrada.'
+            ], 404);
+        }
+
+        if ($artigo['estado'] !== 'ativo') {
+            $this->pdo->rollBack();
+
+            responderJson([
+                'erro' => 'Só é possível remover fotografias '
+                    . 'de artigos ativos.'
+            ], 409);
+        }
+
+        $apagada = $this->fotografias->apagar($id, $itemId);
+
+        // A fotografia pode ter sido removida por outro pedido.
+        if (!$apagada) {
+            $this->pdo->rollBack();
+
+            responderJson([
+                'erro' => 'Fotografia não encontrada.'
+            ], 404);
+        }
+
+        // Solicita uma nova análise com as fotografias restantes.
+        $this->artigos->marcarAnalisePendente($itemId);
+
+        $this->pdo->commit();
+
+    } catch (Throwable $erro) {
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+
+        throw $erro;
+    }
+
+    responderJson([
+        'estado' => 'ok',
+        'mensagem' => 'Fotografia removida.',
+        'foto' => [
+            'id' => $id,
+            'item_id' => $itemId,
+        ]
+    ]);
+}
+
 }
