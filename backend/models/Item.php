@@ -236,6 +236,41 @@ public function atualizar(int $id, array $dados): int
 }
 
 
+// Consulta e bloqueia o artigo durante uma transação.
+public function procurarParaAtualizacao(int $id): ?array
+{
+    $consulta = $this->pdo->prepare(
+        'SELECT id, user_id, tipo, estado
+         FROM items
+         WHERE id = :id
+         LIMIT 1
+         FOR UPDATE'
+    );
+
+    $consulta->execute([
+        'id' => $id
+    ]);
+
+    $artigo = $consulta->fetch();
+
+    return $artigo === false ? null : $artigo;
+}
+
+// Solicita uma nova análise após alterar as fotografias.
+public function marcarAnalisePendente(int $id): void
+{
+    $consulta = $this->pdo->prepare(
+        "UPDATE items
+         SET ia_estado = 'pendente',
+             ia_erro = NULL
+         WHERE id = :id"
+    );
+
+    $consulta->execute([
+        'id' => $id
+    ]);
+}
+
         // Lista os artigos de um utilizador, começando pelos mais recentes.    
     public function listarPorUtilizador(int $userId): array
     {
