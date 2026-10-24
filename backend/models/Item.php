@@ -240,7 +240,7 @@ public function atualizar(int $id, array $dados): int
 public function procurarParaAtualizacao(int $id): ?array
 {
     $consulta = $this->pdo->prepare(
-        'SELECT id, user_id, tipo, estado
+        'SELECT id, user_id, tipo, estado, ponto_recolha_id
          FROM items
          WHERE id = :id
          LIMIT 1
@@ -303,5 +303,22 @@ public function marcarAnalisePendente(int $id): void
 
         return $consulta->fetchAll();
     }
+
+    // Marca um artigo como devolvido apenas se ainda estiver ativo.
+public function marcarDevolvido(int $id): bool
+{
+    $consulta = $this->pdo->prepare(
+        "UPDATE items
+         SET estado = 'devolvido'
+         WHERE id = :id
+           AND estado = 'ativo'"
+    );
+
+    $consulta->execute([
+        'id' => $id
+    ]);
+
+    return $consulta->rowCount() === 1;
+}
 
 }

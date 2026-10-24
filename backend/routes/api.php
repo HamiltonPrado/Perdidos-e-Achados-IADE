@@ -8,6 +8,7 @@ require_once __DIR__ . '/../middleware/administrador.php';
 require_once __DIR__ . '/../controllers/ItemController.php';
 require_once __DIR__ . '/../controllers/AdminItemController.php';
 require_once __DIR__ . '/../controllers/PhotoController.php';
+require_once __DIR__ . '/../controllers/DevolucaoController.php';
 
 // Verifica se o PHP está a responder, sem abrir ligação à BD.
 if ($metodo === 'GET' && $caminho === '/api/health') {
@@ -308,6 +309,32 @@ if (
     $controller = new PhotoController(obterLigacao());
 
     $controller->apagar($id);
+}
+
+// Regista uma devolução presencial confirmada pela equipa.
+if (
+    $metodo === 'POST'
+    && preg_match(
+        '#\A/api/admin/items/([1-9][0-9]*)/return\z#',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.'
+        ], 404);
+    }
+
+    $controller = new DevolucaoController(obterLigacao());
+
+    $controller->criar($id);
 }
 
 // Responde quando nenhuma rota corresponde ao pedido.
