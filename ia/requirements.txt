@@ -1,0 +1,2 @@
+PyMySQL[rsa]==1.2.3
+sentence-transformers==6.2.0

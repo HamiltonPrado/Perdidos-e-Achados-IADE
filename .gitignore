@@ -26,3 +26,4 @@ tatus --short
 /ia/.venv/
 /ia/__pycache__/
 /ia/config.local.json
+/ia/.venv-ai/
