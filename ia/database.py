@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 import pymysql
@@ -6,12 +7,23 @@ from pymysql.cursors import DictCursor
 from pymysql.constants import CLIENT
 
 
-# Abre uma ligação usando a configuração local.
+# Abre uma ligação usando a configuração do Docker ou a configuração local.
 def obter_ligacao():
-    caminho = Path(__file__).resolve().parent / "config.local.json"
+    if "DB_HOST" in os.environ:
+        config = {
+            "host": os.environ["DB_HOST"],
+            "port": os.environ.get("DB_PORT", "3306"),
+            "username": os.environ["DB_USER"],
+            "password": os.environ["DB_PASSWORD"],
+            "database": os.environ["DB_NAME"],
+        }
 
-    with caminho.open(encoding="utf-8") as ficheiro:
-        config = json.load(ficheiro)
+    else:
+        caminho = Path(__file__).resolve().parent / "config.local.json"
+
+        with caminho.open(encoding="utf-8") as ficheiro:
+            config = json.load(ficheiro)
+
 
     return pymysql.connect(
         host=config["host"],
