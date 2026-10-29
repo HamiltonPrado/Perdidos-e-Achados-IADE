@@ -7,7 +7,7 @@ from pymysql.cursors import DictCursor
 from pymysql.constants import CLIENT
 
 
-# Abre uma ligação usando a configuração do Docker ou a configuração local.
+# Abre uma ligação usando variáveis de ambiente ou a configuração local.
 def obter_ligacao():
     if "DB_HOST" in os.environ:
         config = {
