@@ -380,6 +380,13 @@ if (
     $controller->marcarLida($id);
 }
 
+// Lista os perdidos ativos para todos os utilizadores autenticados.
+if ($metodo === 'GET' && $caminho === '/api/items/lost') {
+    $controller = new ItemController(obterLigacao());
+
+    $controller->listarPerdidos();
+}
+
 // Responde quando nenhuma rota corresponde ao pedido.
 responderJson([
     'erro' => 'Rota não encontrada.'

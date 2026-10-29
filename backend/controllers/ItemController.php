@@ -89,8 +89,7 @@ public function criarPerdido(): void
         ]
     ], 201);
 }
-        // Regista um objeto achado, com acesso reservado à equipa.
-
+        
         // Permite ao autor marcar o seu objeto perdido como resolvido.
     public function resolver(int $id): void
     {
@@ -148,7 +147,7 @@ public function criarPerdido(): void
         ]);
     }
 
-        // Devolve um artigo ao seu autor ou à equipa administradora.
+         // Devolve o detalhe respeitando as permissões de consulta.
     public function mostrar(int $id): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -162,20 +161,88 @@ public function criarPerdido(): void
         }
 
         $pertenceAoUtilizador =
-            (int) $artigo['user_id'] === $utilizador['id'];
+            (int) $artigo['user_id'] === (int) $utilizador['id'];
 
         $eAdministrador = $utilizador['role'] === 'admin';
 
-        // Usa também 404 para não revelar artigos de outras pessoas.
-        if (!$pertenceAoUtilizador && !$eAdministrador) {
+        $ePerdidoAtivo =
+            $artigo['tipo'] === 'lost'
+            && $artigo['estado'] === 'ativo';
+
+        if (
+            !$pertenceAoUtilizador
+            && !$eAdministrador
+            && !$ePerdidoAtivo
+        ) {
             responderJson([
                 'erro' => 'Artigo não encontrado.'
             ], 404);
         }
 
+        // Limita os campos apresentados a outros alunos.
+        if (!$pertenceAoUtilizador && !$eAdministrador) {
+            $camposVisiveis = array_flip([
+                'id',
+                'tipo',
+                'titulo',
+                'descricao',
+                'category_id',
+                'categoria',
+                'location_id',
+                'local',
+                'data_ocorrencia',
+                'estado',
+                'criado_em',
+                'atualizado_em',
+            ]);
+
+            $artigo = array_intersect_key(
+                $artigo,
+                $camposVisiveis
+            );
+        }
+
         responderJson([
             'estado' => 'ok',
-            'artigo' => $artigo
+            'artigo' => $artigo,
+        ]);
+    }
+
+        // Permite aos utilizadores autenticados consultar os perdidos ativos.
+    public function listarPerdidos(): void
+    {
+        exigirAutenticacao($this->pdo);
+
+        $pagina = filter_var(
+            $_GET['pagina'] ?? '1',
+            FILTER_VALIDATE_INT,
+            ['options' => [
+                'min_range' => 1,
+                'max_range' => 1000000,
+            ]]
+        );
+
+        if ($pagina === false) {
+            responderJson([
+                'erro' => 'Página inválida.'
+            ], 422);
+        }
+
+        $limite = 20;
+        $offset = ($pagina - 1) * $limite;
+
+        $artigos = $this->artigos->listarPerdidosAtivos(
+            $limite,
+            $offset
+        );
+
+        responderJson([
+            'estado' => 'ok',
+            'artigos' => $artigos,
+            'paginacao' => [
+                'pagina' => $pagina,
+                'por_pagina' => $limite,
+            ],
         ]);
     }
 }

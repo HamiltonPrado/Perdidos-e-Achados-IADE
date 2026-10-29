@@ -302,4 +302,41 @@ public function marcarDevolvido(int $id): bool
     return $consulta->rowCount() === 1;
 }
 
+    // Lista os perdidos ativos para consulta pelos alunos.
+    public function listarPerdidosAtivos(
+        int $limite = 20,
+        int $offset = 0
+    ): array {
+        $sql = "
+            SELECT
+                i.id,
+                i.tipo,
+                i.titulo,
+                i.descricao,
+                i.category_id,
+                c.nome AS categoria,
+                i.location_id,
+                l.nome AS local,
+                i.data_ocorrencia,
+                i.estado,
+                i.criado_em
+            FROM items AS i
+            INNER JOIN categories AS c ON c.id = i.category_id
+            INNER JOIN locations AS l ON l.id = i.location_id
+            WHERE i.tipo = 'lost'
+              AND i.estado = 'ativo'
+            ORDER BY i.criado_em DESC, i.id DESC
+            LIMIT :limite OFFSET :offset
+        ";
+
+        $consulta = $this->pdo->prepare($sql);
+
+        $consulta->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $consulta->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+        $consulta->execute();
+
+        return $consulta->fetchAll();
+    }
+    
 }

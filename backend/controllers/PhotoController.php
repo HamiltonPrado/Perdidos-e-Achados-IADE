@@ -117,13 +117,7 @@ public function listar(int $itemId): void
 
     $artigo = $this->artigos->procurarPorId($itemId);
 
-    if (
-        $artigo === null
-        || (
-            (int) $artigo['user_id'] !== $utilizador['id']
-            && $utilizador['role'] !== 'admin'
-        )
-    ) {
+        if (!$this->podeConsultarArtigo($artigo, $utilizador)) {
         responderJson([
             'erro' => 'Artigo não encontrado.'
         ], 404);
@@ -154,18 +148,13 @@ public function mostrar(int $id): void
         (int) $foto['item_id']
     );
 
-    if (
-        $artigo === null
-        || (
-            (int) $artigo['user_id'] !== $utilizador['id']
-            && $utilizador['role'] !== 'admin'
-        )
-    ) {
+       if (!$this->podeConsultarArtigo($artigo, $utilizador)) {
         responderJson([
             'erro' => 'Fotografia não encontrada.'
         ], 404);
     }
 
+    
     // Substitui o Content-Type JSON pelo tipo da imagem.
     http_response_code(200);
     header('Content-Type: ' . $foto['mime']);
@@ -271,5 +260,22 @@ $this->filaIa->agendar($itemId, $novaVersao);
         ]
     ]);
 }
+
+    // Autoriza a consulta pelo autor, pela equipa ou de um perdido ativo.
+    private function podeConsultarArtigo(
+        ?array $artigo,
+        array $utilizador
+    ): bool {
+        if ($artigo === null) {
+            return false;
+        }
+
+        return $utilizador['role'] === 'admin'
+            || (int) $artigo['user_id'] === (int) $utilizador['id']
+            || (
+                $artigo['tipo'] === 'lost'
+                && $artigo['estado'] === 'ativo'
+            );
+    }
 
 }
