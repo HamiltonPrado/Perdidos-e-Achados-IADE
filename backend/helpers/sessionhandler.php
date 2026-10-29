@@ -112,9 +112,21 @@ class DatabaseSessionHandler implements
         return $consulta->rowCount();
     }
 
+    // Valida o formato do ID e confirma que a sessão não expirou.
     public function validateId(string $id): bool
     {
-        if (preg_match('/\A[a-zA-Z0-9,-]{22,128}\z/', $id) !== 1) {
+        $tamanho = strlen($id);
+
+        $caracteresPermitidos =
+            'abcdefghijklmnopqrstuvwxyz'
+            . 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            . '0123456789,-';
+
+        if (
+            $tamanho < 22
+            || $tamanho > 128
+            || strspn($id, $caracteresPermitidos) !== $tamanho
+        ) {
             return false;
         }
 
