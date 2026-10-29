@@ -10,6 +10,7 @@ require_once __DIR__ . '/../controllers/AdminItemController.php';
 require_once __DIR__ . '/../controllers/PhotoController.php';
 require_once __DIR__ . '/../controllers/DevolucaoController.php';
 require_once __DIR__ . '/../controllers/NotificationController.php';
+require_once __DIR__ . '/../controllers/PedidoLevantamentoController.php';
 
 // Verifica se o PHP está a responder, sem abrir ligação à BD.
 if ($metodo === 'GET' && $caminho === '/api/health') {
@@ -386,6 +387,69 @@ if ($metodo === 'GET' && $caminho === '/api/items/lost') {
 
     $controller->listarPerdidos();
 }
+
+// Solicita um código através de uma notificação do utilizador.
+if (
+    $metodo === 'POST'
+    && preg_match(
+        '#\A/api/notifications/([1-9][0-9]*)/collection-request\z#',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Notificação não encontrada.'
+        ], 404);
+    }
+
+    $controller = new PedidoLevantamentoController(
+        obterLigacao()
+    );
+
+    $controller->criar($id);
+}
+
+// Permite à equipa consultar um código de levantamento.
+if (
+    $metodo === 'GET'
+    && preg_match(
+        '#\A/api/admin/collection-requests/([^/]+)\z#',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $controller = new PedidoLevantamentoController(
+        obterLigacao()
+    );
+
+    $controller->consultar(
+        rawurldecode($parametros[1])
+    );
+}
+
+// Confirma uma entrega presencial através do código de levantamento.
+if (
+    $metodo === 'POST'
+    && preg_match(
+        '#^/api/admin/collection-requests/([^/]+)/confirm$#D',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $controller = new DevolucaoController(obterLigacao());
+
+    $controller->confirmarPorCodigo(
+        rawurldecode($parametros[1])
+    );
+}
+
 
 // Responde quando nenhuma rota corresponde ao pedido.
 responderJson([
