@@ -578,6 +578,39 @@ if (
     $controller->criarPorReclamacao($id);
 }
 
+// Lista as reclamações do utilizador autenticado.
+if ($metodo === 'GET' && $caminho === '/api/claims/mine') {
+    $controller = new ReclamacaoController(obterLigacao());
+
+    $controller->listarMinhas();
+}
+
+// Permite à equipa reabrir uma reclamação recusada.
+if (
+    $metodo === 'POST'
+    && preg_match(
+        '#^/api/admin/claims/([1-9][0-9]*)/reopen$#D',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Reclamação não encontrada.',
+        ], 404);
+    }
+
+    $controller = new ReclamacaoController(obterLigacao());
+
+    $controller->reabrir($id);
+}
+
 // Responde quando nenhuma rota corresponde ao pedido.
 responderJson([
     'erro' => 'Rota não encontrada.'

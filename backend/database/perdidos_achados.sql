@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Tempo de geração: 30-Out-2026 às 16:03
+-- Tempo de geração: 30-Out-2026 às 19:04
 -- Versão do servidor: 8.0.44
 -- versão do PHP: 8.3.30
 
@@ -100,7 +100,11 @@ INSERT INTO `ia_jobs` (`id`, `item_id`, `versao_item`, `estado`, `tentativas`, `
 (2, 2, 1, 'concluido', 1, '2026-10-28 20:52:29', NULL, NULL, NULL, '2026-10-28 20:52:29', '2026-10-29 16:28:38'),
 (3, 3, 1, 'concluido', 1, '2026-10-29 16:34:58', NULL, NULL, NULL, '2026-10-29 16:34:58', '2026-10-29 16:35:01'),
 (4, 4, 1, 'concluido', 1, '2026-10-30 00:57:07', NULL, NULL, NULL, '2026-10-30 00:57:07', '2026-10-30 00:57:10'),
-(5, 5, 2, 'concluido', 1, '2026-10-30 01:20:12', NULL, NULL, NULL, '2026-10-30 01:20:12', '2026-10-30 01:20:14');
+(5, 5, 2, 'concluido', 1, '2026-10-30 01:20:12', NULL, NULL, NULL, '2026-10-30 01:20:12', '2026-10-30 01:20:14'),
+(6, 7, 1, 'pendente', 0, '2026-10-30 17:51:38', NULL, NULL, NULL, '2026-10-30 17:51:38', '2026-10-30 17:51:38'),
+(7, 8, 1, 'pendente', 0, '2026-10-30 17:51:43', NULL, NULL, NULL, '2026-10-30 17:51:43', '2026-10-30 17:51:43'),
+(8, 9, 1, 'pendente', 0, '2026-10-30 17:51:45', NULL, NULL, NULL, '2026-10-30 17:51:45', '2026-10-30 17:51:45'),
+(9, 10, 2, 'pendente', 0, '2026-10-30 17:58:32', NULL, NULL, NULL, '2026-10-30 17:53:05', '2026-10-30 17:58:32');
 
 -- --------------------------------------------------------
 
@@ -147,7 +151,11 @@ INSERT INTO `items` (`id`, `user_id`, `tipo`, `titulo`, `descricao`, `category_i
 (3, 1, 'found', 'Carteira preta com fecho vermelho', 'Carteira preta com um pequeno fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-29', 'devolvido', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-29 16:34:58', '2026-10-29 17:36:09', 'na_recepcao', NULL, NULL, NULL, NULL, NULL, NULL),
 (4, 2, 'lost', 'Carteira preta perdida', 'Perdi uma carteira preta com fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-30', 'ativo', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 00:57:07', '2026-10-30 00:57:10', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (5, 2, 'found', 'Carteira encontrada', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'analisado', NULL, NULL, NULL, 2, NULL, NULL, '2026-10-30 00:57:29', '2026-10-30 01:20:14', 'na_recepcao', 'Prateleira A2', 'Carteira recebida e conferida pela equipa.', 1, '2026-10-30 01:20:12', NULL, NULL),
-(6, 2, 'found', 'Estojo encontrado — teste de fotografia', 'Estojo azul com fecho preto encontrado na biblioteca.', 3, 2, NULL, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 01:49:37', '2026-10-30 01:49:37', 'por_entregar', NULL, NULL, NULL, NULL, NULL, NULL);
+(6, 2, 'found', 'Estojo encontrado — teste de fotografia', 'Estojo azul com fecho preto encontrado na biblioteca.', 3, 2, NULL, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 01:49:37', '2026-10-30 01:49:37', 'por_entregar', NULL, NULL, NULL, NULL, NULL, NULL),
+(7, 1, 'found', '[LAB] Carteira preta', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 17:51:38', '2026-10-30 17:51:38', 'na_recepcao', NULL, NULL, 1, '2026-10-30 17:51:38', NULL, NULL),
+(8, 1, 'found', '[LAB] Carteira preta', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 17:51:43', '2026-10-30 17:51:43', 'na_recepcao', NULL, NULL, 1, '2026-10-30 17:51:43', NULL, NULL),
+(9, 1, 'found', '[LAB] Carteira preta', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 17:51:45', '2026-10-30 17:51:45', 'na_recepcao', NULL, NULL, 1, '2026-10-30 17:51:45', NULL, NULL),
+(10, 1, 'found', '[LAB] Carteira preta', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 2, NULL, NULL, '2026-10-30 17:53:05', '2026-10-30 17:58:32', 'na_recepcao', NULL, NULL, 1, '2026-10-30 17:53:05', 'Qual é a cor do fecho?', 'Vermelho');
 
 -- --------------------------------------------------------
 
@@ -314,13 +322,23 @@ CREATE TABLE `reclamacoes` (
   `pergunta_secreta` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `resposta` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
   `informacao_adicional` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `estado` enum('pendente','aprovada','recusada','cancelada') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendente',
+  `estado` enum('pendente','aprovada','recusada','cancelada','reaberta') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendente',
   `decidido_por` int UNSIGNED DEFAULT NULL,
   `motivo_decisao` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `decidido_em` datetime DEFAULT NULL,
   `criado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `atualizado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `reaberta_por` int UNSIGNED DEFAULT NULL,
+  `reaberta_em` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Extraindo dados da tabela `reclamacoes`
+--
+
+INSERT INTO `reclamacoes` (`id`, `user_id`, `item_achado_id`, `item_perdido_id`, `match_id`, `versao_item`, `pergunta_secreta`, `resposta`, `informacao_adicional`, `estado`, `decidido_por`, `motivo_decisao`, `decidido_em`, `criado_em`, `atualizado_em`, `reaberta_por`, `reaberta_em`) VALUES
+(1, 2, 10, NULL, NULL, 2, 'Qual é a cor do fecho?', 'IADE', 'A palavra está escrita no interior.', 'pendente', NULL, NULL, NULL, '2026-10-30 17:54:35', '2026-10-30 18:15:57', 1, '2026-10-30 18:14:16'),
+(2, 1, 10, NULL, NULL, 2, 'Qual é a cor do fecho?', 'IADE', 'A palavra está escrita no interior.', 'pendente', NULL, NULL, NULL, '2026-10-30 18:15:15', '2026-10-30 18:15:15', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -350,7 +368,8 @@ INSERT INTO `sessions` (`id`, `user_id`, `dados`, `expira_em`, `atualizado_em`) 
 ('ce44oqceht12f61beno68np9uh', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2264636161653130333934356261333530386135323839346538366562353039323464326537383134323034666232626138633339323435633130643066633930223b, '2026-10-27 22:58:41', '2026-10-27 21:58:41'),
 ('cofk7pdh6bb3la2dojr3m7dj5r', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2265643630316534633566396466646162336334393761346235326638613333363862396266306563666135666462653561623234316566643739636361396533223b, '2026-10-27 22:58:46', '2026-10-27 21:58:46'),
 ('gu2iduk3tltc4oictnvrrn2t2e', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2239366264323534636139666433646261663533643031303965313835373734626638376231633130396636623434653930383235313062653466343635633135223b, '2026-10-27 22:45:31', '2026-10-27 21:45:31'),
-('i6t2jh8if8c206qe9up1lf6pcf', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2239343465646636303132323061383664343438653364613233643337346266333634393066653933373939663664633163363763666663643332363233663039223b, '2026-10-29 17:48:47', '2026-10-29 16:48:47');
+('i6t2jh8if8c206qe9up1lf6pcf', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2239343465646636303132323061383664343438653364613233643337346266333634393066653933373939663664633163363763666663643332363233663039223b, '2026-10-29 17:48:47', '2026-10-29 16:48:47'),
+('r4ltp2l7eg6deajp0b95umg6vn', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2236653334363531363638636662396233393139366161613031643736623664663966323938313766646334336364373333663131613530356266323732633066223b, '2026-10-30 20:02:03', '2026-10-30 19:02:03');
 
 -- --------------------------------------------------------
 
@@ -492,7 +511,8 @@ ALTER TABLE `reclamacoes`
   ADD KEY `fk_reclamacoes_achado` (`item_achado_id`),
   ADD KEY `fk_reclamacoes_perdido` (`item_perdido_id`),
   ADD KEY `fk_reclamacoes_match` (`match_id`),
-  ADD KEY `fk_reclamacoes_decisor` (`decidido_por`);
+  ADD KEY `fk_reclamacoes_decisor` (`decidido_por`),
+  ADD KEY `fk_reclamacoes_reaberta_por` (`reaberta_por`);
 
 --
 -- Índices para tabela `sessions`
@@ -529,13 +549,13 @@ ALTER TABLE `devolucoes`
 -- AUTO_INCREMENT de tabela `ia_jobs`
 --
 ALTER TABLE `ia_jobs`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `item_photos`
@@ -577,7 +597,7 @@ ALTER TABLE `pontos_recolha`
 -- AUTO_INCREMENT de tabela `reclamacoes`
 --
 ALTER TABLE `reclamacoes`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `users`
@@ -656,7 +676,8 @@ ALTER TABLE `reclamacoes`
   ADD CONSTRAINT `fk_reclamacoes_aluno` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `fk_reclamacoes_decisor` FOREIGN KEY (`decidido_por`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `fk_reclamacoes_match` FOREIGN KEY (`match_id`) REFERENCES `matches` (`id`),
-  ADD CONSTRAINT `fk_reclamacoes_perdido` FOREIGN KEY (`item_perdido_id`) REFERENCES `items` (`id`);
+  ADD CONSTRAINT `fk_reclamacoes_perdido` FOREIGN KEY (`item_perdido_id`) REFERENCES `items` (`id`),
+  ADD CONSTRAINT `fk_reclamacoes_reaberta_por` FOREIGN KEY (`reaberta_por`) REFERENCES `users` (`id`);
 
 --
 -- Limitadores para a tabela `sessions`

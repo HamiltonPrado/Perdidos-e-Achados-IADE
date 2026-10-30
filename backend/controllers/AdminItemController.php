@@ -41,7 +41,7 @@ public function criarAchado(): void
     $utilizador = exigirAdministrador($this->pdo);
     exigirCsrf();
 
-    $dados = ItemValidator::lerDadosArtigo(true);
+    $dados = ItemValidator::lerDadosArtigo(true, true);
 
     try {
         $this->pdo->beginTransaction();

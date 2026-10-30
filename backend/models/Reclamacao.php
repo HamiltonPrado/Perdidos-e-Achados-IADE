@@ -228,5 +228,144 @@ class Reclamacao
         return $consulta->rowCount() === 1;
     }
 
+    // Lista apenas as reclamações do aluno indicado.
+public function listarPorUtilizador(int $userId): array
+{
+    $sql = '
+        SELECT
+            r.id,
+            r.item_achado_id,
+            achado.titulo AS achado_titulo,
+            achado.estado AS estado_artigo,
+            achado.estado_recepcao,
+            p.nome AS ponto_recolha,
+            r.item_perdido_id,
+            perdido.titulo AS perdido_titulo,
+            r.pergunta_secreta,
+            r.resposta,
+            r.informacao_adicional,
+            r.estado,
+            r.motivo_decisao,
+            r.decidido_em,
+            r.criado_em,
+            r.atualizado_em
+        FROM reclamacoes AS r
+        INNER JOIN items AS achado
+            ON achado.id = r.item_achado_id
+        LEFT JOIN items AS perdido
+            ON perdido.id = r.item_perdido_id
+        LEFT JOIN pontos_recolha AS p
+            ON p.id = achado.ponto_recolha_id
+        WHERE r.user_id = :user_id
+        ORDER BY r.criado_em DESC, r.id DESC
+    ';
+
+    $consulta = $this->pdo->prepare($sql);
+
+    $consulta->execute([
+        'user_id' => $userId,
+    ]);
+
+    return $consulta->fetchAll();
+}
+
+// Permite responder novamente quando a pergunta do objeto mudou.
+public function reenviarDesatualizada(
+    int $id,
+    int $userId,
+    array $achado,
+    array $dados
+): bool {
+    if (!$this->pdo->inTransaction()) {
+        throw new LogicException(
+            'O reenvio da reclamação exige uma transação.'
+        );
+    }
+
+    // O controller já deve ter bloqueado o artigo.
+    $reclamacao = $this->procurarPorId($id, true);
+
+    if (
+        $reclamacao === null
+        || (int) $reclamacao['user_id'] !== $userId
+        || (int) $reclamacao['item_achado_id'] !== (int) $achado['id']
+        || !in_array(
+    $reclamacao['estado'],
+    ['pendente', 'aprovada', 'reaberta'],
+    true
+)
+|| (
+    $reclamacao['estado'] !== 'reaberta'
+    && $reclamacao['pergunta_secreta'] === $achado['pergunta_secreta']
+)
+    ) {
+        return false;
+    }
+
+    $consulta = $this->pdo->prepare(
+        "UPDATE reclamacoes
+         SET item_perdido_id = :item_perdido_id,
+             match_id = NULL,
+             versao_item = :versao_item,
+             pergunta_secreta = :pergunta_secreta,
+             resposta = :resposta,
+             informacao_adicional = :informacao_adicional,
+             estado = 'pendente',
+             decidido_por = NULL,
+             motivo_decisao = NULL,
+             decidido_em = NULL
+         WHERE id = :id"
+    );
+
+    $consulta->execute([
+        'item_perdido_id' => $dados['item_perdido_id'],
+        'versao_item' => (int) $achado['versao'],
+        'pergunta_secreta' => $achado['pergunta_secreta'],
+        'resposta' => $dados['resposta'],
+        'informacao_adicional' => $dados['informacao_adicional'],
+        'id' => $id,
+    ]);
+
+    // A nova resposta precisa de aprovação antes de gerar outro código.
+    $cancelarCodigos = $this->pdo->prepare(
+        "UPDATE pedidos_levantamento
+         SET estado = 'cancelado'
+         WHERE reclamacao_id = :reclamacao_id
+           AND estado = 'pendente'"
+    );
+
+    $cancelarCodigos->execute([
+        'reclamacao_id' => $id,
+    ]);
+
+    return true;
+}
+
+// Reabre uma reclamação recusada, por decisão da equipa.
+public function reabrir(int $id, int $adminId): bool
+{
+    if (!$this->pdo->inTransaction()) {
+        throw new LogicException(
+            'A reabertura da reclamação exige uma transação.'
+        );
+    }
+
+    $consulta = $this->pdo->prepare(
+        "UPDATE reclamacoes
+         SET estado = 'reaberta',
+             reaberta_por = :reaberta_por,
+             reaberta_em = CURRENT_TIMESTAMP
+         WHERE id = :id
+           AND estado = 'recusada'"
+    );
+
+    $consulta->execute([
+        'reaberta_por' => $adminId,
+        'id' => $id,
+    ]);
+
+    return $consulta->rowCount() === 1;
+}
+
 
 }
