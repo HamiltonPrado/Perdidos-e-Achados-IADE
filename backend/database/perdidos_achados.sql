@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Tempo de geração: 29-Out-2026 às 17:47
+-- Tempo de geração: 30-Out-2026 às 01:36
 -- Versão do servidor: 8.0.44
 -- versão do PHP: 8.3.30
 
@@ -98,7 +98,9 @@ CREATE TABLE `ia_jobs` (
 INSERT INTO `ia_jobs` (`id`, `item_id`, `versao_item`, `estado`, `tentativas`, `disponivel_em`, `reservado_ate`, `token_reserva`, `ultimo_erro`, `criado_em`, `atualizado_em`) VALUES
 (1, 1, 1, 'concluido', 1, '2026-10-27 16:32:50', NULL, NULL, NULL, '2026-10-27 16:32:50', '2026-10-29 16:28:38'),
 (2, 2, 1, 'concluido', 1, '2026-10-28 20:52:29', NULL, NULL, NULL, '2026-10-28 20:52:29', '2026-10-29 16:28:38'),
-(3, 3, 1, 'concluido', 1, '2026-10-29 16:34:58', NULL, NULL, NULL, '2026-10-29 16:34:58', '2026-10-29 16:35:01');
+(3, 3, 1, 'concluido', 1, '2026-10-29 16:34:58', NULL, NULL, NULL, '2026-10-29 16:34:58', '2026-10-29 16:35:01'),
+(4, 4, 1, 'concluido', 1, '2026-10-30 00:57:07', NULL, NULL, NULL, '2026-10-30 00:57:07', '2026-10-30 00:57:10'),
+(5, 5, 2, 'concluido', 1, '2026-10-30 01:20:12', NULL, NULL, NULL, '2026-10-30 01:20:12', '2026-10-30 01:20:14');
 
 -- --------------------------------------------------------
 
@@ -125,17 +127,24 @@ CREATE TABLE `items` (
   `chave_pedido` varchar(64) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
   `pedido_hash` binary(32) DEFAULT NULL,
   `criado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `atualizado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `estado_recepcao` enum('por_entregar','na_recepcao') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `localizacao_stock` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `observacoes_internas` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `recebido_por` int UNSIGNED DEFAULT NULL,
+  `recebido_em` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Extraindo dados da tabela `items`
 --
 
-INSERT INTO `items` (`id`, `user_id`, `tipo`, `titulo`, `descricao`, `category_id`, `location_id`, `ponto_recolha_id`, `data_ocorrencia`, `estado`, `ia_estado`, `ia_erro`, `embedding_texto`, `embedding_modelo`, `versao`, `chave_pedido`, `pedido_hash`, `criado_em`, `atualizado_em`) VALUES
-(1, 2, 'lost', 'Carteira preta — teste Postman', 'Perdi uma carteira preta com um pequeno fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-27', 'ativo', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-27 16:32:50', '2026-10-29 16:28:38'),
-(2, 2, 'lost', 'Carteira preta — teste Postman', 'Perdi uma carteira preta com um pequeno fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-28', 'devolvido', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-28 20:52:29', '2026-10-29 17:36:09'),
-(3, 1, 'found', 'Carteira preta com fecho vermelho', 'Carteira preta com um pequeno fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-29', 'devolvido', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-29 16:34:58', '2026-10-29 17:36:09');
+INSERT INTO `items` (`id`, `user_id`, `tipo`, `titulo`, `descricao`, `category_id`, `location_id`, `ponto_recolha_id`, `data_ocorrencia`, `estado`, `ia_estado`, `ia_erro`, `embedding_texto`, `embedding_modelo`, `versao`, `chave_pedido`, `pedido_hash`, `criado_em`, `atualizado_em`, `estado_recepcao`, `localizacao_stock`, `observacoes_internas`, `recebido_por`, `recebido_em`) VALUES
+(1, 2, 'lost', 'Carteira preta — teste Postman', 'Perdi uma carteira preta com um pequeno fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-27', 'ativo', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-27 16:32:50', '2026-10-29 16:28:38', NULL, NULL, NULL, NULL, NULL),
+(2, 2, 'lost', 'Carteira preta — teste Postman', 'Perdi uma carteira preta com um pequeno fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-28', 'devolvido', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-28 20:52:29', '2026-10-29 17:36:09', NULL, NULL, NULL, NULL, NULL),
+(3, 1, 'found', 'Carteira preta com fecho vermelho', 'Carteira preta com um pequeno fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-29', 'devolvido', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-29 16:34:58', '2026-10-29 17:36:09', 'na_recepcao', NULL, NULL, NULL, NULL),
+(4, 2, 'lost', 'Carteira preta perdida', 'Perdi uma carteira preta com fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-30', 'ativo', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 00:57:07', '2026-10-30 00:57:10', NULL, NULL, NULL, NULL, NULL),
+(5, 2, 'found', 'Carteira encontrada', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'analisado', NULL, NULL, NULL, 2, NULL, NULL, '2026-10-30 00:57:29', '2026-10-30 01:20:14', 'na_recepcao', 'Prateleira A2', 'Carteira recebida e conferida pela equipa.', 1, '2026-10-30 01:20:12');
 
 -- --------------------------------------------------------
 
@@ -207,7 +216,9 @@ CREATE TABLE `matches` (
 
 INSERT INTO `matches` (`id`, `item_id`, `matched_item_id`, `score`, `score_texto`, `score_imagem`, `modelo_ia`, `versao_perdido`, `versao_achado`, `estado`, `criado_em`, `atualizado_em`) VALUES
 (1, 1, 3, 0.8229, 0.8229, NULL, 'texto-v1:minilm-multilingual-l12-v2@e8f8c211226b894fcb81acc59f3b34ba3efd5f42', 1, 1, 'sugerido', '2026-10-29 16:35:01', '2026-10-29 16:35:01'),
-(2, 2, 3, 0.8229, 0.8229, NULL, 'texto-v1:minilm-multilingual-l12-v2@e8f8c211226b894fcb81acc59f3b34ba3efd5f42', 1, 1, 'concluido', '2026-10-29 16:35:01', '2026-10-29 17:36:09');
+(2, 2, 3, 0.8229, 0.8229, NULL, 'texto-v1:minilm-multilingual-l12-v2@e8f8c211226b894fcb81acc59f3b34ba3efd5f42', 1, 1, 'concluido', '2026-10-29 16:35:01', '2026-10-29 17:36:09'),
+(3, 1, 5, 0.8081, 0.8081, NULL, 'texto-v1:minilm-multilingual-l12-v2@e8f8c211226b894fcb81acc59f3b34ba3efd5f42', 1, 2, 'sugerido', '2026-10-30 01:20:14', '2026-10-30 01:20:14'),
+(4, 4, 5, 0.7639, 0.7639, NULL, 'texto-v1:minilm-multilingual-l12-v2@e8f8c211226b894fcb81acc59f3b34ba3efd5f42', 1, 2, 'sugerido', '2026-10-30 01:20:14', '2026-10-30 01:20:14');
 
 -- --------------------------------------------------------
 
@@ -233,7 +244,9 @@ CREATE TABLE `notifications` (
 
 INSERT INTO `notifications` (`id`, `match_id`, `user_id`, `item_id`, `ponto_recolha_id`, `lida`, `lida_em`, `invalidada_em`, `criado_em`) VALUES
 (1, 1, 2, 1, 1, 0, NULL, NULL, '2026-10-29 16:35:01'),
-(2, 2, 2, 2, 1, 0, NULL, NULL, '2026-10-29 16:35:01');
+(2, 2, 2, 2, 1, 0, NULL, NULL, '2026-10-29 16:35:01'),
+(3, 3, 2, 1, 1, 0, NULL, NULL, '2026-10-30 01:20:14'),
+(4, 4, 2, 4, 1, 0, NULL, NULL, '2026-10-30 01:20:14');
 
 -- --------------------------------------------------------
 
@@ -381,7 +394,9 @@ ALTER TABLE `items`
   ADD KEY `fk_items_ponto_recolha` (`ponto_recolha_id`),
   ADD KEY `idx_items_user` (`user_id`,`estado`),
   ADD KEY `idx_items_filtros` (`tipo`,`estado`,`category_id`,`location_id`,`data_ocorrencia`),
-  ADD KEY `idx_items_ia` (`ia_estado`,`estado`);
+  ADD KEY `idx_items_ia` (`ia_estado`,`estado`),
+  ADD KEY `fk_items_recebido_por` (`recebido_por`),
+  ADD KEY `idx_items_recepcao` (`tipo`,`estado`,`estado_recepcao`);
 
 --
 -- Índices para tabela `item_photos`
@@ -472,13 +487,13 @@ ALTER TABLE `devolucoes`
 -- AUTO_INCREMENT de tabela `ia_jobs`
 --
 ALTER TABLE `ia_jobs`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de tabela `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de tabela `item_photos`
@@ -496,13 +511,13 @@ ALTER TABLE `locations`
 -- AUTO_INCREMENT de tabela `matches`
 --
 ALTER TABLE `matches`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de tabela `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos_levantamento`
@@ -550,6 +565,7 @@ ALTER TABLE `items`
   ADD CONSTRAINT `fk_items_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
   ADD CONSTRAINT `fk_items_location` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`),
   ADD CONSTRAINT `fk_items_ponto_recolha` FOREIGN KEY (`ponto_recolha_id`) REFERENCES `pontos_recolha` (`id`),
+  ADD CONSTRAINT `fk_items_recebido_por` FOREIGN KEY (`recebido_por`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `fk_items_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --

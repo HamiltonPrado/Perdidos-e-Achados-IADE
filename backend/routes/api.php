@@ -83,6 +83,13 @@ if ($metodo === 'POST' && $caminho === '/api/items/lost') {
     $controller->criarPerdido();
 }
 
+// Regista um achado do aluno, ainda por entregar na receção.
+if ($metodo === 'POST' && $caminho === '/api/items/found') {
+    $controller = new ItemController(obterLigacao());
+
+    $controller->criarAchado();
+}
+
 
 // Lista os artigos do utilizador autenticado.
 if ($metodo === 'GET' && $caminho === '/api/items/mine') {
@@ -448,6 +455,32 @@ if (
     $controller->confirmarPorCodigo(
         rawurldecode($parametros[1])
     );
+}
+
+// Confirma a entrada física de um achado na receção.
+if (
+    $metodo === 'POST'
+    && preg_match(
+        '#^/api/admin/items/([1-9][0-9]*)/receive$#D',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.'
+        ], 404);
+    }
+
+    $controller = new AdminItemController(obterLigacao());
+
+    $controller->confirmarEntrada($id);
 }
 
 

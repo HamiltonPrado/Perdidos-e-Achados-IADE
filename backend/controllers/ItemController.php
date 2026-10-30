@@ -245,4 +245,45 @@ public function criarPerdido(): void
             ],
         ]);
     }
+
+        // Regista um achado que o aluno ainda vai entregar à equipa.
+    public function criarAchado(): void
+    {
+        $utilizador = exigirAutenticacao($this->pdo);
+        exigirCsrf();
+
+        // O aluno não define o ponto de recolha nem os dados da receção.
+        $dados = ItemValidator::lerDadosArtigo();
+
+        try {
+            $id = $this->artigos->criarAchadoPorAluno(
+                (int) $utilizador['id'],
+                $dados
+            );
+        } catch (PDOException $erro) {
+            if ((int) ($erro->errorInfo[1] ?? 0) === 1452) {
+                responderJson([
+                    'erro' => 'Não foi possível associar o registo. '
+                        . 'Confirma a categoria e o local selecionados.'
+                ], 422);
+
+                return;
+            }
+
+            throw $erro;
+        }
+
+        responderJson([
+            'estado' => 'ok',
+            'mensagem' => 'Objeto registado. Entrega-o à equipa '
+                . 'para confirmar a entrada na receção.',
+            'item' => [
+                'id' => $id,
+                'tipo' => 'found',
+                'estado' => 'ativo',
+                'estado_recepcao' => 'por_entregar',
+            ],
+        ], 201);
+    }
+    
 }

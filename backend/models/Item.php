@@ -52,7 +52,7 @@ class Item
     }
 
         // Lista todos os artigos para a gestão pela equipa.
-    public function listarTodos(): array
+        public function listarTodos(): array
     {
         $sql = '
             SELECT
@@ -67,6 +67,11 @@ class Item
                 p.nome AS ponto_recolha,
                 i.data_ocorrencia,
                 i.estado,
+                i.estado_recepcao,
+                i.localizacao_stock,
+                i.observacoes_internas,
+                i.recebido_por,
+                i.recebido_em,
                 i.ia_estado,
                 i.criado_em
             FROM items AS i
@@ -85,7 +90,7 @@ class Item
         // Guarda um objeto achado registado por um membro da equipa.
     public function criarAchado(int $userId, array $dados): int
     {
-        $sql = "
+                $sql = "
             INSERT INTO items (
                 user_id,
                 tipo,
@@ -94,7 +99,10 @@ class Item
                 category_id,
                 location_id,
                 ponto_recolha_id,
-                data_ocorrencia
+                data_ocorrencia,
+                estado_recepcao,
+                recebido_por,
+                recebido_em
             )
             VALUES (
                 :user_id,
@@ -104,13 +112,15 @@ class Item
                 :category_id,
                 :location_id,
                 :ponto_recolha_id,
-                :data_ocorrencia
+                :data_ocorrencia,
+                'na_recepcao',
+                :recebido_por,
+                CURRENT_TIMESTAMP
             )
         ";
-
         $consulta = $this->pdo->prepare($sql);
 
-        $consulta->execute([
+                $consulta->execute([
             'user_id' => $userId,
             'titulo' => $dados['titulo'],
             'descricao' => $dados['descricao'],
@@ -118,9 +128,11 @@ class Item
             'location_id' => $dados['location_id'],
             'ponto_recolha_id' => $dados['ponto_recolha_id'],
             'data_ocorrencia' => $dados['data_ocorrencia'],
+            'recebido_por' => $userId,
         ]);
+        return (int) $this->pdo->lastInsertId();  
 
-        return (int) $this->pdo->lastInsertId();
+        
     }
 
         // Procura um artigo pelo identificador.
@@ -141,6 +153,7 @@ class Item
                 p.nome AS ponto_recolha,
                 i.data_ocorrencia,
                 i.estado,
+                i.estado_recepcao,
                 i.ia_estado,
                 i.criado_em,
                 i.atualizado_em
@@ -243,7 +256,8 @@ public function atualizar(int $id, array $dados): int
 public function procurarParaAtualizacao(int $id): ?array
 {
     $consulta = $this->pdo->prepare(
-        'SELECT id, user_id, tipo, estado, ponto_recolha_id, versao
+               'SELECT id, user_id, tipo, estado, estado_recepcao,
+                ponto_recolha_id, versao
          FROM items
          WHERE id = :id
          LIMIT 1
@@ -339,4 +353,93 @@ public function marcarDevolvido(int $id): bool
         return $consulta->fetchAll();
     }
     
+        // Regista um achado do aluno, a aguardar entrega na receção.
+    public function criarAchadoPorAluno(
+        int $userId,
+        array $dados
+    ): int {
+        $sql = "
+            INSERT INTO items (
+                user_id,
+                tipo,
+                titulo,
+                descricao,
+                category_id,
+                location_id,
+                ponto_recolha_id,
+                data_ocorrencia,
+                estado_recepcao
+            )
+            VALUES (
+                :user_id,
+                'found',
+                :titulo,
+                :descricao,
+                :category_id,
+                :location_id,
+                NULL,
+                :data_ocorrencia,
+                'por_entregar'
+            )
+        ";
+
+        $consulta = $this->pdo->prepare($sql);
+
+        $consulta->execute([
+            'user_id' => $userId,
+            'titulo' => $dados['titulo'],
+            'descricao' => $dados['descricao'],
+            'category_id' => $dados['category_id'],
+            'location_id' => $dados['location_id'],
+            'data_ocorrencia' => $dados['data_ocorrencia'],
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+        // Confirma a entrada física de um achado entregue à equipa.
+    public function confirmarEntrada(
+        int $id,
+        int $adminId,
+        array $dados
+    ): bool {
+        if (!$this->pdo->inTransaction()) {
+            throw new LogicException(
+                'A confirmação de entrada exige uma transação.'
+            );
+        }
+
+        $sql = "
+            UPDATE items
+            SET estado_recepcao = 'na_recepcao',
+                ponto_recolha_id = :ponto_recolha_id,
+                localizacao_stock = :localizacao_stock,
+                observacoes_internas = :observacoes_internas,
+                recebido_por = :recebido_por,
+                recebido_em = CURRENT_TIMESTAMP,
+                versao = versao + 1,
+                ia_estado = 'pendente',
+                ia_erro = NULL,
+                embedding_texto = NULL,
+                embedding_modelo = NULL
+            WHERE id = :id
+              AND tipo = 'found'
+              AND estado = 'ativo'
+              AND estado_recepcao = 'por_entregar'
+        ";
+
+        $consulta = $this->pdo->prepare($sql);
+
+        $consulta->execute([
+            'ponto_recolha_id' => $dados['ponto_recolha_id'],
+            'localizacao_stock' => $dados['localizacao_stock'],
+            'observacoes_internas' => $dados['observacoes_internas'],
+            'recebido_por' => $adminId,
+            'id' => $id,
+        ]);
+
+        return $consulta->rowCount() === 1;
+    }
+
+
 }

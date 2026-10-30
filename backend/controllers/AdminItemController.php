@@ -8,6 +8,7 @@ require_once __DIR__ . '/../middleware/administrador.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../validators/ItemValidator.php';
 require_once __DIR__ . '/../models/IaJob.php';
+require_once __DIR__ . '/../validators/RecepcaoValidator.php';
 class AdminItemController
 {
     private PDO $pdo;
@@ -226,5 +227,113 @@ public function arquivar(int $id): void
         ]
     ]);
 }
+    // Confirma a entrada do achado e agenda a análise da IA.
+    public function confirmarEntrada(int $id): void
+    {
+        $admin = exigirAdministrador($this->pdo);
+        exigirCsrf();
+
+        $dados = RecepcaoValidator::lerDados();
+
+        try {
+            $this->pdo->beginTransaction();
+
+            $artigo = $this->artigos->procurarParaAtualizacao($id);
+
+            if ($artigo === null) {
+                throw new DomainException(
+                    'Artigo não encontrado.',
+                    404
+                );
+            }
+
+            if ($artigo['tipo'] !== 'found') {
+                throw new DomainException(
+                    'Só é possível confirmar a entrada de objetos achados.',
+                    422
+                );
+            }
+
+            if ($artigo['estado'] !== 'ativo') {
+                throw new DomainException(
+                    'Só é possível receber um objeto achado ativo.',
+                    409
+                );
+            }
+
+            if ($artigo['estado_recepcao'] !== 'por_entregar') {
+                throw new DomainException(
+                    'O objeto já foi recebido ou não está por entregar.',
+                    409
+                );
+            }
+
+            $confirmado = $this->artigos->confirmarEntrada(
+                $id,
+                (int) $admin['id'],
+                $dados
+            );
+
+            if (!$confirmado) {
+                throw new DomainException(
+                    'O artigo foi alterado entretanto. Atualiza os dados.',
+                    409
+                );
+            }
+
+            $novaVersao = (int) $artigo['versao'] + 1;
+
+            // A entrada e o trabalho da IA são guardados em conjunto.
+            $this->filaIa->agendar($id, $novaVersao);
+
+            $this->pdo->commit();
+
+        } catch (DomainException $erro) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+
+            responderJson([
+                'erro' => $erro->getMessage()
+            ], $erro->getCode());
+
+            return;
+
+        } catch (Throwable $erro) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+
+            if (
+                $erro instanceof PDOException
+                && (int) ($erro->errorInfo[1] ?? 0) === 1452
+            ) {
+                responderJson([
+                    'erro' => 'Não foi possível associar a receção. '
+                        . 'Confirma o ponto de recolha selecionado.'
+                ], 422);
+
+                return;
+            }
+
+            throw $erro;
+        }
+
+        responderJson([
+            'estado' => 'ok',
+            'mensagem' => 'Entrada na receção confirmada.',
+            'item' => [
+                'id' => $id,
+                'tipo' => 'found',
+                'estado' => 'ativo',
+                'estado_recepcao' => 'na_recepcao',
+                'ponto_recolha_id' => $dados['ponto_recolha_id'],
+                'localizacao_stock' => $dados['localizacao_stock'],
+                'recebido_por' => (int) $admin['id'],
+                'versao' => $novaVersao,
+                'ia_estado' => 'pendente',
+            ],
+        ]);
+    }
 
 }

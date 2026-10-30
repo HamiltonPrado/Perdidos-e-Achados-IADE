@@ -28,9 +28,13 @@ def carregar_artigo(trabalho):
                   AND j.estado = 'em_processamento'
                   AND j.reservado_ate > CURRENT_TIMESTAMP
                   AND j.versao_item = %s
-                  AND i.versao = j.versao_item
+                                   AND i.versao = j.versao_item
                   AND i.estado = 'ativo'
-                """,
+                  AND (
+                      i.tipo = 'lost'
+                      OR i.estado_recepcao = 'na_recepcao'
+                  )
+                               """,
                 (
                     trabalho["id"],
                     trabalho["item_id"],
@@ -66,8 +70,12 @@ def listar_candidatos(artigo):
                     data_ocorrencia,
                     versao
                 FROM items
-                WHERE tipo = %s
+                               WHERE tipo = %s
                   AND estado = 'ativo'
+                  AND (
+                      tipo = 'lost'
+                      OR estado_recepcao = 'na_recepcao'
+                  )
                 ORDER BY id ASC
                 """,
                 (tipo_oposto,),
