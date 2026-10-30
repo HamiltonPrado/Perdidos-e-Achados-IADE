@@ -50,15 +50,22 @@ class PhotoController
                 ], 404);
             }
 
-            // A equipa pode adicionar fotografias a qualquer artigo.
-            // O utilizador pode adicioná-las aos seus próprios perdidos.
+            // A equipa pode alterar fotografias de artigos ativos.
+            // O autor pode alterar as dos seus perdidos
+            // ou dos seus achados ainda por entregar.
             $eAdministrador = $utilizador['role'] === 'admin';
 
-            $ePerdidoDoUtilizador =
-                $artigo['tipo'] === 'lost'
-                && (int) $artigo['user_id'] === $utilizador['id'];
+                        $eArtigoDoUtilizador =
+                (int) $artigo['user_id'] === (int) $utilizador['id']
+                && (
+                    $artigo['tipo'] === 'lost'
+                    || (
+                        $artigo['tipo'] === 'found'
+                        && $artigo['estado_recepcao'] === 'por_entregar'
+                    )
+                );
 
-            if (!$eAdministrador && !$ePerdidoDoUtilizador) {
+            if (!$eAdministrador && !$eArtigoDoUtilizador) {
                 $this->pdo->rollBack();
 
                 responderJson([
@@ -82,13 +89,21 @@ class PhotoController
                 $foto['dados']
             );
 
-            $this->artigos->marcarAnalisePendente($itemId);
+                   $this->artigos->marcarAnalisePendente($itemId);
 
-// O artigo continua bloqueado desde a consulta inicial.
-$novaVersao = (int) $artigo['versao'] + 1;
+        $novaVersao = (int) $artigo['versao'] + 1;
 
-$this->filaIa->agendar($itemId, $novaVersao);
+        // Achados por entregar só serão analisados após a receção.
+        $podeAgendarIa =
+            $artigo['tipo'] === 'lost'
+            || (
+                $artigo['tipo'] === 'found'
+                && $artigo['estado_recepcao'] === 'na_recepcao'
+            );
 
+        if ($podeAgendarIa) {
+            $this->filaIa->agendar($itemId, $novaVersao);
+        }
             $this->pdo->commit();
 
         } catch (Throwable $erro) {
@@ -154,7 +169,7 @@ public function mostrar(int $id): void
         ], 404);
     }
 
-    
+
     // Substitui o Content-Type JSON pelo tipo da imagem.
     http_response_code(200);
     header('Content-Type: ' . $foto['mime']);
@@ -199,13 +214,19 @@ public function apagar(int $id): void
         }
 
         // Aplica as mesmas permissões usadas no upload.
-        $eAdministrador = $utilizador['role'] === 'admin';
+                $eAdministrador = $utilizador['role'] === 'admin';
 
-        $ePerdidoDoUtilizador =
-            $artigo['tipo'] === 'lost'
-            && (int) $artigo['user_id'] === $utilizador['id'];
+        $eArtigoDoUtilizador =
+            (int) $artigo['user_id'] === (int) $utilizador['id']
+            && (
+                $artigo['tipo'] === 'lost'
+                || (
+                    $artigo['tipo'] === 'found'
+                    && $artigo['estado_recepcao'] === 'por_entregar'
+                )
+            );
 
-        if (!$eAdministrador && !$ePerdidoDoUtilizador) {
+               if (!$eAdministrador && !$eArtigoDoUtilizador) {
             $this->pdo->rollBack();
 
             responderJson([
@@ -234,13 +255,21 @@ public function apagar(int $id): void
         }
 
         // Solicita uma nova análise com as fotografias restantes.
-        $this->artigos->marcarAnalisePendente($itemId);
+               $this->artigos->marcarAnalisePendente($itemId);
 
-// O artigo continua bloqueado desde a consulta inicial.
-$novaVersao = (int) $artigo['versao'] + 1;
+        $novaVersao = (int) $artigo['versao'] + 1;
 
-$this->filaIa->agendar($itemId, $novaVersao);
+        // Achados por entregar só serão analisados após a receção.
+        $podeAgendarIa =
+            $artigo['tipo'] === 'lost'
+            || (
+                $artigo['tipo'] === 'found'
+                && $artigo['estado_recepcao'] === 'na_recepcao'
+            );
 
+        if ($podeAgendarIa) {
+            $this->filaIa->agendar($itemId, $novaVersao);
+        }
         $this->pdo->commit();
 
     } catch (Throwable $erro) {
@@ -261,7 +290,8 @@ $this->filaIa->agendar($itemId, $novaVersao);
     ]);
 }
 
-    // Autoriza a consulta pelo autor, pela equipa ou de um perdido ativo.
+
+        // Autoriza a consulta pelo autor, pela equipa ou pelo catálogo.
     private function podeConsultarArtigo(
         ?array $artigo,
         array $utilizador
@@ -270,12 +300,21 @@ $this->filaIa->agendar($itemId, $novaVersao);
             return false;
         }
 
-        return $utilizador['role'] === 'admin'
-            || (int) $artigo['user_id'] === (int) $utilizador['id']
-            || (
-                $artigo['tipo'] === 'lost'
-                && $artigo['estado'] === 'ativo'
-            );
-    }
+        $eAutor =
+            (int) $artigo['user_id'] === (int) $utilizador['id'];
 
+        $eAdministrador = $utilizador['role'] === 'admin';
+
+        $eArtigoDisponivel =
+            $artigo['estado'] === 'ativo'
+            && (
+                $artigo['tipo'] === 'lost'
+                || (
+                    $artigo['tipo'] === 'found'
+                    && $artigo['estado_recepcao'] === 'na_recepcao'
+                )
+            );
+
+        return $eAutor || $eAdministrador || $eArtigoDisponivel;
+    }
 }

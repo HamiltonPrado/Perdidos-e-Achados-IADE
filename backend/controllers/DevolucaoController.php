@@ -327,7 +327,9 @@ public function listarTodos(): void
         }
 
         $achadoId = (int) $referencia['item_achado_id'];
-        $perdidoId = (int) $referencia['item_perdido_id'];
+            $perdidoId = $referencia['item_perdido_id'] === null
+            ? null
+            : (int) $referencia['item_perdido_id'];
 
         for ($tentativa = 0; $tentativa < 3; $tentativa++) {
             try {
@@ -342,7 +344,11 @@ public function listarTodos(): void
                 if (
                     $pedido === null
                     || (int) $pedido['item_achado_id'] !== $achadoId
-                    || (int) $pedido['item_perdido_id'] !== $perdidoId
+                                        || (
+                        $pedido['item_perdido_id'] === null
+                            ? null
+                            : (int) $pedido['item_perdido_id']
+                    ) !== $perdidoId
                 ) {
                     throw new DomainException(
                         'O código ou os artigos já não estão disponíveis.',
@@ -376,9 +382,12 @@ public function listarTodos(): void
                     ]
                 );
 
-                if (
+                  if (
                     !$this->artigos->marcarDevolvido($achadoId)
-                    || !$this->artigos->marcarDevolvido($perdidoId)
+                    || (
+                        $perdidoId !== null
+                        && !$this->artigos->marcarDevolvido($perdidoId)
+                    )
                 ) {
                     throw new DomainException(
                         'Não foi possível atualizar os artigos.',
@@ -386,7 +395,10 @@ public function listarTodos(): void
                     );
                 }
 
-                if (!$this->correspondencias->concluir($matchId)) {
+                    if (
+                    $matchId !== null
+                    && !$this->correspondencias->concluir($matchId)
+                ) {
                     throw new DomainException(
                         'Não foi possível concluir a correspondência.',
                         409

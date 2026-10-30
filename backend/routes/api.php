@@ -11,6 +11,7 @@ require_once __DIR__ . '/../controllers/PhotoController.php';
 require_once __DIR__ . '/../controllers/DevolucaoController.php';
 require_once __DIR__ . '/../controllers/NotificationController.php';
 require_once __DIR__ . '/../controllers/PedidoLevantamentoController.php';
+require_once __DIR__ . '/../controllers/ReclamacaoController.php';
 
 // Verifica se o PHP está a responder, sem abrir ligação à BD.
 if ($metodo === 'GET' && $caminho === '/api/health') {
@@ -88,6 +89,13 @@ if ($metodo === 'POST' && $caminho === '/api/items/found') {
     $controller = new ItemController(obterLigacao());
 
     $controller->criarAchado();
+}
+
+// Lista os achados disponíveis para os alunos autenticados.
+if ($metodo === 'GET' && $caminho === '/api/items/found') {
+    $controller = new ItemController(obterLigacao());
+
+    $controller->listarAchados();
 }
 
 
@@ -483,6 +491,92 @@ if (
     $controller->confirmarEntrada($id);
 }
 
+// Envia uma reclamação de propriedade sobre um achado disponível.
+if (
+    $metodo === 'POST'
+    && preg_match(
+        '#^/api/items/([1-9][0-9]*)/claims$#D',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.'
+        ], 404);
+    }
+
+    $controller = new ReclamacaoController(obterLigacao());
+
+    $controller->criar($id);
+}
+
+// Lista as reclamações para análise pela equipa.
+if ($metodo === 'GET' && $caminho === '/api/admin/claims') {
+    $controller = new ReclamacaoController(obterLigacao());
+
+    $controller->listarTodos();
+}
+
+// Permite à equipa aprovar ou recusar uma reclamação.
+if (
+    $metodo === 'PATCH'
+    && preg_match(
+        '#^/api/admin/claims/([1-9][0-9]*)$#D',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Reclamação não encontrada.'
+        ], 404);
+    }
+
+    $controller = new ReclamacaoController(obterLigacao());
+
+    $controller->decidir($id);
+}
+
+// Emite o código de levantamento de uma reclamação aprovada.
+if (
+    $metodo === 'POST'
+    && preg_match(
+        '#^/api/claims/([1-9][0-9]*)/collection-request$#D',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Reclamação não encontrada.'
+        ], 404);
+    }
+
+    $controller = new PedidoLevantamentoController(
+        obterLigacao()
+    );
+
+    $controller->criarPorReclamacao($id);
+}
 
 // Responde quando nenhuma rota corresponde ao pedido.
 responderJson([

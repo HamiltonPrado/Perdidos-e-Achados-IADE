@@ -155,16 +155,24 @@ class PedidoLevantamento
         return $resultado === false ? null : $resultado;
     }
 
-    // Substitui o código de um pedido que ainda não foi utilizado.
+       // Renova um código ainda não utilizado.
     public function renovar(
         int $id,
         string $codigo,
-        int $itemPerdidoId,
-        int $matchId
+        int $reclamacaoId,
+        ?int $itemPerdidoId = null,
+        ?int $matchId = null
     ): bool {
+        if (!$this->pdo->inTransaction()) {
+            throw new LogicException(
+                'A renovação do código exige uma transação.'
+            );
+        }
+
         $consulta = $this->pdo->prepare(
             "UPDATE pedidos_levantamento
              SET codigo = :codigo,
+                 reclamacao_id = :reclamacao_id,
                  item_perdido_id = :item_perdido_id,
                  match_id = :match_id,
                  estado = 'pendente',
@@ -178,6 +186,7 @@ class PedidoLevantamento
         $consulta->execute([
             'id' => $id,
             'codigo' => $codigo,
+            'reclamacao_id' => $reclamacaoId,
             'item_perdido_id' => $itemPerdidoId,
             'match_id' => $matchId,
         ]);
@@ -185,7 +194,7 @@ class PedidoLevantamento
         return $consulta->rowCount() === 1;
     }
 
-        // Consulta um código válido e os dados necessários para a entrega.
+          // Consulta um código associado a uma reclamação ainda válida.
     public function procurarValidoPorCodigo(
         string $codigo,
         bool $bloquear = false
@@ -203,6 +212,7 @@ class PedidoLevantamento
                 p.item_achado_id,
                 p.item_perdido_id,
                 p.match_id,
+                p.reclamacao_id,
                 p.codigo,
                 p.estado,
                 p.expira_em,
@@ -213,36 +223,55 @@ class PedidoLevantamento
                 achado.ponto_recolha_id,
                 ponto.nome AS ponto_recolha
             FROM pedidos_levantamento AS p
+            INNER JOIN reclamacoes AS r
+                ON r.id = p.reclamacao_id
+                AND r.user_id = p.user_id
+                AND r.item_achado_id = p.item_achado_id
+                AND (
+                    r.item_perdido_id <=> p.item_perdido_id
+                )
+                AND (
+                    r.match_id <=> p.match_id
+                )
             INNER JOIN users AS aluno
                 ON aluno.id = p.user_id
             INNER JOIN items AS achado
                 ON achado.id = p.item_achado_id
-            INNER JOIN items AS perdido
-                ON perdido.id = p.item_perdido_id
-                AND perdido.user_id = p.user_id
-            INNER JOIN matches AS m
-                ON m.id = p.match_id
-                AND m.item_id = perdido.id
-                AND m.matched_item_id = achado.id
-            INNER JOIN notifications AS n
-                ON n.match_id = m.id
-                AND n.user_id = p.user_id
-                AND n.item_id = perdido.id
             INNER JOIN pontos_recolha AS ponto
                 ON ponto.id = achado.ponto_recolha_id
+            LEFT JOIN items AS perdido
+                ON perdido.id = p.item_perdido_id
+            LEFT JOIN matches AS m
+                ON m.id = p.match_id
             WHERE p.codigo = :codigo
               AND p.estado = 'pendente'
+              AND p.utilizado_em IS NULL
               AND p.expira_em > NOW()
               AND aluno.ativo = 1
-              AND perdido.tipo = 'lost'
+              AND r.estado = 'aprovada'
+              AND r.versao_item = achado.versao
+              AND r.pergunta_secreta = achado.pergunta_secreta
               AND achado.tipo = 'found'
-              AND perdido.estado = 'ativo'
               AND achado.estado = 'ativo'
-              AND m.estado = 'sugerido'
-              AND m.versao_perdido = perdido.versao
-              AND m.versao_achado = achado.versao
-              AND n.invalidada_em IS NULL
-              AND n.ponto_recolha_id = achado.ponto_recolha_id
+              AND achado.estado_recepcao = 'na_recepcao'
+              AND (
+                  p.item_perdido_id IS NULL
+                  OR (
+                      perdido.tipo = 'lost'
+                      AND perdido.user_id = p.user_id
+                      AND perdido.estado = 'ativo'
+                  )
+              )
+              AND (
+                  p.match_id IS NULL
+                  OR (
+                      m.item_id = p.item_perdido_id
+                      AND m.matched_item_id = achado.id
+                      AND m.estado = 'sugerido'
+                      AND m.versao_perdido = perdido.versao
+                      AND m.versao_achado = achado.versao
+                  )
+              )
             LIMIT 1
         ";
 

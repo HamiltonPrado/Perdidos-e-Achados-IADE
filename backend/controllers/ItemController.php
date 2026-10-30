@@ -22,7 +22,7 @@ class ItemController
         $this->artigos = new Item($pdo);
         $this->filaIa = new IaJob($pdo);
     }
-   
+
    // Devolve os artigos pertencentes ao utilizador autenticado.
     public function listarMeus(): void
     {
@@ -89,7 +89,7 @@ public function criarPerdido(): void
         ]
     ], 201);
 }
-        
+
         // Permite ao autor marcar o seu objeto perdido como resolvido.
     public function resolver(int $id): void
     {
@@ -165,14 +165,20 @@ public function criarPerdido(): void
 
         $eAdministrador = $utilizador['role'] === 'admin';
 
-        $ePerdidoAtivo =
-            $artigo['tipo'] === 'lost'
-            && $artigo['estado'] === 'ativo';
+               $eArtigoDisponivel =
+            $artigo['estado'] === 'ativo'
+            && (
+                $artigo['tipo'] === 'lost'
+                || (
+                    $artigo['tipo'] === 'found'
+                    && $artigo['estado_recepcao'] === 'na_recepcao'
+                )
+            );
 
         if (
             !$pertenceAoUtilizador
             && !$eAdministrador
-            && !$ePerdidoAtivo
+                       && !$eArtigoDisponivel
         ) {
             responderJson([
                 'erro' => 'Artigo não encontrado.'
@@ -181,7 +187,7 @@ public function criarPerdido(): void
 
         // Limita os campos apresentados a outros alunos.
         if (!$pertenceAoUtilizador && !$eAdministrador) {
-            $camposVisiveis = array_flip([
+                        $camposVisiveis = array_flip([
                 'id',
                 'tipo',
                 'titulo',
@@ -190,10 +196,15 @@ public function criarPerdido(): void
                 'categoria',
                 'location_id',
                 'local',
+                'ponto_recolha_id',
+                'ponto_recolha',
                 'data_ocorrencia',
                 'estado',
+                'estado_recepcao',
+                'pergunta_secreta',
                 'criado_em',
                 'atualizado_em',
+
             ]);
 
             $artigo = array_intersect_key(
@@ -285,5 +296,5 @@ public function criarPerdido(): void
             ],
         ], 201);
     }
-    
+
 }

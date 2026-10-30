@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Tempo de geração: 30-Out-2026 às 01:36
+-- Tempo de geração: 30-Out-2026 às 16:03
 -- Versão do servidor: 8.0.44
 -- versão do PHP: 8.3.30
 
@@ -132,19 +132,22 @@ CREATE TABLE `items` (
   `localizacao_stock` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `observacoes_internas` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `recebido_por` int UNSIGNED DEFAULT NULL,
-  `recebido_em` datetime DEFAULT NULL
+  `recebido_em` datetime DEFAULT NULL,
+  `pergunta_secreta` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `resposta_esperada` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Extraindo dados da tabela `items`
 --
 
-INSERT INTO `items` (`id`, `user_id`, `tipo`, `titulo`, `descricao`, `category_id`, `location_id`, `ponto_recolha_id`, `data_ocorrencia`, `estado`, `ia_estado`, `ia_erro`, `embedding_texto`, `embedding_modelo`, `versao`, `chave_pedido`, `pedido_hash`, `criado_em`, `atualizado_em`, `estado_recepcao`, `localizacao_stock`, `observacoes_internas`, `recebido_por`, `recebido_em`) VALUES
-(1, 2, 'lost', 'Carteira preta — teste Postman', 'Perdi uma carteira preta com um pequeno fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-27', 'ativo', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-27 16:32:50', '2026-10-29 16:28:38', NULL, NULL, NULL, NULL, NULL),
-(2, 2, 'lost', 'Carteira preta — teste Postman', 'Perdi uma carteira preta com um pequeno fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-28', 'devolvido', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-28 20:52:29', '2026-10-29 17:36:09', NULL, NULL, NULL, NULL, NULL),
-(3, 1, 'found', 'Carteira preta com fecho vermelho', 'Carteira preta com um pequeno fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-29', 'devolvido', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-29 16:34:58', '2026-10-29 17:36:09', 'na_recepcao', NULL, NULL, NULL, NULL),
-(4, 2, 'lost', 'Carteira preta perdida', 'Perdi uma carteira preta com fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-30', 'ativo', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 00:57:07', '2026-10-30 00:57:10', NULL, NULL, NULL, NULL, NULL),
-(5, 2, 'found', 'Carteira encontrada', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'analisado', NULL, NULL, NULL, 2, NULL, NULL, '2026-10-30 00:57:29', '2026-10-30 01:20:14', 'na_recepcao', 'Prateleira A2', 'Carteira recebida e conferida pela equipa.', 1, '2026-10-30 01:20:12');
+INSERT INTO `items` (`id`, `user_id`, `tipo`, `titulo`, `descricao`, `category_id`, `location_id`, `ponto_recolha_id`, `data_ocorrencia`, `estado`, `ia_estado`, `ia_erro`, `embedding_texto`, `embedding_modelo`, `versao`, `chave_pedido`, `pedido_hash`, `criado_em`, `atualizado_em`, `estado_recepcao`, `localizacao_stock`, `observacoes_internas`, `recebido_por`, `recebido_em`, `pergunta_secreta`, `resposta_esperada`) VALUES
+(1, 2, 'lost', 'Carteira preta — teste Postman', 'Perdi uma carteira preta com um pequeno fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-27', 'ativo', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-27 16:32:50', '2026-10-29 16:28:38', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(2, 2, 'lost', 'Carteira preta — teste Postman', 'Perdi uma carteira preta com um pequeno fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-28', 'devolvido', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-28 20:52:29', '2026-10-29 17:36:09', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(3, 1, 'found', 'Carteira preta com fecho vermelho', 'Carteira preta com um pequeno fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-29', 'devolvido', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-29 16:34:58', '2026-10-29 17:36:09', 'na_recepcao', NULL, NULL, NULL, NULL, NULL, NULL),
+(4, 2, 'lost', 'Carteira preta perdida', 'Perdi uma carteira preta com fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-30', 'ativo', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 00:57:07', '2026-10-30 00:57:10', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(5, 2, 'found', 'Carteira encontrada', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'analisado', NULL, NULL, NULL, 2, NULL, NULL, '2026-10-30 00:57:29', '2026-10-30 01:20:14', 'na_recepcao', 'Prateleira A2', 'Carteira recebida e conferida pela equipa.', 1, '2026-10-30 01:20:12', NULL, NULL),
+(6, 2, 'found', 'Estojo encontrado — teste de fotografia', 'Estojo azul com fecho preto encontrado na biblioteca.', 3, 2, NULL, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 01:49:37', '2026-10-30 01:49:37', 'por_entregar', NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -265,15 +268,16 @@ CREATE TABLE `pedidos_levantamento` (
   `expira_em` datetime NOT NULL,
   `utilizado_em` datetime DEFAULT NULL,
   `criado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `atualizado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `reclamacao_id` int UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Extraindo dados da tabela `pedidos_levantamento`
 --
 
-INSERT INTO `pedidos_levantamento` (`id`, `user_id`, `item_achado_id`, `item_perdido_id`, `match_id`, `codigo`, `estado`, `expira_em`, `utilizado_em`, `criado_em`, `atualizado_em`) VALUES
-(1, 2, 3, 2, 2, '3G236BVX', 'utilizado', '2026-10-30 16:48:47', '2026-10-29 17:36:09', '2026-10-29 16:48:47', '2026-10-29 17:36:09');
+INSERT INTO `pedidos_levantamento` (`id`, `user_id`, `item_achado_id`, `item_perdido_id`, `match_id`, `codigo`, `estado`, `expira_em`, `utilizado_em`, `criado_em`, `atualizado_em`, `reclamacao_id`) VALUES
+(1, 2, 3, 2, 2, '3G236BVX', 'utilizado', '2026-10-30 16:48:47', '2026-10-29 17:36:09', '2026-10-29 16:48:47', '2026-10-29 17:36:09', NULL);
 
 -- --------------------------------------------------------
 
@@ -293,6 +297,30 @@ CREATE TABLE `pontos_recolha` (
 INSERT INTO `pontos_recolha` (`id`, `nome`) VALUES
 (2, 'Biblioteca'),
 (1, 'Receção');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `reclamacoes`
+--
+
+CREATE TABLE `reclamacoes` (
+  `id` int UNSIGNED NOT NULL,
+  `user_id` int UNSIGNED NOT NULL,
+  `item_achado_id` int UNSIGNED NOT NULL,
+  `item_perdido_id` int UNSIGNED DEFAULT NULL,
+  `match_id` int UNSIGNED DEFAULT NULL,
+  `versao_item` int UNSIGNED NOT NULL,
+  `pergunta_secreta` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `resposta` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `informacao_adicional` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` enum('pendente','aprovada','recusada','cancelada') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendente',
+  `decidido_por` int UNSIGNED DEFAULT NULL,
+  `motivo_decisao` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `decidido_em` datetime DEFAULT NULL,
+  `criado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `atualizado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -317,6 +345,7 @@ INSERT INTO `sessions` (`id`, `user_id`, `dados`, `expira_em`, `atualizado_em`) 
 ('2uvammnn4hbm14ug29bus76fck', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2233636132363165343032663433616332636633323336633937303266306437303439353664656236323064373134663836663937386630346330633333373830223b, '2026-10-29 18:30:05', '2026-10-29 17:30:05'),
 ('3ntr8b87k5nh3hjkt30buqq0dt', 1, 0x757365725f69647c693a313b637372665f746f6b656e7c733a36343a2263633937326136633338666563356334396462306562346162393730316433386137373630623462323465333432336164343138393363383434666664626438223b, '2026-10-29 18:41:49', '2026-10-29 17:41:49'),
 ('4mba4c4v5hip6huvbso24r40o7', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2238653632663330313238356165326565343532636531626661326538633234613762373565316662653536346364326538636135363730646462623239376438223b, '2026-10-27 23:51:10', '2026-10-27 22:51:10'),
+('a25co9f0dotb0vs6pmc57flf47', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2262336435326438313765353238623065336639356264363232343537616336346539653864656261313335656337306532653530646138633630363161323833223b, '2026-10-30 02:49:37', '2026-10-30 01:49:37'),
 ('aki7np1c940fljh69clhqej8e5', 3, 0x757365725f69647c693a333b637372665f746f6b656e7c733a36343a2237313762646266666437626164316566313137313839323064353430373531343866316362326336316261613831336437313461323432616132316134386463223b, '2026-10-28 22:21:37', '2026-10-28 21:21:37'),
 ('ce44oqceht12f61beno68np9uh', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2264636161653130333934356261333530386135323839346538366562353039323464326537383134323034666232626138633339323435633130643066633930223b, '2026-10-27 22:58:41', '2026-10-27 21:58:41'),
 ('cofk7pdh6bb3la2dojr3m7dj5r', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2265643630316534633566396466646162336334393761346235326638613333363862396266306563666135666462653561623234316566643739636361396533223b, '2026-10-27 22:58:46', '2026-10-27 21:58:46'),
@@ -441,6 +470,7 @@ ALTER TABLE `pedidos_levantamento`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uq_levantamento_codigo` (`codigo`),
   ADD UNIQUE KEY `uq_levantamento_aluno_achado` (`user_id`,`item_achado_id`),
+  ADD UNIQUE KEY `uq_levantamento_reclamacao` (`reclamacao_id`),
   ADD KEY `fk_levantamento_achado` (`item_achado_id`),
   ADD KEY `fk_levantamento_perdido` (`item_perdido_id`),
   ADD KEY `fk_levantamento_match` (`match_id`);
@@ -451,6 +481,18 @@ ALTER TABLE `pedidos_levantamento`
 ALTER TABLE `pontos_recolha`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uq_pontos_recolha_nome` (`nome`);
+
+--
+-- Índices para tabela `reclamacoes`
+--
+ALTER TABLE `reclamacoes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_reclamacao_aluno_achado` (`user_id`,`item_achado_id`),
+  ADD KEY `idx_reclamacoes_estado` (`estado`,`criado_em`),
+  ADD KEY `fk_reclamacoes_achado` (`item_achado_id`),
+  ADD KEY `fk_reclamacoes_perdido` (`item_perdido_id`),
+  ADD KEY `fk_reclamacoes_match` (`match_id`),
+  ADD KEY `fk_reclamacoes_decisor` (`decidido_por`);
 
 --
 -- Índices para tabela `sessions`
@@ -493,7 +535,7 @@ ALTER TABLE `ia_jobs`
 -- AUTO_INCREMENT de tabela `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de tabela `item_photos`
@@ -530,6 +572,12 @@ ALTER TABLE `pedidos_levantamento`
 --
 ALTER TABLE `pontos_recolha`
   MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de tabela `reclamacoes`
+--
+ALTER TABLE `reclamacoes`
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `users`
@@ -597,7 +645,18 @@ ALTER TABLE `pedidos_levantamento`
   ADD CONSTRAINT `fk_levantamento_achado` FOREIGN KEY (`item_achado_id`) REFERENCES `items` (`id`),
   ADD CONSTRAINT `fk_levantamento_aluno` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `fk_levantamento_match` FOREIGN KEY (`match_id`) REFERENCES `matches` (`id`),
-  ADD CONSTRAINT `fk_levantamento_perdido` FOREIGN KEY (`item_perdido_id`) REFERENCES `items` (`id`);
+  ADD CONSTRAINT `fk_levantamento_perdido` FOREIGN KEY (`item_perdido_id`) REFERENCES `items` (`id`),
+  ADD CONSTRAINT `fk_levantamento_reclamacao` FOREIGN KEY (`reclamacao_id`) REFERENCES `reclamacoes` (`id`);
+
+--
+-- Limitadores para a tabela `reclamacoes`
+--
+ALTER TABLE `reclamacoes`
+  ADD CONSTRAINT `fk_reclamacoes_achado` FOREIGN KEY (`item_achado_id`) REFERENCES `items` (`id`),
+  ADD CONSTRAINT `fk_reclamacoes_aluno` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `fk_reclamacoes_decisor` FOREIGN KEY (`decidido_por`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `fk_reclamacoes_match` FOREIGN KEY (`match_id`) REFERENCES `matches` (`id`),
+  ADD CONSTRAINT `fk_reclamacoes_perdido` FOREIGN KEY (`item_perdido_id`) REFERENCES `items` (`id`);
 
 --
 -- Limitadores para a tabela `sessions`

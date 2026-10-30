@@ -3,12 +3,14 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers/resposta.php';
+require_once __DIR__ . '/VerificacaoValidator.php';
 
 class ItemValidator
 {
     // Lê o JSON e valida os dados necessários para registar um artigo.
-    public static function lerDadosArtigo(
-        bool $exigirPontoRecolha = false
+        public static function lerDadosArtigo(
+        bool $exigirPontoRecolha = false,
+        bool $exigirVerificacao = false
     ): array {
         $tipoConteudo = strtolower(
             trim(explode(';', $_SERVER['CONTENT_TYPE'] ?? '')[0])
@@ -128,7 +130,11 @@ class ItemValidator
         }
 
         // Devolve apenas os campos permitidos e já validados.
-        return [
+                    $verificacao = $exigirVerificacao
+            ? VerificacaoValidator::validar($dados)
+            : [];
+
+        return array_merge([
             'titulo' => $titulo,
             'descricao' => $descricao,
             'category_id' => $dados['category_id'],
@@ -137,6 +143,6 @@ class ItemValidator
             'ponto_recolha_id' => $exigirPontoRecolha
                 ? $dados['ponto_recolha_id']
                 : null,
-        ];
+        ], $verificacao);
     }
 }

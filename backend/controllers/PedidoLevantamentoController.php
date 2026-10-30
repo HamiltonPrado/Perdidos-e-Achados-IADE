@@ -7,160 +7,70 @@ require_once __DIR__ . '/../middleware/autenticacao.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../helpers/resposta.php';
 require_once __DIR__ . '/../middleware/administrador.php';
+require_once __DIR__ . '/../models/Item.php';
+require_once __DIR__ . '/../models/Reclamacao.php';
 
 class PedidoLevantamentoController
 {
     private PDO $pdo;
     private PedidoLevantamento $pedidos;
+    private Item $artigos;
+    private Reclamacao $reclamacoes;
 
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
         $this->pedidos = new PedidoLevantamento($pdo);
+        $this->artigos = new Item($pdo);
+        $this->reclamacoes = new Reclamacao($pdo);
     }
 
-    // Emite ou recupera um código através de uma notificação do aluno.
-    public function criar(int $notificacaoId): void
-    {
-        $utilizador = exigirAutenticacao($this->pdo);
-        exigirCsrf();
-
-        // Repete a transação em conflitos temporários ou colisões de código.
-        for ($tentativa = 0; $tentativa < 3; $tentativa++) {
-            try {
-                $this->pdo->beginTransaction();
-
-                $contexto = $this->pedidos->procurarNotificacaoValida(
-                    $notificacaoId,
-                    (int) $utilizador['id']
-                );
-
-                if ($contexto === null) {
-                    throw new DomainException(
-                        'Notificação não encontrada ou correspondência '
-                            . 'já indisponível.',
-                        404
-                    );
-                }
-
-                $achadoId = (int) $contexto['item_achado_id'];
-                $perdidoId = (int) $contexto['item_perdido_id'];
-                $matchId = (int) $contexto['match_id'];
-
-                $pedido = $this->pedidos->procurarPorAlunoEAchado(
-                    (int) $utilizador['id'],
-                    $achadoId
-                );
-
-                $codigoHttp = $pedido === null ? 201 : 200;
-
-                if (
-                    $pedido !== null
-                    && $pedido['estado'] === 'utilizado'
-                ) {
-                    throw new DomainException(
-                        'Este pedido de levantamento já foi utilizado.',
-                        409
-                    );
-                }
-
-                // Mantém o código quando o mesmo pedido continua válido.
-                $reutilizavel =
-                    $pedido !== null
-                    && $pedido['estado'] === 'pendente'
-                    && (int) $pedido['prazo_expirado'] === 0
-                    && (int) $pedido['item_perdido_id'] === $perdidoId
-                    && (int) $pedido['match_id'] === $matchId;
-
-                if (!$reutilizavel) {
-                    $codigo = $this->pedidos->gerarCodigo();
-
-                    if ($pedido === null) {
-                        $this->pedidos->criar(
-                            (int) $utilizador['id'],
-                            $achadoId,
-                            $codigo,
-                            $perdidoId,
-                            $matchId
-                        );
-                    } else {
-                        $renovado = $this->pedidos->renovar(
-                            (int) $pedido['id'],
-                            $codigo,
-                            $perdidoId,
-                            $matchId
-                        );
-
-                        if (!$renovado) {
-                            throw new DomainException(
-                                'O pedido foi alterado entretanto. '
-                                    . 'Atualiza os dados e tenta novamente.',
-                                409
-                            );
-                        }
-                    }
-
-                    $pedido = $this->pedidos->procurarPorCodigo(
-                        $codigo
-                    );
-                }
-
-                if ($pedido === null) {
-                    throw new RuntimeException(
-                        'Não foi possível consultar o pedido criado.'
-                    );
-                }
-
-                $this->pdo->commit();
-
-                responderJson([
-                    'estado' => 'ok',
-                    'mensagem' => 'Código de levantamento disponível.',
-                    'pedido' => [
-                        'id' => (int) $pedido['id'],
-                        'codigo' => $pedido['codigo'],
-                        'estado' => $pedido['estado'],
-                        'expira_em' => $pedido['expira_em'],
-                        'item_achado_id' => $achadoId,
-                        'item_perdido_id' => $perdidoId,
-                        'ponto_recolha_id' =>
-                            (int) $contexto['ponto_recolha_id'],
-                    ],
-                ], $codigoHttp);
-
-                return;
-
-            } catch (Throwable $erro) {
-                if ($this->pdo->inTransaction()) {
-                    $this->pdo->rollBack();
-                }
-
-                if ($erro instanceof DomainException) {
-                    responderJson([
-                        'erro' => $erro->getMessage(),
-                    ], $erro->getCode());
-                }
-
-                if ($erro instanceof PDOException) {
-                    $codigoMysql = (int) (
-                        $erro->errorInfo[1] ?? 0
-                    );
-
-                    if (
-                        in_array(
-                            $codigoMysql,
-                            [1062, 1213, 1205],
-                            true
-                        )
-                        && $tentativa < 2
-                    ) {
-                        continue;
-                    }
-                }
-
-                throw $erro;
-            }
+        // O levantamento passa a depender de uma reclamação aprovada.
+       // Guarda um código associado a uma reclamação aprovada.
+    public function criar(
+        int $userId,
+        int $itemAchadoId,
+        string $codigo,
+        int $reclamacaoId,
+        ?int $itemPerdidoId = null,
+        ?int $matchId = null
+    ): int {
+        if (!$this->pdo->inTransaction()) {
+            throw new LogicException(
+                'A criação do código exige uma transação.'
+            );
         }
+
+        $consulta = $this->pdo->prepare(
+            "INSERT INTO pedidos_levantamento (
+                user_id,
+                item_achado_id,
+                item_perdido_id,
+                match_id,
+                reclamacao_id,
+                codigo,
+                expira_em
+            ) VALUES (
+                :user_id,
+                :item_achado_id,
+                :item_perdido_id,
+                :match_id,
+                :reclamacao_id,
+                :codigo,
+                DATE_ADD(NOW(), INTERVAL 24 HOUR)
+            )"
+        );
+
+        $consulta->execute([
+            'user_id' => $userId,
+            'item_achado_id' => $itemAchadoId,
+            'item_perdido_id' => $itemPerdidoId,
+            'match_id' => $matchId,
+            'reclamacao_id' => $reclamacaoId,
+            'codigo' => $codigo,
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
     }
 
         // Permite à equipa consultar um código antes da entrega presencial.
@@ -197,6 +107,7 @@ class PedidoLevantamentoController
             'estado' => 'ok',
             'pedido' => [
                 'id' => (int) $pedido['id'],
+                'reclamacao_id' => (int) $pedido['reclamacao_id'],
                 'codigo' => $pedido['codigo'],
                 'estado' => $pedido['estado'],
                 'expira_em' => $pedido['expira_em'],
@@ -209,15 +120,232 @@ class PedidoLevantamentoController
                     'id' => (int) $pedido['item_achado_id'],
                     'titulo' => $pedido['achado_titulo'],
                 ],
-                'perdido' => [
+             'perdido' => $pedido['item_perdido_id'] === null
+                    ? null
+                    : [
                     'id' => (int) $pedido['item_perdido_id'],
                     'titulo' => $pedido['perdido_titulo'],
-                ],
+                    ],
                 'ponto_recolha' => [
                     'id' => (int) $pedido['ponto_recolha_id'],
                     'nome' => $pedido['ponto_recolha'],
                 ],
             ],
         ]);
+    }
+
+        // Emite ou recupera o código de uma reclamação aprovada.
+    public function criarPorReclamacao(int $reclamacaoId): void
+    {
+        $utilizador = exigirAutenticacao($this->pdo);
+        exigirCsrf();
+
+        header('Cache-Control: private, no-store');
+
+        $userId = (int) $utilizador['id'];
+
+        $referencia = $this->reclamacoes->procurarPorId(
+            $reclamacaoId
+        );
+
+        if (
+            $referencia === null
+            || (int) $referencia['user_id'] !== $userId
+        ) {
+            responderJson([
+                'erro' => 'Reclamação não encontrada.'
+            ], 404);
+
+            return;
+        }
+
+        $achadoId = (int) $referencia['item_achado_id'];
+
+        $perdidoId = $referencia['item_perdido_id'] === null
+            ? null
+            : (int) $referencia['item_perdido_id'];
+
+        try {
+            $this->pdo->beginTransaction();
+
+            $ids = [$achadoId];
+
+            if ($perdidoId !== null) {
+                $ids[] = $perdidoId;
+            }
+
+            $ids = array_unique($ids);
+            sort($ids, SORT_NUMERIC);
+
+            foreach ($ids as $id) {
+                $artigo = $this->artigos->procurarParaAtualizacao($id);
+
+                if ($artigo === null) {
+                    throw new DomainException(
+                        'O objeto já não está disponível.',
+                        409
+                    );
+                }
+            }
+
+            $reclamacao = $this->reclamacoes->procurarPorId(
+                $reclamacaoId,
+                true
+            );
+
+            if (
+                $reclamacao === null
+                || (int) $reclamacao['user_id'] !== $userId
+            ) {
+                throw new DomainException(
+                    'Reclamação não encontrada.',
+                    404
+                );
+            }
+
+            $perdidoAtualId =
+                $reclamacao['item_perdido_id'] === null
+                    ? null
+                    : (int) $reclamacao['item_perdido_id'];
+
+            if (
+                (int) $reclamacao['item_achado_id'] !== $achadoId
+                || $perdidoAtualId !== $perdidoId
+            ) {
+                throw new DomainException(
+                    'A reclamação foi alterada. Atualiza os dados.',
+                    409
+                );
+            }
+
+            if ($reclamacao['estado'] !== 'aprovada') {
+                throw new DomainException(
+                    'O código só está disponível após '
+                        . 'a aprovação da equipa.',
+                    409
+                );
+            }
+
+            $matchId = $reclamacao['match_id'] === null
+                ? null
+                : (int) $reclamacao['match_id'];
+
+            $pedido = $this->pedidos->procurarPorAlunoEAchado(
+                $userId,
+                $achadoId
+            );
+
+            $codigoHttp = $pedido === null ? 201 : 200;
+
+            if (
+                $pedido !== null
+                && $pedido['estado'] === 'utilizado'
+            ) {
+                throw new DomainException(
+                    'Este pedido de levantamento já foi utilizado.',
+                    409
+                );
+            }
+
+            $reutilizavel =
+                $pedido !== null
+                && $pedido['estado'] === 'pendente'
+                && (int) $pedido['prazo_expirado'] === 0
+                && (int) $pedido['reclamacao_id'] === $reclamacaoId;
+
+            if ($reutilizavel) {
+                $codigo = $pedido['codigo'];
+            } else {
+                $codigo = $this->pedidos->gerarCodigo();
+
+                if ($pedido === null) {
+                    $this->pedidos->criar(
+                        $userId,
+                        $achadoId,
+                        $codigo,
+                        $reclamacaoId,
+                        $perdidoId,
+                        $matchId
+                    );
+                } else {
+                    $renovado = $this->pedidos->renovar(
+                        (int) $pedido['id'],
+                        $codigo,
+                        $reclamacaoId,
+                        $perdidoId,
+                        $matchId
+                    );
+
+                    if (!$renovado) {
+                        throw new DomainException(
+                            'Não foi possível renovar o código.',
+                            409
+                        );
+                    }
+                }
+            }
+
+            // Confirma aprovação, versão, disponibilidade e associações.
+            $pedido = $this->pedidos->procurarValidoPorCodigo(
+                $codigo,
+                true
+            );
+
+            if ($pedido === null) {
+                throw new DomainException(
+                    'O objeto ou a reclamação já não estão '
+                        . 'disponíveis para levantamento.',
+                    409
+                );
+            }
+
+            $this->pdo->commit();
+
+        } catch (Throwable $erro) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+
+            if ($erro instanceof DomainException) {
+                responderJson([
+                    'erro' => $erro->getMessage()
+                ], $erro->getCode());
+
+                return;
+            }
+
+            if (
+                $erro instanceof PDOException
+                && in_array(
+                    (int) ($erro->errorInfo[1] ?? 0),
+                    [1062, 1213, 1205],
+                    true
+                )
+            ) {
+                responderJson([
+                    'erro' => 'Ocorreu um conflito. '
+                        . 'Tenta novamente.'
+                ], 409);
+
+                return;
+            }
+
+            throw $erro;
+        }
+
+        responderJson([
+            'estado' => 'ok',
+            'mensagem' => 'Código de levantamento disponível.',
+            'pedido' => [
+                'id' => (int) $pedido['id'],
+                'reclamacao_id' => $reclamacaoId,
+                'codigo' => $pedido['codigo'],
+                'estado' => $pedido['estado'],
+                'expira_em' => $pedido['expira_em'],
+                'item_achado_id' => $achadoId,
+                'item_perdido_id' => $perdidoId,
+                'ponto_recolha_id' => (int) $pedido['ponto_recolha_id'],
+            ],
+        ], $codigoHttp);
     }
 }
