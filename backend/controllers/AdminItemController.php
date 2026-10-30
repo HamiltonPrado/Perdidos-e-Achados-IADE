@@ -9,6 +9,7 @@ require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../validators/ItemValidator.php';
 require_once __DIR__ . '/../models/IaJob.php';
 require_once __DIR__ . '/../validators/RecepcaoValidator.php';
+require_once __DIR__ . '/../models/Reclamacao.php';
 class AdminItemController
 {
     private PDO $pdo;
@@ -86,29 +87,43 @@ public function criarAchado(): void
     ], 201);
 }
 
-// Guarda a edição e agenda a análise da nova versão.
+// Edita o artigo e trata a IA e as reclamações na mesma transação.
 public function atualizar(int $id): void
 {
     exigirAdministrador($this->pdo);
     exigirCsrf();
 
-    $artigo = $this->artigos->procurarPorId($id);
+    header('Cache-Control: private, no-store');
+
+    $artigo = $this->artigos->procurarParaGestao($id);
 
     if ($artigo === null) {
         responderJson([
-            'erro' => 'Artigo não encontrado.'
+            'erro' => 'Artigo não encontrado.',
         ], 404);
+
+        return;
     }
 
-    // Valida o pedido antes de abrir a transação.
+    $eAchado = $artigo['tipo'] === 'found';
+
+    $eAchadoRecebido =
+        $eAchado
+        && $artigo['estado_recepcao'] === 'na_recepcao';
+
     $dados = ItemValidator::lerDadosArtigo(
-        $artigo['tipo'] === 'found'
+        $eAchadoRecebido,
+        $eAchado,
+        $eAchado
     );
 
     try {
         $this->pdo->beginTransaction();
 
-        $bloqueado = $this->artigos->procurarParaAtualizacao($id);
+        $bloqueado = $this->artigos->procurarParaGestao(
+            $id,
+            true
+        );
 
         if ($bloqueado === null) {
             throw new DomainException(
@@ -124,26 +139,46 @@ public function atualizar(int $id): void
             );
         }
 
-        if ($bloqueado['tipo'] !== $artigo['tipo']) {
+        if (
+            $bloqueado['tipo'] !== $artigo['tipo']
+            || $bloqueado['estado_recepcao']
+                !== $artigo['estado_recepcao']
+            || (int) $bloqueado['versao']
+                !== (int) $artigo['versao']
+        ) {
             throw new DomainException(
                 'O artigo foi alterado entretanto. Atualiza os dados.',
                 409
             );
         }
 
-        $alterados = $this->artigos->atualizar($id, $dados);
+        $resultado = $this->artigos->atualizarPelaEquipa(
+            $id,
+            $dados
+        );
 
-        if ($alterados !== 1) {
-            throw new DomainException(
-                'Não foi possível atualizar o artigo.',
-                409
+        $efeitos = [
+            'aprovacoes_revogadas' => 0,
+            'codigos_cancelados' => 0,
+        ];
+
+        if ($eAchado && $resultado['versao_alterada']) {
+            $reclamacoes = new Reclamacao($this->pdo);
+
+            $efeitos = $reclamacoes->atualizarAposEdicaoDoAchado(
+                $id,
+                $resultado['versao_anterior'],
+                $resultado['versao'],
+                $resultado['pergunta_alterada']
             );
         }
 
-        // O modelo incrementou a versão enquanto mantemos o bloqueio.
-        $novaVersao = (int) $bloqueado['versao'] + 1;
-
-        $this->filaIa->agendar($id, $novaVersao);
+        if ($resultado['reagendar_ia']) {
+            $this->filaIa->agendar(
+                $id,
+                $resultado['versao']
+            );
+        }
 
         $this->pdo->commit();
 
@@ -153,22 +188,37 @@ public function atualizar(int $id): void
         }
 
         responderJson([
-            'erro' => $erro->getMessage()
+            'erro' => $erro->getMessage(),
         ], $erro->getCode());
+
+        return;
 
     } catch (Throwable $erro) {
         if ($this->pdo->inTransaction()) {
             $this->pdo->rollBack();
         }
 
-        if (
-            $erro instanceof PDOException
-            && (int) ($erro->errorInfo[1] ?? 0) === 1452
-        ) {
-            responderJson([
-                'erro' => 'Não foi possível associar o registo. '
-                    . 'Confirma a categoria, o local e o ponto de recolha.'
-            ], 422);
+        if ($erro instanceof PDOException) {
+            $codigo = (int) ($erro->errorInfo[1] ?? 0);
+
+            if ($codigo === 1452) {
+                responderJson([
+                    'erro' => 'Não foi possível associar o registo. '
+                        . 'Confirma a categoria, o local '
+                        . 'e o ponto de recolha.',
+                ], 422);
+
+                return;
+            }
+
+            if (in_array($codigo, [1213, 1205], true)) {
+                responderJson([
+                    'erro' => 'Ocorreu um conflito. '
+                        . 'Atualiza os dados e tenta novamente.',
+                ], 409);
+
+                return;
+            }
         }
 
         throw $erro;
@@ -176,12 +226,19 @@ public function atualizar(int $id): void
 
     responderJson([
         'estado' => 'ok',
-        'mensagem' => 'Artigo atualizado.',
+        'mensagem' => $resultado['alterado']
+            ? 'Artigo atualizado.'
+            : 'Os dados já estavam atualizados.',
+        'alterado' => $resultado['alterado'],
         'item' => [
             'id' => $id,
-            'versao' => $novaVersao,
-            'ia_estado' => 'pendente',
-        ]
+            'tipo' => $artigo['tipo'],
+            'versao' => $resultado['versao'],
+            'ia_estado' => $resultado['ia_estado'],
+        ],
+        'ia_agendada' => $resultado['reagendar_ia'],
+        'aprovacoes_revogadas' => $efeitos['aprovacoes_revogadas'],
+        'codigos_cancelados' => $efeitos['codigos_cancelados'],
     ]);
 }
 
@@ -335,5 +392,28 @@ public function arquivar(int $id): void
             ],
         ]);
     }
+
+    // Devolve os dados completos de gestão à equipa.
+public function mostrar(int $id): void
+{
+    exigirAdministrador($this->pdo);
+
+    header('Cache-Control: private, no-store');
+
+    $artigo = $this->artigos->procurarParaGestao($id);
+
+    if ($artigo === null) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.',
+        ], 404);
+
+        return;
+    }
+
+    responderJson([
+        'estado' => 'ok',
+        'artigo' => $artigo,
+    ]);
+}
 
 }

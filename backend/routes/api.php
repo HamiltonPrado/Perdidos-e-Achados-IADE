@@ -611,6 +611,32 @@ if (
     $controller->reabrir($id);
 }
 
+// Consulta os dados de gestão de um artigo, com acesso da equipa.
+if (
+    $metodo === 'GET'
+    && preg_match(
+        '#^/api/admin/items/([1-9][0-9]*)$#D',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.',
+        ], 404);
+    }
+
+    $controller = new AdminItemController(obterLigacao());
+
+    $controller->mostrar($id);
+}
+
 // Responde quando nenhuma rota corresponde ao pedido.
 responderJson([
     'erro' => 'Rota não encontrada.'

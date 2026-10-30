@@ -257,6 +257,47 @@ public function criarPerdido(): void
         ]);
     }
 
+    // Lista os achados disponíveis para utilizadores autenticados.
+public function listarAchados(): void
+{
+    exigirAutenticacao($this->pdo);
+
+    $pagina = filter_var(
+        $_GET['pagina'] ?? '1',
+        FILTER_VALIDATE_INT,
+        ['options' => [
+            'min_range' => 1,
+            'max_range' => 1000000,
+        ]]
+    );
+
+    if ($pagina === false) {
+        responderJson([
+            'erro' => 'Página inválida.'
+        ], 422);
+
+        return;
+    }
+
+    $limite = 20;
+    $offset = ($pagina - 1) * $limite;
+
+    $artigos = $this->artigos->listarAchadosDisponiveis(
+        $limite,
+        $offset
+    );
+
+    responderJson([
+        'estado' => 'ok',
+        'artigos' => $artigos,
+        'paginacao' => [
+            'pagina' => $pagina,
+            'por_pagina' => $limite,
+        ],
+    ]);
+}
+
+
         // Regista um achado que o aluno ainda vai entregar à equipa.
     public function criarAchado(): void
     {
@@ -264,7 +305,7 @@ public function criarPerdido(): void
         exigirCsrf();
 
         // O aluno não define o ponto de recolha nem os dados da receção.
-        $dados = ItemValidator::lerDadosArtigo();
+       $dados = ItemValidator::lerDadosArtigo(false, true);
 
         try {
             $id = $this->artigos->criarAchadoPorAluno(

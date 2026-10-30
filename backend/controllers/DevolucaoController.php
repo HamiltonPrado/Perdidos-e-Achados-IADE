@@ -357,7 +357,9 @@ public function listarTodos(): void
                 }
 
                 $pedidoId = (int) $pedido['id'];
-                $matchId = (int) $pedido['match_id'];
+                $matchId = $pedido['match_id'] === null
+                ? null
+                : (int) $pedido['match_id'];
                 $recebedorId = (int) $pedido['user_id'];
 
                 if (

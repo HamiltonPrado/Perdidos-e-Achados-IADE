@@ -11,6 +11,45 @@ class Item
         $this->pdo = $pdo;
     }
 
+    // Lista apenas os artigos do utilizador indicado.
+public function listarPorUtilizador(int $userId): array
+{
+    $consulta = $this->pdo->prepare(
+        'SELECT
+            i.id,
+            i.user_id,
+            i.tipo,
+            i.titulo,
+            i.descricao,
+            i.category_id,
+            c.nome AS categoria,
+            i.location_id,
+            l.nome AS local,
+            i.ponto_recolha_id,
+            p.nome AS ponto_recolha,
+            i.data_ocorrencia,
+            i.estado,
+            i.estado_recepcao,
+            i.ia_estado,
+            i.criado_em,
+            i.atualizado_em
+         FROM items AS i
+         INNER JOIN categories AS c ON c.id = i.category_id
+         INNER JOIN locations AS l ON l.id = i.location_id
+         LEFT JOIN pontos_recolha AS p
+            ON p.id = i.ponto_recolha_id
+         WHERE i.user_id = :user_id
+         ORDER BY i.criado_em DESC, i.id DESC'
+    );
+
+    $consulta->execute([
+        'user_id' => $userId,
+    ]);
+
+    return $consulta->fetchAll();
+}
+
+
     // Guarda um objeto perdido associado ao utilizador autenticado.
     public function criarPerdido(int $userId, array $dados): int
     {
@@ -221,42 +260,6 @@ public function arquivar(int $id): bool
 
     return $consulta->rowCount() === 1;
 }
-
-// Atualiza os dados de um artigo que ainda esteja ativo.
-public function atualizar(int $id, array $dados): int
-{
-    $sql = "
-    UPDATE items
-    SET titulo = :titulo,
-        descricao = :descricao,
-        category_id = :category_id,
-        location_id = :location_id,
-        ponto_recolha_id = :ponto_recolha_id,
-        data_ocorrencia = :data_ocorrencia,
-        versao = versao + 1,
-        ia_estado = 'pendente',
-        ia_erro = NULL,
-        embedding_texto = NULL,
-        embedding_modelo = NULL
-    WHERE id = :id
-      AND estado = 'ativo'
-";
-
-    $consulta = $this->pdo->prepare($sql);
-
-    $consulta->execute([
-        'id' => $id,
-        'titulo' => $dados['titulo'],
-        'descricao' => $dados['descricao'],
-        'category_id' => $dados['category_id'],
-        'location_id' => $dados['location_id'],
-        'ponto_recolha_id' => $dados['ponto_recolha_id'],
-        'data_ocorrencia' => $dados['data_ocorrencia'],
-    ]);
-
-    return $consulta->rowCount();
-}
-
 
 // Consulta e bloqueia o artigo durante uma transação.
 public function procurarParaAtualizacao(int $id): ?array
@@ -502,6 +505,209 @@ public function marcarDevolvido(int $id): bool
 
         return $consulta->fetchAll();
     }
+
+    // Obtém os dados de gestão para operações autorizadas da equipa.
+public function procurarParaGestao(
+    int $id,
+    bool $bloquear = false
+): ?array {
+    if ($bloquear && !$this->pdo->inTransaction()) {
+        throw new LogicException(
+            'O bloqueio do artigo exige uma transação.'
+        );
+    }
+
+    $sql = '
+        SELECT
+            id,
+            user_id,
+            tipo,
+            estado,
+            estado_recepcao,
+            titulo,
+            descricao,
+            category_id,
+            location_id,
+            ponto_recolha_id,
+            data_ocorrencia,
+            pergunta_secreta,
+            resposta_esperada,
+            localizacao_stock,
+            observacoes_internas,
+            recebido_por,
+            recebido_em,
+            versao,
+            ia_estado
+        FROM items
+        WHERE id = :id
+        LIMIT 1
+    ';
+
+    if ($bloquear) {
+        $sql .= ' FOR UPDATE';
+    }
+
+    $consulta = $this->pdo->prepare($sql);
+    $consulta->execute(['id' => $id]);
+
+    $artigo = $consulta->fetch();
+
+    return $artigo === false ? null : $artigo;
+}
+
+public function atualizarPelaEquipa(int $id, array $dados): array
+{
+    if (!$this->pdo->inTransaction()) {
+        throw new LogicException(
+            'A edição do artigo exige uma transação.'
+        );
+    }
+
+    $atual = $this->procurarParaGestao($id, true);
+
+    if ($atual === null) {
+        throw new DomainException('Artigo não encontrado.', 404);
+    }
+
+    if ($atual['estado'] !== 'ativo') {
+        throw new DomainException(
+            'Só é possível editar artigos ativos.',
+            409
+        );
+    }
+
+    $eAchado = $atual['tipo'] === 'found';
+
+    $eAchadoRecebido =
+        $eAchado
+        && $atual['estado_recepcao'] === 'na_recepcao';
+
+    $camposStock = [
+        'localizacao_stock',
+        'observacoes_internas',
+    ];
+
+    if (
+        !$eAchadoRecebido
+        && array_intersect($camposStock, array_keys($dados))
+    ) {
+        throw new DomainException(
+            'Os dados de stock aplicam-se a achados já recebidos.',
+            409
+        );
+    }
+
+    $campos = [
+        'titulo',
+        'descricao',
+        'category_id',
+        'location_id',
+        'data_ocorrencia',
+    ];
+
+    if ($eAchado) {
+        $campos = array_merge($campos, [
+            'pergunta_secreta',
+            'resposta_esperada',
+            'localizacao_stock',
+            'observacoes_internas',
+        ]);
+    }
+
+    // Os campos opcionais omitidos mantêm o valor atual.
+    $novos = array_intersect_key(
+        $dados,
+        array_flip($campos)
+    );
+
+    $novos['ponto_recolha_id'] = $eAchadoRecebido
+        ? $dados['ponto_recolha_id']
+        : null;
+
+    $alteracoes = [];
+
+    foreach ($novos as $campo => $valor) {
+        $anterior = $atual[$campo];
+
+        if (in_array(
+            $campo,
+            ['category_id', 'location_id', 'ponto_recolha_id'],
+            true
+        )) {
+            $anterior = $anterior === null ? null : (int) $anterior;
+            $valor = $valor === null ? null : (int) $valor;
+        }
+
+        if ($anterior !== $valor) {
+            $alteracoes[$campo] = $valor;
+        }
+    }
+
+    // Alterações exclusivamente de stock preservam a versão.
+    $mudouVersao = count(
+        array_diff(array_keys($alteracoes), $camposStock)
+    ) > 0;
+
+    $versaoAnterior = (int) $atual['versao'];
+    $novaVersao = $versaoAnterior + ($mudouVersao ? 1 : 0);
+
+    $resultado = [
+        'alterado' => $alteracoes !== [],
+        'versao_anterior' => $versaoAnterior,
+        'versao' => $novaVersao,
+        'versao_alterada' => $mudouVersao,
+        'pergunta_alterada' => array_key_exists(
+            'pergunta_secreta',
+            $alteracoes
+        ),
+        'ia_estado' => $mudouVersao
+            ? 'pendente'
+            : $atual['ia_estado'],
+        'reagendar_ia' => $mudouVersao
+            && ($atual['tipo'] === 'lost' || $eAchadoRecebido),
+    ];
+
+    if ($alteracoes === []) {
+        return $resultado;
+    }
+
+    $atribuicoes = [];
+    $parametros = ['id' => $id];
+
+    // Os nomes das colunas vêm da lista fixa acima.
+    foreach ($alteracoes as $campo => $valor) {
+        $atribuicoes[] = $campo . ' = :' . $campo;
+        $parametros[$campo] = $valor;
+    }
+
+    if ($mudouVersao) {
+        $atribuicoes = array_merge($atribuicoes, [
+            'versao = versao + 1',
+            "ia_estado = 'pendente'",
+            'ia_erro = NULL',
+            'embedding_texto = NULL',
+            'embedding_modelo = NULL',
+        ]);
+    }
+
+    $consulta = $this->pdo->prepare(
+        'UPDATE items
+         SET ' . implode(', ', $atribuicoes) . "
+         WHERE id = :id
+           AND estado = 'ativo'"
+    );
+
+    $consulta->execute($parametros);
+
+    if ($consulta->rowCount() !== 1) {
+        throw new DomainException(
+            'Não foi possível atualizar o artigo.',
+            409
+        );
+    }
+
+    return $resultado;
+}
 
 
 }

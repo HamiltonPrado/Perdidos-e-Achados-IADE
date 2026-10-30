@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers/resposta.php';
 require_once __DIR__ . '/VerificacaoValidator.php';
+require_once __DIR__ . '/StockValidator.php';
 
 class ItemValidator
 {
     // Lê o JSON e valida os dados necessários para registar um artigo.
         public static function lerDadosArtigo(
-        bool $exigirPontoRecolha = false,
-        bool $exigirVerificacao = false
-    ): array {
+    bool $exigirPontoRecolha = false,
+    bool $exigirVerificacao = false,
+    bool $permitirDadosStock = false
+): array {
         $tipoConteudo = strtolower(
             trim(explode(';', $_SERVER['CONTENT_TYPE'] ?? '')[0])
         );
@@ -131,18 +133,22 @@ class ItemValidator
 
         // Devolve apenas os campos permitidos e já validados.
                     $verificacao = $exigirVerificacao
-            ? VerificacaoValidator::validar($dados)
-            : [];
+    ? VerificacaoValidator::validar($dados)
+    : [];
 
-        return array_merge([
-            'titulo' => $titulo,
-            'descricao' => $descricao,
-            'category_id' => $dados['category_id'],
-            'location_id' => $dados['location_id'],
-            'data_ocorrencia' => $dataTexto,
-            'ponto_recolha_id' => $exigirPontoRecolha
-                ? $dados['ponto_recolha_id']
-                : null,
-        ], $verificacao);
+$stock = $permitirDadosStock
+    ? StockValidator::validar($dados)
+    : [];
+
+return array_merge([
+    'titulo' => $titulo,
+    'descricao' => $descricao,
+    'category_id' => $dados['category_id'],
+    'location_id' => $dados['location_id'],
+    'data_ocorrencia' => $dataTexto,
+    'ponto_recolha_id' => $exigirPontoRecolha
+        ? $dados['ponto_recolha_id']
+        : null,
+], $verificacao, $stock);
     }
 }

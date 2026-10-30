@@ -26,42 +26,52 @@ class PedidoLevantamento
     }
 
     // Guarda um pedido com validade de 24 horas.
-    public function criar(
-        int $userId,
-        int $itemAchadoId,
-        string $codigo,
-        ?int $itemPerdidoId = null,
-        ?int $matchId = null
-    ): int {
-        $consulta = $this->pdo->prepare(
-            "INSERT INTO pedidos_levantamento (
-                user_id,
-                item_achado_id,
-                item_perdido_id,
-                match_id,
-                codigo,
-                expira_em
-            ) VALUES (
-                :user_id,
-                :item_achado_id,
-                :item_perdido_id,
-                :match_id,
-                :codigo,
-                DATE_ADD(NOW(), INTERVAL 24 HOUR)
-            )"
+    // Guarda um código associado a uma reclamação aprovada.
+public function criar(
+    int $userId,
+    int $itemAchadoId,
+    string $codigo,
+    int $reclamacaoId,
+    ?int $itemPerdidoId = null,
+    ?int $matchId = null
+): int {
+    if (!$this->pdo->inTransaction()) {
+        throw new LogicException(
+            'A criação do código exige uma transação.'
         );
-
-        $consulta->execute([
-            'user_id' => $userId,
-            'item_achado_id' => $itemAchadoId,
-            'item_perdido_id' => $itemPerdidoId,
-            'match_id' => $matchId,
-            'codigo' => $codigo,
-        ]);
-
-        return (int) $this->pdo->lastInsertId();
     }
 
+    $consulta = $this->pdo->prepare(
+        "INSERT INTO pedidos_levantamento (
+            user_id,
+            item_achado_id,
+            item_perdido_id,
+            match_id,
+            reclamacao_id,
+            codigo,
+            expira_em
+        ) VALUES (
+            :user_id,
+            :item_achado_id,
+            :item_perdido_id,
+            :match_id,
+            :reclamacao_id,
+            :codigo,
+            DATE_ADD(NOW(), INTERVAL 24 HOUR)
+        )"
+    );
+
+    $consulta->execute([
+        'user_id' => $userId,
+        'item_achado_id' => $itemAchadoId,
+        'item_perdido_id' => $itemPerdidoId,
+        'match_id' => $matchId,
+        'reclamacao_id' => $reclamacaoId,
+        'codigo' => $codigo,
+    ]);
+
+    return (int) $this->pdo->lastInsertId();
+}
     // Procura um pedido existente do aluno para o mesmo achado.
     public function procurarPorAlunoEAchado(
         int $userId,

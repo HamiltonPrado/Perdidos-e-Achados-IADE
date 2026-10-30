@@ -25,54 +25,17 @@ class PedidoLevantamentoController
         $this->reclamacoes = new Reclamacao($pdo);
     }
 
-        // O levantamento passa a depender de uma reclamação aprovada.
-       // Guarda um código associado a uma reclamação aprovada.
-    public function criar(
-        int $userId,
-        int $itemAchadoId,
-        string $codigo,
-        int $reclamacaoId,
-        ?int $itemPerdidoId = null,
-        ?int $matchId = null
-    ): int {
-        if (!$this->pdo->inTransaction()) {
-            throw new LogicException(
-                'A criação do código exige uma transação.'
-            );
-        }
+       // A emissão de códigos passa pelas reclamações aprovadas.
+public function criar(int $notificacaoId): void
+{
+    exigirAutenticacao($this->pdo);
+    exigirCsrf();
 
-        $consulta = $this->pdo->prepare(
-            "INSERT INTO pedidos_levantamento (
-                user_id,
-                item_achado_id,
-                item_perdido_id,
-                match_id,
-                reclamacao_id,
-                codigo,
-                expira_em
-            ) VALUES (
-                :user_id,
-                :item_achado_id,
-                :item_perdido_id,
-                :match_id,
-                :reclamacao_id,
-                :codigo,
-                DATE_ADD(NOW(), INTERVAL 24 HOUR)
-            )"
-        );
-
-        $consulta->execute([
-            'user_id' => $userId,
-            'item_achado_id' => $itemAchadoId,
-            'item_perdido_id' => $itemPerdidoId,
-            'match_id' => $matchId,
-            'reclamacao_id' => $reclamacaoId,
-            'codigo' => $codigo,
-        ]);
-
-        return (int) $this->pdo->lastInsertId();
-    }
-
+    responderJson([
+ 'erro' => 'O código deve ser solicitado através '
+   . 'de uma reclamação aprovada pela equipa.',
+    ], 409);
+}
         // Permite à equipa consultar um código antes da entrega presencial.
     public function consultar(string $codigo): void
     {
