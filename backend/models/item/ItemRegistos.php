@@ -128,6 +128,8 @@ trait ItemRegistos
                 :location_id,
                 NULL,
                 :data_ocorrencia,
+                :pergunta_secreta,
+                :resposta_esperada,
                 'por_entregar'
             )
         ";
@@ -141,6 +143,8 @@ trait ItemRegistos
             'category_id' => $dados['category_id'],
             'location_id' => $dados['location_id'],
             'data_ocorrencia' => $dados['data_ocorrencia'],
+            'pergunta_secreta' => $dados['pergunta_secreta'],
+            'resposta_esperada' => $dados['resposta_esperada'],
         ]);
 
         return (int) $this->pdo->lastInsertId();
