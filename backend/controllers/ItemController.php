@@ -304,8 +304,8 @@ public function listarAchados(): void
         $utilizador = exigirAutenticacao($this->pdo);
         exigirCsrf();
 
-        // O aluno não define o ponto de recolha nem os dados da receção.
-       $dados = ItemValidator::lerDadosArtigo(false, true);
+        // O aluno regista o objeto; a equipa define os dados de verificação.
+        $dados = ItemValidator::lerDadosArtigo();
 
         try {
             $id = $this->artigos->criarAchadoPorAluno(

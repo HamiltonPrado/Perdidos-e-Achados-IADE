@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers/resposta.php';
+require_once __DIR__ . '/VerificacaoValidator.php';
 
 class RecepcaoValidator
 {
@@ -89,10 +90,13 @@ class RecepcaoValidator
             }
         }
 
-        return [
+        // A equipa define a pergunta e a resposta ao receber o objeto.
+        $verificacao = VerificacaoValidator::validar($dados);
+
+        return array_merge([
             'ponto_recolha_id' => $dados['ponto_recolha_id'],
             'localizacao_stock' => $localizacao,
             'observacoes_internas' => $observacoes,
-        ];
+        ], $verificacao);
     }
 }

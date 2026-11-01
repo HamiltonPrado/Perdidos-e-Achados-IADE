@@ -106,6 +106,8 @@ public function marcarDevolvido(int $id): bool
                 ponto_recolha_id = :ponto_recolha_id,
                 localizacao_stock = :localizacao_stock,
                 observacoes_internas = :observacoes_internas,
+                pergunta_secreta = :pergunta_secreta,
+                resposta_esperada = :resposta_esperada,
                 recebido_por = :recebido_por,
                 recebido_em = CURRENT_TIMESTAMP,
                 versao = versao + 1,
@@ -125,6 +127,8 @@ public function marcarDevolvido(int $id): bool
             'ponto_recolha_id' => $dados['ponto_recolha_id'],
             'localizacao_stock' => $dados['localizacao_stock'],
             'observacoes_internas' => $dados['observacoes_internas'],
+            'pergunta_secreta' => $dados['pergunta_secreta'],
+            'resposta_esperada' => $dados['resposta_esperada'],
             'recebido_por' => $adminId,
             'id' => $id,
         ]);
