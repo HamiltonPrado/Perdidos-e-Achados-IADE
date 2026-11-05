@@ -1,6 +1,6 @@
 // TODO: ir buscar a GET /rececao quando existir no backend
 export const RECECAO = {
-  responsavel: 'Sra. Leonor',
-  local: 'Receção principal',
+  responsavel: 'A recepção',
+  local: 'Entrada da universidade',
   horario: '09:00–18:00',
 };
