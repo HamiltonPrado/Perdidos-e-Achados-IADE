@@ -1,18 +1,13 @@
 <!doctype html>
-<!--
-  meus-anuncios.html — OS MEUS ANÚNCIOS   🔒 precisa de sessão
-  Lista os objetos que publiquei e os pedidos "É meu" de cada um.
-  JavaScript: js/pages/meusAnuncios.js · Estilos: assets/css/pages/meus-anuncios.css
--->
 <html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Os meus anúncios · Achados e Perdidos IADE</title>
+  <title>Os meus anúncios · Perdidos &amp; Achados</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Public+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
 
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/style.css">
@@ -23,13 +18,19 @@
 <body>
   <header class="navbar" id="navbar"></header>
 
-  <main class="contentor contentor--estreito pagina">
-    <p class="sobretitulo">A tua conta</p>
-    <h1 class="titulo-pagina">Os meus anúncios</h1>
-    <p class="intro">Objetos que publicaste e pedidos de quem diz ser o dono.</p>
+  <main class="contentor meus">
+    <p class="sobretitulo">Área pessoal</p>
+    <h1 class="meus__titulo">Os meus registos</h1>
 
-    <!-- Lista — preenchida pelo meusAnuncios.js -->
-    <div class="anuncios" id="anuncios" aria-live="polite">
+    <div class="separadores" role="tablist" aria-label="Estado dos objetos">
+      <button type="button" class="separador" role="tab" data-separador="por_entregar">Por entregar <span data-contagem="por_entregar">0</span></button>
+      <button type="button" class="separador" role="tab" data-separador="na_rececao">Na receção <span data-contagem="na_rececao">0</span></button>
+      <button type="button" class="separador" role="tab" data-separador="devolvidos">Devolvidos <span data-contagem="devolvidos">0</span></button>
+    </div>
+
+    <div class="aviso meus__aviso" id="aviso-entregar" hidden></div>
+
+    <div class="registos" id="registos" aria-live="polite">
       <p class="ajuda">A carregar…</p>
     </div>
   </main>

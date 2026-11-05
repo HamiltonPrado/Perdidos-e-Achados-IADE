@@ -1,59 +1,42 @@
-/*
- * components/navbar.js — BARRA DE NAVEGAÇÃO (topo preto)
- * ------------------------------------------------------------
- * Igual ao NavBar.vue do AquaPoint.
- * Em vez de copiar o mesmo HTML para as 5 páginas, cada página tem
- * só <header id="navbar"></header> e chama montarNavBar(), que
- * escreve lá dentro o logótipo, os links e o avatar.
- *
- * Uso (no js de cada página):
- *     import { montarNavBar } from '../components/navbar.js';
- *     montarNavBar('inicio');   // nome da página atual, para a sublinhar
- *
- * Estilos: assets/css/components/navbar.css
- */
-
-import { getUser, isLoggedIn, login, logout, USER_EXEMPLO } from '../utilities/auth.js';
-import { USAR_MOCKS } from '../services/api.js';
+import { getUser, isLoggedIn, logout } from '../utilities/auth.js';
 import { esc, iniciais } from '../utilities/tools.js';
+import { logoHtml } from './logo.js';
+import { itemsService } from '../services/itemsService.js';
 
-// Links do menu: [nome da página, ficheiro, texto]
 const LINKS = [
-  ['inicio', 'index.html', 'Achados'],
+  ['inicio', 'index.html', 'Explorar'],
+  ['procurar', 'procurar.html', 'Encontrar'],
   ['publicar', 'publicar.html', 'Publicar'],
-  ['meus-anuncios', 'meus-anuncios.html', 'Os meus anúncios'],
+  ['meus-anuncios', 'meus-anuncios.html', 'Meus anúncios'],
 ];
 
 const ICONE_MENU = 'M4 7h16M4 12h16M4 17h16';
 const ICONE_FECHAR = 'M6 6l12 12M18 6L6 18';
 
-export function montarNavBar(paginaAtual) {
-  const user = getUser();
-  const comSessao = isLoggedIn();
+function paginaAtual() {
+  return window.location.pathname.split('/').pop() + window.location.search;
+}
 
-  // Cada link recebe a classe "ativo" se for a página atual
+export function montarNavBar(pagina) {
+  const user = getUser();
+
   const links = LINKS.map(([nome, ficheiro, texto]) => {
-    const ativo = nome === paginaAtual;
-    return `<a href="${ficheiro}" class="navbar__link${ativo ? ' ativo' : ''}"${ativo ? ' aria-current="page"' : ''}>${texto}</a>`;
+    const ativo = nome === pagina;
+    const bolinha = nome === 'meus-anuncios' ? '<span class="navbar__bolinha" id="navbar-bolinha" hidden></span>' : '';
+    return `<a href="${ficheiro}" class="navbar__link${ativo ? ' ativo' : ''}"${ativo ? ' aria-current="page"' : ''}>${texto}${bolinha}</a>`;
   }).join('');
 
-  // Avatar: foto, ou as iniciais se não houver foto
-  const avatar = user?.foto ? `<img src="${user.foto}" alt="">` : esc(iniciais(user?.nome));
-  const perfilAtivo = paginaAtual === 'perfil';
+  const avatar = user?.foto ? `<img src="${esc(user.foto)}" alt="">` : esc(iniciais(user?.nome));
 
-  // Parte da direita: com sessão → Perfil + Terminar sessão + avatar; sem sessão → Entrar
-  const zonaSessao = comSessao
-    ? `<a href="perfil.html" class="navbar__link navbar__perfil${perfilAtivo ? ' ativo' : ''}">Perfil</a>
+  const zonaSessao = isLoggedIn()
+    ? `<a href="perfil.html" class="navbar__link navbar__perfil${pagina === 'perfil' ? ' ativo' : ''}">Perfil</a>
        <button type="button" class="navbar__link" id="navbar-sair">Terminar sessão</button>
        <a href="perfil.html" class="navbar__avatar" aria-label="O meu perfil">${avatar}</a>`
-    : `<button type="button" class="navbar__link" id="navbar-entrar">Entrar</button>`;
+    : `<a href="entrar.html?voltar=${encodeURIComponent(paginaAtual())}" class="navbar__entrar">Entrar</a>`;
 
   document.getElementById('navbar').innerHTML = `
     <div class="contentor navbar__barra">
-      <a href="index.html" class="navbar__marca">
-        <span class="navbar__logo">IADE</span>
-        <span class="navbar__nome">Achados e Perdidos</span>
-      </a>
+      <a href="index.html" class="navbar__marca" aria-label="Perdidos e Achados, página inicial">${logoHtml()}</a>
 
       <button type="button" class="navbar__menu-botao" id="navbar-menu-botao"
               aria-label="Abrir menu" aria-expanded="false" aria-controls="navbar-menu">
@@ -68,7 +51,6 @@ export function montarNavBar(paginaAtual) {
       </nav>
     </div>`;
 
-  // --- Botão ☰ (telemóvel): abre e fecha o menu ---
   const botaoMenu = document.getElementById('navbar-menu-botao');
   botaoMenu.addEventListener('click', () => {
     const aberto = document.getElementById('navbar-menu').classList.toggle('navbar__nav--aberto');
@@ -77,18 +59,24 @@ export function montarNavBar(paginaAtual) {
     document.getElementById('navbar-menu-icone').setAttribute('d', aberto ? ICONE_FECHAR : ICONE_MENU);
   });
 
-  // --- Terminar sessão → volta à página inicial ---
   document.getElementById('navbar-sair')?.addEventListener('click', () => {
     logout();
     window.location.href = 'index.html';
   });
 
-  // --- Entrar ---
-  // TODO: quando existir login.html, trocar por: window.location.href = 'login.html'
-  document.getElementById('navbar-entrar')?.addEventListener('click', () => {
-    if (USAR_MOCKS) {
-      login(USER_EXEMPLO, 'token-de-exemplo'); // entra com a Ana Silva de exemplo
-      window.location.reload();
-    }
-  });
+  if (isLoggedIn()) mostrarPorEntregar();
+}
+
+async function mostrarPorEntregar() {
+  try {
+    const meus = await itemsService.getMine();
+    const n = meus.filter((i) => i.estado === 'por_receber').length;
+    const bolinha = document.getElementById('navbar-bolinha');
+    if (!bolinha || n === 0) return;
+    bolinha.textContent = n;
+    bolinha.setAttribute('aria-label', `${n} ${n === 1 ? 'objeto' : 'objetos'} por entregar na receção`);
+    bolinha.title = 'Por entregar na receção';
+    bolinha.hidden = false;
+  } catch {
+  }
 }

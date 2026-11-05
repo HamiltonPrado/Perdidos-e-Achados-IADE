@@ -1,21 +1,9 @@
-/*
- * services/itemsService.js — OBJETOS ENCONTRADOS
- * ------------------------------------------------------------
- * Igual ao aquapointService.js do AquaPoint.
- * Todas as funções devolvem dados já convertidos com o model Item.
- *
- * Uso numa página:
- *     import { itemsService } from '../services/itemsService.js';
- *     const lista = await itemsService.getAll({ categoria: 'chaves' });
- */
-
 import { api, USAR_MOCKS, esperar } from './api.js';
 import { Item } from '../models/Item.js';
 import { db, guardar, novoId } from '../mocks/db.js';
 import { getUser } from '../utilities/auth.js';
 import { lerImagem, nomeCurto } from '../utilities/tools.js';
 
-// Pesquisa, filtros e ordem — só com mocks (com o backend, é ele que filtra)
 function filtrarMocks({ q = '', categoria = '', local = '', ordem = 'recentes' }) {
   const texto = q.trim().toLowerCase();
 
@@ -35,7 +23,7 @@ function filtrarMocks({ q = '', categoria = '', local = '', ordem = 'recentes' }
 }
 
 export const itemsService = {
-  // GET /items?q=&categoria=&local=&ordem=   → lista para a página inicial
+  // GET /items?q=&categoria=&local=&ordem=
   async getAll(filtros = {}) {
     if (USAR_MOCKS) {
       await esperar();
@@ -45,7 +33,7 @@ export const itemsService = {
     return dados.map((d) => new Item(d));
   },
 
-  // GET /items/:id   → um objeto (página Detalhe). Devolve null se não existir.
+  // GET /items/:id
   async getById(id) {
     if (USAR_MOCKS) {
       const encontrado = db.items.find((i) => i.id === Number(id));
@@ -54,7 +42,7 @@ export const itemsService = {
     return new Item(await api.get(`/items/${id}`));
   },
 
-  // GET /me/items   → os meus anúncios
+  // GET /me/items
   async getMine() {
     if (USAR_MOCKS) {
       const eu = getUser();
@@ -67,20 +55,18 @@ export const itemsService = {
     return dados.map((d) => new Item(d));
   },
 
-  /*
-   * POST /items   → publicar um objeto
-   * "dados" = { titulo, descricao, categoriaId, localId, dataEncontrado,
-   *             ondeEsta, pergunta, fotos: [File, …] }
-   */
   async create(dados, categorias = [], locais = []) {
     if (USAR_MOCKS) {
       const eu = getUser();
+      const id = novoId(db.items);
       const novo = {
         ...dados,
-        id: novoId(db.items),
+        id,
+        referencia: `UE-${String(240 + id).padStart(4, '0')}`,
+        ondeEsta: 'com_quem_encontrou',
         categoria: categorias.find((c) => c.id === dados.categoriaId)?.nome ?? '',
         local: locais.find((l) => l.id === dados.localId)?.nome ?? '',
-        estado: 'por_reclamar',
+        estado: 'por_receber',
         publicadoPor: { id: eu.id, nome: nomeCurto(eu.nome) },
         fotos: await Promise.all(dados.fotos.map((f) => lerImagem(f))),
       };
@@ -89,7 +75,6 @@ export const itemsService = {
       return new Item(novo);
     }
 
-    // Com o backend: os ficheiros vão num FormData (multipart)
     const formData = new FormData();
     Object.entries(dados).forEach(([chave, valor]) => {
       if (chave !== 'fotos') formData.append(chave, valor);
@@ -98,7 +83,7 @@ export const itemsService = {
     return new Item(await api.post('/items', formData));
   },
 
-  // PATCH /items/:id   → mudar o estado (ex.: { estado: 'devolvido' })
+  // PATCH /items/:id
   async update(id, alteracoes) {
     if (USAR_MOCKS) {
       const item = db.items.find((i) => i.id === Number(id));

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar · Perdidos &amp; Achados</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/pages/entrar.css">
+</head>
+<body>
+  <main class="entrar">
+    <section class="entrar__visual">
+      <a href="index.html" class="entrar__marca" id="entrar-logo" aria-label="Perdidos e Achados, página inicial"></a>
+
+      <div>
+        <p class="sobretitulo entrar__sobretitulo">Perdidos &amp; Achados</p>
+        <h1 class="entrar__frase">Pequenos gestos.<br>Grandes reencontros.</h1>
+      </div>
+
+      <p class="entrar__rodape">Uma comunidade mais atenta.<br>Um campus com menos coisas perdidas.</p>
+    </section>
+
+    <section class="entrar__formulario">
+      <div class="entrar__caixa">
+        <a href="index.html" class="voltar">← Voltar a explorar</a>
+
+        <h2 class="entrar__titulo">Bem-vindo</h2>
+        <p class="entrar__texto">Entra com a tua conta da Universidade Europeia para publicar e reclamar objetos.</p>
+
+        <button type="button" class="botao botao--destaque entrar__botao" id="botao-entrar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+          Entrar com a conta da Universidade →
+        </button>
+
+        <p class="erro" id="erro-entrar" role="alert" hidden></p>
+
+        <div class="entrar__nota">
+          <b>Como funciona</b>
+          <span>Vais ser levado para a página de login da universidade. Usa o mesmo email e palavra-passe do portal do estudante. A app nunca vê a tua palavra-passe.</span>
+        </div>
+
+        <p class="ajuda entrar__simulado" id="aviso-simulado" hidden>Modo de demonstração: o login é simulado e entras como <b>Ana Silva</b>.</p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="js/pages/entrar.js"></script>
+</body>
+</html>

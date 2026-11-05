@@ -1,0 +1,108 @@
+.entrar {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.entrar__visual {
+  background: var(--cor-preto);
+  color: #fff;
+  padding: 48px 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+}
+
+.entrar__marca {
+  color: #fff;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.entrar__sobretitulo {
+  color: #a9a9a4;
+  margin: 0;
+}
+
+.entrar__frase {
+  font-size: clamp(36px, 4.6vw, 60px);
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 18px 0 0;
+}
+
+.entrar__rodape {
+  margin: 0;
+  color: #a9a9a4;
+  line-height: 1.6;
+}
+
+.entrar__formulario {
+  background: var(--cor-superficie);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 56px;
+}
+
+.entrar__caixa {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+}
+
+.entrar__titulo {
+  font-size: 32px;
+  margin: 32px 0 8px;
+}
+
+.entrar__texto {
+  margin: 0 0 28px;
+  color: var(--cor-texto-secundario);
+  line-height: 1.5;
+}
+
+.entrar__botao {
+  width: 100%;
+  min-height: 56px;
+}
+
+.entrar__nota {
+  margin-top: 24px;
+  background: var(--cor-cinza-suave);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.entrar__nota span {
+  color: var(--cor-texto-secundario);
+  line-height: 1.5;
+}
+
+.entrar__simulado {
+  margin-top: 16px;
+}
+
+@media (max-width: 820px) {
+  .entrar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .entrar__visual {
+    padding: 32px 20px;
+    gap: 32px;
+  }
+
+  .entrar__formulario {
+    padding: 32px 20px 48px;
+  }
+
+  .entrar__titulo {
+    margin-top: 20px;
+  }
+}

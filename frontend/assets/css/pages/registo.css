@@ -1,0 +1,82 @@
+.registo {
+  max-width: 640px;
+  padding-top: 64px;
+  padding-bottom: 80px;
+}
+
+.registo__icone {
+  margin: 0 0 20px;
+  background: var(--cor-ok);
+  color: #fff;
+}
+
+.registo__sobretitulo {
+  color: var(--cor-ok);
+  margin: 0;
+}
+
+.registo__titulo {
+  font-size: clamp(30px, 5vw, 44px);
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 10px 0 12px;
+}
+
+.registo__texto {
+  color: var(--cor-texto-secundario);
+  font-size: 17px;
+  margin: 0 0 28px;
+}
+
+.registo__referencia {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  background: var(--cor-aviso-fundo);
+  border-left: 4px solid var(--cor-aviso-borda);
+}
+
+.registo__referencia strong {
+  font-family: var(--fonte-titulos);
+  font-size: 28px;
+  letter-spacing: 0.04em;
+}
+
+.registo__info {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+  padding: 20px 0;
+  border-top: 1px solid var(--cor-borda);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.registo__info dt {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cor-texto-secundario);
+}
+
+.registo__info dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+
+.registo__nota {
+  margin: 0 0 28px;
+}
+
+@media (max-width: 600px) {
+  .registo__info {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .registo__acoes .botao {
+    width: 100%;
+  }
+}

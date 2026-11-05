@@ -1,18 +1,13 @@
 <!doctype html>
-<!--
-  publicar.html — PUBLICAR UM OBJETO ENCONTRADO   🔒 precisa de sessão
-  Mockup: "3 · Publicar objeto encontrado"
-  JavaScript: js/pages/publicar.js · Estilos: assets/css/pages/publicar.css
--->
 <html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Publicar objeto · Achados e Perdidos IADE</title>
+  <title>Publicar objeto · Perdidos &amp; Achados</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Public+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
 
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/style.css">
@@ -23,105 +18,104 @@
 <body>
   <header class="navbar" id="navbar"></header>
 
-  <main class="contentor contentor--estreito pagina">
-    <a href="index.html" class="voltar">← Voltar aos achados</a>
-    <h1 class="titulo-pagina">Encontrei um objeto</h1>
-    <p class="intro">Publica o que encontraste para que o dono o possa reclamar. Não mostres dados pessoais, como nomes em cartões ou números de documentos.</p>
+  <main class="contentor publicar">
+    <a href="index.html" class="voltar">← Voltar a explorar</a>
 
-    <!-- Passos: o publicar.js muda o aria-current conforme se preenche -->
-    <ol class="passos" aria-label="Passos">
-      <li aria-current="step">1. Foto e descrição</li>
-      <li>2. Onde e quando</li>
-      <li>3. Verificação</li>
-    </ol>
+    <p class="sobretitulo publicar__sobretitulo">Registar objeto </p>
+    <h1 class="publicar__titulo">Encontraste alguma coisa?</h1>
+    <p class="publicar__intro" id="intro">Regista o objeto e entrega-o na receção da Universidade Europeia.</p>
 
-    <!-- novalidate: os erros são mostrados pelo nosso JavaScript, não pelo browser -->
-    <form class="formulario" id="form-publicar" novalidate>
+    <form id="form-publicar" novalidate>
 
-      <!-- Fotografias -->
-      <div class="grupo">
-        <span class="rotulo">Fotografias <span class="rotulo__opcional">(até 5)</span></span>
-        <label for="fotos" class="upload">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v13H4z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-          <span class="upload__titulo">Tirar foto ou carregar imagem</span>
-          <span class="ajuda">JPG ou PNG · máx. 10 MB</span>
-          <input id="fotos" type="file" accept="image/*" multiple class="so-leitor">
-        </label>
-        <div class="miniaturas-upload" id="miniaturas-fotos" aria-live="polite"></div>
-        <span class="erro" id="erro-fotos" hidden>Só podes juntar até 5 fotos.</span>
-      </div>
-
-      <!-- Título -->
-      <div class="grupo">
-        <label for="titulo" class="rotulo">Título</label>
-        <input id="titulo" type="text" class="campo" maxlength="80" placeholder="Ex.: Carteira de pele castanha">
-        <span class="erro" id="erro-titulo" hidden>Dá um título ao objeto.</span>
-      </div>
-
-      <!-- Categoria + cor -->
-      <div class="duas-colunas">
-        <div class="grupo">
-          <label for="categoria" class="rotulo">Categoria</label>
-          <select id="categoria" class="campo">
-            <option value="">Escolher…</option>
-            <!-- opções vêm do categoriasService -->
-          </select>
-          <span class="erro" id="erro-categoria" hidden>Escolhe uma categoria.</span>
+      <section class="passo">
+        <span class="passo__numero">01</span>
+        <div class="passo__conteudo">
+          <h2 class="passo__titulo">Fotografia</h2>
+          <label for="fotos" class="upload">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            <span class="upload__titulo">Adicionar fotografia</span>
+            <span class="ajuda">JPG ou PNG, até 8 MB · até 5 fotos</span>
+            <input id="fotos" type="file" accept="image/*" multiple class="so-leitor">
+          </label>
+          <div class="miniaturas-upload" id="miniaturas-fotos" aria-live="polite"></div>
+          <span class="erro" id="erro-fotos" hidden>Só podes juntar até 5 fotos.</span>
         </div>
-        <div class="grupo">
-          <label for="cor" class="rotulo">Cor principal <span class="rotulo__opcional">(opcional)</span></label>
-          <input id="cor" type="text" class="campo" placeholder="Ex.: castanho">
+      </section>
+
+      <section class="passo">
+        <span class="passo__numero">02</span>
+        <div class="passo__conteudo">
+          <h2 class="passo__titulo">Sobre o objeto</h2>
+          <div class="duas-colunas">
+            <div class="grupo">
+              <label for="titulo" class="rotulo">Nome do objeto</label>
+              <input id="titulo" type="text" class="campo" maxlength="80" placeholder="Ex.: Auscultadores pretos">
+              <span class="erro" id="erro-titulo" hidden>Dá um nome ao objeto.</span>
+            </div>
+            <div class="grupo">
+              <label for="categoria" class="rotulo">Categoria</label>
+              <select id="categoria" class="campo">
+                <option value="">Escolher…</option>
+              </select>
+              <span class="erro" id="erro-categoria" hidden>Escolhe uma categoria.</span>
+            </div>
+          </div>
+          <div class="grupo">
+            <label for="descricao" class="rotulo">Descrição</label>
+            <textarea id="descricao" class="campo" rows="3" maxlength="500" placeholder="Indica a cor, marca, estado e outros detalhes úteis…"></textarea>
+            <span class="ajuda" id="contador">0 / 500 caracteres</span>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Descrição -->
-      <div class="grupo">
-        <label for="descricao" class="rotulo">Descrição</label>
-        <textarea id="descricao" class="campo" rows="4" maxlength="500" placeholder="Descreve o objeto sem revelar detalhes que só o dono saberia."></textarea>
-        <span class="ajuda" id="contador">0 / 500 caracteres</span>
-      </div>
-
-      <!-- Local + data -->
-      <div class="duas-colunas">
-        <div class="grupo">
-          <label for="local" class="rotulo">Onde encontraste</label>
-          <select id="local" class="campo">
-            <option value="">Escolher local…</option>
-            <!-- opções vêm do locaisService -->
-          </select>
-          <span class="erro" id="erro-local" hidden>Escolhe o local.</span>
+      <section class="passo">
+        <span class="passo__numero">03</span>
+        <div class="passo__conteudo">
+          <h2 class="passo__titulo">Onde e quando?</h2>
+          <div class="duas-colunas">
+            <div class="grupo">
+              <label for="local" class="rotulo">Local</label>
+              <select id="local" class="campo">
+                <option value="">Escolher local…</option>
+              </select>
+              <span class="erro" id="erro-local" hidden>Escolhe o local.</span>
+            </div>
+            <div class="grupo">
+              <label for="data" class="rotulo">Data</label>
+              <input id="data" type="datetime-local" class="campo">
+            </div>
+          </div>
         </div>
-        <div class="grupo">
-          <label for="data" class="rotulo">Quando</label>
-          <input id="data" type="datetime-local" class="campo">
+      </section>
+
+      <section class="passo">
+        <span class="passo__numero">04</span>
+        <div class="passo__conteudo">
+          <h2 class="passo__titulo">Pergunta secreta</h2>
+          <p class="ajuda passo__ajuda">Será apresentada a quem reclamar e validada pela equipa da receção.</p>
+          <div class="grupo">
+            <label for="pergunta" class="rotulo">Pergunta</label>
+            <input id="pergunta" type="text" class="campo" placeholder="Ex.: Qual é a marca dos auscultadores?">
+            <span class="erro" id="erro-pergunta" hidden>Escreve uma pergunta que só o dono saiba responder.</span>
+          </div>
+          <div class="grupo">
+            <label for="resposta" class="rotulo">Resposta esperada · <span class="rotulo__opcional">apenas para a receção</span></label>
+            <input id="resposta" type="text" class="campo" placeholder="Ex.: Apple" autocomplete="off">
+            <span class="erro" id="erro-resposta" hidden>Escreve a resposta certa, para a receção a poder comparar.</span>
+          </div>
+
+          <div class="publicar__nota">
+            <b>Próximo passo</b>
+            <span id="nota-proximo">Depois de registares, entrega o objeto na receção.</span>
+          </div>
+
+          <p class="erro" id="erro-geral" role="alert" hidden></p>
+
+          <div class="publicar__acoes">
+            <button type="submit" class="botao botao--destaque" id="botao-publicar">Registar objeto →</button>
+          </div>
         </div>
-      </div>
-
-      <!-- Onde está agora -->
-      <fieldset>
-        <legend>Onde está o objeto agora?</legend>
-        <label class="opcao"><input type="radio" name="onde" value="secretaria" checked> Entreguei na secretaria</label>
-        <label class="opcao"><input type="radio" name="onde" value="com_quem_encontrou"> Fica comigo, combino a entrega pela app</label>
-      </fieldset>
-
-      <!-- Pergunta de verificação -->
-      <div class="grupo">
-        <label for="pergunta" class="rotulo">Pergunta de verificação</label>
-        <input id="pergunta" type="text" class="campo" placeholder="Ex.: O que estava dentro da carteira?">
-        <span class="ajuda">Só quem souber responder pode reclamar o objeto. A resposta nunca é mostrada no anúncio.</span>
-        <span class="erro" id="erro-pergunta" hidden>Escreve uma pergunta que só o dono saiba responder.</span>
-      </div>
-
-      <label class="confirmar"><input type="checkbox" id="confirmo"> Confirmo que as fotos não mostram dados pessoais do dono.</label>
-      <span class="erro" id="erro-confirmo" hidden>Confirma antes de publicar.</span>
-
-      <!-- Erro do servidor (se houver) -->
-      <p class="erro" id="erro-geral" role="alert" hidden></p>
-
-      <div class="acoes">
-        <a href="index.html" class="botao botao--contorno">Cancelar</a>
-        <button type="submit" class="botao botao--destaque" id="botao-publicar">Publicar anúncio</button>
-      </div>
+      </section>
     </form>
   </main>
 

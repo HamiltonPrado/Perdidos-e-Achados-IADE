@@ -1,0 +1,54 @@
+.reclamar {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 0 72px;
+  display: flex;
+  flex-direction: column;
+}
+
+.reclamar .sobretitulo {
+  margin: 24px 0 0;
+}
+
+.reclamar__titulo {
+  font-size: clamp(30px, 4.6vw, 44px);
+  font-weight: 800;
+  line-height: 1.08;
+  margin: 10px 0 12px;
+}
+
+.reclamar__intro {
+  margin: 0 0 24px;
+  color: var(--cor-texto-secundario);
+}
+
+.reclamar__form {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reclamar__pergunta {
+  font-family: var(--fonte-titulos);
+  font-size: 18px;
+}
+
+.reclamar__acoes {
+  border-top: 1px solid #dddddd;
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.reclamar__cancelar {
+  color: var(--cor-texto);
+  font-weight: 500;
+}
+
+.reclamar__erro {
+  max-width: 640px;
+  margin: 48px auto;
+}

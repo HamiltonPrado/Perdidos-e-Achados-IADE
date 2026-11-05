@@ -1,26 +1,3 @@
-/*
- * style.css — ESTILOS QUE VALEM PARA A APP TODA
- * ------------------------------------------------------------
- * Ligado em TODAS as páginas .html (logo a seguir ao variables.css).
- *
- *   1. Base (body, títulos, links)
- *   2. Estrutura (.contentor, cabeçalho das páginas)
- *   3. Utilitários (.so-leitor, [hidden])
- *   4. Botões (.botao)
- *   5. Formulários (campos, labels, erros, upload de fotos)
- *   6. Mensagens e etiquetas
- *   7. Foto vazia (placeholder com X)
- *
- * Estilos de UM componente ou UMA página ficam nas pastas:
- *   assets/css/components/  e  assets/css/pages/
- */
-
-
-/* ============================================================
- * 1. BASE
- * ============================================================ */
-
-/* padding e border passam a contar dentro da largura definida */
 *,
 *::before,
 *::after {
@@ -39,7 +16,6 @@ body {
   font-family: var(--fonte-texto);
   font-size: 15px;
   line-height: 1.45;
-  /* coluna: navbar em cima, conteúdo a esticar, footer em baixo */
   display: flex;
   flex-direction: column;
 }
@@ -59,7 +35,6 @@ a {
   color: var(--cor-preto);
 }
 
-/* Por defeito, botões e campos não herdam a fonte — isto corrige */
 button,
 input,
 select,
@@ -72,18 +47,11 @@ img {
   max-width: 100%;
 }
 
-/* Contorno azul visível quando se navega com o teclado (Tab) */
 :focus-visible {
   outline: 3px solid var(--cor-destaque);
   outline-offset: 2px;
 }
 
-
-/* ============================================================
- * 2. ESTRUTURA
- * ============================================================ */
-
-/* Centra o conteúdo com largura máxima, como nos mockups */
 .contentor {
   max-width: 1200px;
   margin: 0 auto;
@@ -92,12 +60,10 @@ img {
   padding-right: 24px;
 }
 
-/* Versão mais estreita, para formulários (Publicar, Perfil…) */
 .contentor--estreito {
   max-width: 860px;
 }
 
-/* Cabeçalho simples das páginas: sobretítulo + título + texto */
 .pagina {
   padding-top: 40px;
   padding-bottom: 64px;
@@ -130,18 +96,10 @@ img {
   margin-bottom: 16px;
 }
 
-
-/* ============================================================
- * 3. UTILITÁRIOS
- * ============================================================ */
-
-/* Qualquer elemento com o atributo hidden fica escondido.
-   No JavaScript: elemento.hidden = true / false */
 [hidden] {
   display: none !important;
 }
 
-/* Esconde visualmente, mas leitores de ecrã continuam a ler */
 .so-leitor {
   position: absolute;
   width: 1px;
@@ -151,46 +109,36 @@ img {
   white-space: nowrap;
 }
 
-
-/* ============================================================
- * 4. BOTÕES
- * Uso: <button class="botao botao--preto">…</button>
- * ============================================================ */
-
 .botao {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;              /* espaço entre ícone e texto */
+  gap: 10px;
   min-height: 48px;
   padding: 0 24px;
   border: 1px solid transparent;
   font-weight: 600;
-  text-decoration: none;  /* para quando o botão é um <a> */
+  text-decoration: none;
   cursor: pointer;
 }
 
-/* Preto (ex.: "Pesquisar") */
 .botao--preto {
   background: var(--cor-preto);
   color: #fff;
 }
 
-/* Azul, um pouco mais alto (ex.: "Encontrei um objeto") */
 .botao--destaque {
   background: var(--cor-destaque);
   color: #fff;
   min-height: 52px;
 }
 
-/* Branco com contorno preto (ex.: "Cancelar", "Recusar") */
 .botao--contorno {
   background: transparent;
   border-color: var(--cor-preto);
   color: var(--cor-texto);
 }
 
-/* Mais pequeno (ex.: botões dentro de listas) */
 .botao--pequeno {
   min-height: 40px;
   padding: 0 16px;
@@ -201,12 +149,6 @@ img {
   filter: brightness(1.12);
 }
 
-
-/* ============================================================
- * 5. FORMULÁRIOS
- * ============================================================ */
-
-/* Caixa branca que envolve um formulário */
 .formulario {
   background: var(--cor-superficie);
   border: 1px solid var(--cor-borda);
@@ -216,7 +158,6 @@ img {
   gap: 24px;
 }
 
-/* Um campo: label + input + ajuda/erro, em coluna */
 .grupo {
   display: flex;
   flex-direction: column;
@@ -224,7 +165,6 @@ img {
   min-width: 0;
 }
 
-/* Dois campos lado a lado (passa a um por linha no telemóvel) */
 .duas-colunas {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -240,7 +180,6 @@ img {
   color: var(--cor-texto-secundario);
 }
 
-/* Caixas de texto, selects e textareas */
 .campo {
   width: 100%;
   min-height: 48px;
@@ -259,19 +198,16 @@ select.campo {
   padding: 0 10px;
 }
 
-/* Texto pequeno de ajuda por baixo de um campo */
 .ajuda {
   font-size: 13px;
   color: var(--cor-texto-secundario);
 }
 
-/* Mensagem de erro de um campo (começa com hidden no HTML) */
 .erro {
   font-size: 13px;
   color: var(--cor-erro);
 }
 
-/* Grupo de opções (radio buttons) */
 fieldset {
   border: 1px solid var(--cor-borda);
   padding: 16px;
@@ -293,7 +229,6 @@ legend {
   min-height: 32px;
 }
 
-/* Checkbox com texto ao lado */
 .confirmar {
   display: flex;
   gap: 10px;
@@ -305,7 +240,6 @@ legend {
   margin-top: 3px;
 }
 
-/* Linha de botões no fim do formulário */
 .acoes {
   display: flex;
   gap: 12px;
@@ -316,10 +250,6 @@ legend {
   padding-top: 24px;
 }
 
-/* --- Upload de fotos (Publicar e reclamar) --- */
-
-/* A <label> tracejada onde se clica para escolher fotos.
-   O <input type="file"> fica escondido lá dentro (.so-leitor). */
 .upload {
   border: 2px dashed var(--cor-borda-forte);
   background: var(--cor-fundo);
@@ -336,7 +266,6 @@ legend {
   border-color: var(--cor-preto);
 }
 
-/* Versão baixinha (ícone à esquerda, texto à direita) */
 .upload--compacto {
   flex-direction: row;
   justify-content: flex-start;
@@ -350,7 +279,6 @@ legend {
   display: block;
 }
 
-/* Miniaturas das fotos escolhidas */
 .miniaturas-upload {
   display: flex;
   gap: 10px;
@@ -373,7 +301,6 @@ legend {
   display: block;
 }
 
-/* Botão ✕ no canto da miniatura, para remover a foto */
 .miniatura-upload__remover {
   position: absolute;
   top: 2px;
@@ -389,12 +316,6 @@ legend {
   cursor: pointer;
 }
 
-
-/* ============================================================
- * 6. MENSAGENS E ETIQUETAS
- * ============================================================ */
-
-/* Caixa verde de sucesso */
 .mensagem {
   margin: 0;
   padding: 12px 14px;
@@ -403,13 +324,11 @@ legend {
   background: var(--cor-ok-fundo);
 }
 
-/* Variante amarela de aviso */
 .mensagem--aviso {
   border-color: var(--cor-aviso-borda);
   background: var(--cor-aviso-fundo);
 }
 
-/* Etiqueta pequena (estado de um anúncio, categoria…) */
 .etiqueta {
   display: inline-block;
   width: fit-content;
@@ -436,7 +355,6 @@ legend {
   border-color: var(--cor-ok-borda);
 }
 
-/* Caixa tracejada para listas vazias */
 .vazio {
   background: var(--cor-superficie);
   border: 1px dashed var(--cor-borda-forte);
@@ -452,12 +370,6 @@ legend {
   margin: 0;
 }
 
-
-/* ============================================================
- * 7. FOTO VAZIA (placeholder com X)
- * Gerada pela função fotoVazia() em js/utilities/tools.js
- * ============================================================ */
-
 .foto-vazia {
   position: absolute;
   inset: 0;
@@ -469,10 +381,6 @@ legend {
   stroke: var(--cor-placeholder-linha);
 }
 
-
-/* ============================================================
- * TELEMÓVEL (ecrãs até 600px)
- * ============================================================ */
 @media (max-width: 600px) {
   .contentor {
     padding-left: 16px;
@@ -490,4 +398,186 @@ legend {
   .acoes .botao {
     flex: 1 1 auto;
   }
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.03em;
+}
+
+.sobretitulo {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cor-texto-secundario);
+}
+
+.voltar {
+  color: var(--cor-destaque-texto);
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.voltar:hover {
+  text-decoration: underline;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo__icone {
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: var(--cor-marca);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.logo__pin {
+  fill: var(--cor-marca);
+  stroke-width: 1;
+}
+
+.logo__ponto {
+  fill: var(--cor-preto);
+  stroke: none;
+}
+
+.logo__texto {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--fonte-titulos);
+  font-weight: 800;
+  font-size: 17px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.logo__texto em {
+  color: var(--cor-marca);
+  font-style: normal;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+.botao--preto {
+  background: var(--cor-preto);
+  color: #fff;
+}
+
+.aviso {
+  background: var(--cor-aviso-fundo);
+  border-left: 3px solid var(--cor-aviso-borda);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.aviso p {
+  margin: 0;
+}
+
+.aviso__rotulo {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cor-destaque-texto);
+}
+
+.etiqueta--categoria {
+  background: var(--cor-etiqueta);
+  border-color: var(--cor-etiqueta);
+  color: var(--cor-texto);
+}
+
+.resumo-objeto {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #edede8;
+  padding: 12px;
+}
+
+.resumo-objeto__foto {
+  position: relative;
+  width: 96px;
+  height: 76px;
+  flex-shrink: 0;
+  background: var(--cor-placeholder);
+  overflow: hidden;
+}
+
+.resumo-objeto__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.resumo-objeto__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.resumo-objeto__texto small {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--cor-texto-secundario);
+}
+
+.resumo-objeto__texto b {
+  font-family: var(--fonte-titulos);
+  font-size: 17px;
+}
+
+.resumo-objeto__texto span {
+  font-size: 13px;
+  color: var(--cor-texto-secundario);
+}
+
+.sucesso {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 72px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+}
+
+.sucesso__icone {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--cor-destaque);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  margin-bottom: 8px;
+}
+
+.sucesso h1 {
+  font-size: clamp(30px, 5vw, 44px);
+  line-height: 1.08;
+}
+
+.sucesso p {
+  margin: 0;
+  color: var(--cor-texto-secundario);
+  line-height: 1.6;
 }

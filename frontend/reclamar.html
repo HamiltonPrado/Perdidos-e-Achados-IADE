@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reclamar objeto · Perdidos &amp; Achados</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/components/navbar.css">
+  <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/pages/reclamar.css">
+</head>
+<body>
+  <header class="navbar" id="navbar"></header>
+
+  <main class="contentor">
+    <div class="vazio reclamar__erro" id="indisponivel" hidden>
+      <p id="indisponivel-texto">Este objeto não existe ou já não está disponível.</p>
+      <a href="index.html" class="botao botao--preto botao--pequeno">Voltar a explorar</a>
+    </div>
+
+    <section class="reclamar" id="ecra-formulario" hidden>
+      <a href="#" class="voltar" id="voltar-detalhe">← Voltar aos detalhes</a>
+
+      <p class="sobretitulo">Reclamar objeto · Validação</p>
+      <h1 class="reclamar__titulo">Ajuda a receção a confirmar que o objeto é teu.</h1>
+      <p class="reclamar__intro">A tua resposta será revista pela receção antes do levantamento.</p>
+
+      <div class="resumo-objeto">
+        <div class="resumo-objeto__foto" id="resumo-foto"></div>
+        <div class="resumo-objeto__texto">
+          <small>ESTÁS A RECLAMAR</small>
+          <b id="resumo-titulo"></b>
+          <span id="resumo-local"></span>
+        </div>
+      </div>
+
+      <form class="reclamar__form" id="form-reclamar" novalidate>
+        <div class="aviso">
+          <span class="aviso__rotulo">Pergunta secreta</span>
+          <b class="reclamar__pergunta" id="pergunta"></b>
+          <p class="ajuda">A resposta será enviada de forma privada para a receção.</p>
+        </div>
+
+        <div class="grupo">
+          <label for="resposta" class="rotulo">A tua resposta</label>
+          <input id="resposta" type="text" class="campo" placeholder="Escreve a tua resposta…" autocomplete="off">
+          <span class="erro" id="erro-resposta" hidden>Escreve a tua resposta antes de continuar.</span>
+        </div>
+
+        <div class="grupo">
+          <label for="informacao" class="rotulo">Informação adicional <span class="rotulo__opcional">(opcional)</span></label>
+          <textarea id="informacao" class="campo" rows="3" placeholder="Ex.: uma marca, autocolante ou risco…"></textarea>
+        </div>
+
+        <div class="grupo">
+          <span class="rotulo">Fotos de prova <span class="rotulo__opcional">(opcional, até 3)</span></span>
+          <label for="fotos-prova" class="upload upload--compacto">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v13H4z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+            <span><span class="upload__titulo">Adicionar foto</span><span class="ajuda">Ex.: uma foto tua com o objeto ou a fatura</span></span>
+            <input id="fotos-prova" type="file" accept="image/*" multiple class="so-leitor">
+          </label>
+          <div class="miniaturas-upload" id="miniaturas-prova" aria-live="polite"></div>
+          <span class="erro" id="erro-fotos" hidden>Só podes juntar até 3 fotos.</span>
+        </div>
+
+        <p class="erro" id="erro-geral" role="alert" hidden></p>
+
+        <div class="reclamar__acoes">
+          <a href="#" class="reclamar__cancelar" id="cancelar">Cancelar</a>
+          <button type="submit" class="botao botao--destaque" id="botao-continuar">Continuar →</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="sucesso" id="ecra-enviado" hidden>
+      <div class="sucesso__icone" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"></path></svg>
+      </div>
+      <p class="sobretitulo">Pedido enviado</p>
+      <h1>A receção vai rever o teu pedido.</h1>
+      <p id="enviado-texto">Vais receber uma notificação quando a tua resposta for validada. Depois, é só levantar o objeto na receção.</p>
+      <a href="index.html" class="botao botao--destaque">Voltar a explorar →</a>
+    </section>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script type="module" src="js/pages/reclamar.js"></script>
+</body>
+</html>

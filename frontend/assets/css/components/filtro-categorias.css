@@ -1,18 +1,11 @@
-/*
- * filtro-categorias.css — botões de categoria
- * Usado por: js/components/filtroCategorias.js
- */
-
-/* Linha de botões (passa para a linha seguinte se não couber) */
 .filtro {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-/* Botão normal: branco com borda cinzenta */
 .filtro__botao {
-  height: 40px;
+  min-height: 40px;
   padding: 0 16px;
   border: 1px solid var(--cor-borda-forte);
   background: #fff;
@@ -22,12 +15,11 @@
 }
 
 .filtro__botao:hover {
-  border-color: var(--cor-preto);
+  border-color: var(--cor-destaque);
 }
 
-/* Botão escolhido: preto com texto branco */
 .filtro__botao--ativo {
-  background: var(--cor-preto);
-  border-color: var(--cor-preto);
+  background: var(--cor-destaque);
+  border-color: var(--cor-destaque);
   color: #fff;
 }

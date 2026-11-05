@@ -1,10 +1,3 @@
-/*
- * services/reclamacoesService.js — PEDIDOS "É MEU"
- * ------------------------------------------------------------
- * Usado na página Detalhe (reclamar) e em Os meus anúncios
- * (ver pedidos, aceitar e recusar).
- */
-
 import { api, USAR_MOCKS } from './api.js';
 import { Reclamacao } from '../models/Reclamacao.js';
 import { db, guardar, novoId } from '../mocks/db.js';
@@ -12,10 +5,6 @@ import { getUser } from '../utilities/auth.js';
 import { lerImagem, nomeCurto } from '../utilities/tools.js';
 
 export const reclamacoesService = {
-  /*
-   * POST /items/:id/reclamacoes   → reclamar um objeto
-   * "dados" = { resposta, fotos: [File, …] }  (até 3 fotos de prova)
-   */
   async create(itemId, dados) {
     if (USAR_MOCKS) {
       const eu = getUser();
@@ -23,6 +12,7 @@ export const reclamacoesService = {
         id: novoId(db.reclamacoes),
         itemId: Number(itemId),
         resposta: dados.resposta,
+        informacao: dados.informacao ?? '',
         fotos: await Promise.all(dados.fotos.map((f) => lerImagem(f, 600))),
         estado: 'pendente',
         criadoEm: new Date().toISOString(),
@@ -35,11 +25,12 @@ export const reclamacoesService = {
 
     const formData = new FormData();
     formData.append('resposta', dados.resposta);
+    formData.append('informacao', dados.informacao ?? '');
     dados.fotos.forEach((f) => formData.append('fotos', f));
     return new Reclamacao(await api.post(`/items/${itemId}/reclamacoes`, formData));
   },
 
-  // GET /items/:id/reclamacoes   → pedidos de um objeto MEU (com fotos de prova)
+  // GET /items/:id/reclamacoes
   async getByItem(itemId) {
     if (USAR_MOCKS) {
       return db.reclamacoes
@@ -50,7 +41,7 @@ export const reclamacoesService = {
     return dados.map((d) => new Reclamacao(d));
   },
 
-  // GET /me/reclamacoes   → pedidos que EU fiz (para saber se já reclamei)
+  // GET /me/reclamacoes
   async getMinhas() {
     if (USAR_MOCKS) {
       const eu = getUser();
@@ -60,10 +51,6 @@ export const reclamacoesService = {
     return dados.map((d) => new Reclamacao(d));
   },
 
-  /*
-   * PATCH /reclamacoes/:id   → { estado: 'aceite' } ou { estado: 'recusada' }
-   * Ao aceitar, o objeto passa a "reclamado" (entrega combinada).
-   */
   async responder(id, estado) {
     if (USAR_MOCKS) {
       const r = db.reclamacoes.find((x) => x.id === Number(id));

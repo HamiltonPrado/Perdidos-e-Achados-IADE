@@ -1,39 +1,80 @@
-/*
- * publicar.css — estilos da página "Encontrei um objeto"
- * Usado por: publicar.html + js/pages/publicar.js
- *
- * Quase tudo vem do style.css (formulário, campos, upload).
- * Aqui só fica o que é desta página.
- */
+.publicar {
+  max-width: 920px;
+  padding-top: 40px;
+  padding-bottom: 72px;
+}
 
-/* Barra de 3 passos por cima do formulário */
-.passos {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 28px;
+.publicar__sobretitulo {
+  margin: 28px 0 0;
+}
+
+.publicar__titulo {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 10px 0 10px;
+}
+
+.publicar__intro {
+  margin: 0 0 32px;
+  color: var(--cor-texto-secundario);
+  font-size: 17px;
+}
+
+.passo {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: 64px minmax(0, 1fr);
+  padding: 32px 0;
+  border-top: 1px solid #cccccc;
+}
+
+.passo__numero {
+  font-family: var(--fonte-titulos);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.passo__conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.passo__titulo {
+  font-size: 22px;
+  margin: 0;
+}
+
+.passo__ajuda {
+  margin: -8px 0 0;
+}
+
+.publicar__nota {
+  background: var(--cor-cinza-suave);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   font-size: 14px;
 }
 
-/* Cada passo: uma linha grossa cinzenta em cima */
-.passos li {
-  border-top: 4px solid var(--cor-borda-forte);
-  padding-top: 8px;
+.publicar__nota span {
   color: var(--cor-texto-secundario);
 }
 
-/* Passo atual: linha preta e texto a negrito.
-   O publicar.js muda o aria-current conforme se preenche. */
-.passos li[aria-current="step"] {
-  border-top-color: var(--cor-preto);
-  color: var(--cor-texto);
-  font-weight: 600;
+.publicar__acoes {
+  display: flex;
+  justify-content: flex-end;
 }
 
 @media (max-width: 600px) {
-  .passos {
-    font-size: 13px;
+  .passo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .publicar__acoes .botao {
+    width: 100%;
   }
 }

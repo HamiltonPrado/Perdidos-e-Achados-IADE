@@ -1,74 +1,40 @@
-/*
- * navbar.css — estilos da barra de navegação (topo)
- * Usado por: js/components/navbar.js
- *
- * Nomes das classes: navbar__parte  e  navbar__parte--variante
- * (assim percebe-se logo a que componente pertence cada classe)
- */
-
-
-/* ---------- Barra ---------- */
-
 .navbar {
   background: var(--cor-preto);
   color: #fff;
 }
 
-/* Linha com logótipo à esquerda e menu à direita */
 .navbar__barra {
   min-height: 72px;
   display: flex;
   align-items: center;
   gap: 24px;
-  flex-wrap: wrap; /* deixa o menu passar para baixo no telemóvel */
+  flex-wrap: wrap;
 }
 
-
-/* ---------- Logótipo ---------- */
-
 .navbar__marca {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   color: #fff;
   text-decoration: none;
 }
 
-/* Caixa com "IADE" */
-.navbar__logo {
-  border: 2px solid #fff;
-  padding: 4px 10px;
-  font-family: var(--fonte-titulos);
-  font-weight: 800;
-  letter-spacing: 2px;
-  font-size: 18px;
-}
-
-.navbar__nome {
-  font-family: var(--fonte-titulos);
-  font-weight: 500;
-  font-size: 16px;
-}
-
-
-/* ---------- Menu ---------- */
-
 .navbar__nav {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto; /* empurra o menu para a direita */
+  align-items: stretch;
+  gap: 8px;
+  margin-left: auto;
+  align-self: stretch;
   flex-wrap: wrap;
 }
 
-/* Cada link do menu (também usado no botão "Terminar sessão") */
 .navbar__link {
-  color: #d6d6d6;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  color: #cfcfcb;
+  font-size: 15px;
   text-decoration: none;
-  padding: 12px 14px;
   background: none;
   border: 0;
-  border-bottom: 3px solid transparent; /* espaço para o sublinhado azul */
+  border-bottom: 3px solid transparent;
   cursor: pointer;
 }
 
@@ -76,33 +42,46 @@
   color: #fff;
 }
 
-/* O navbar.js junta a classe "ativo" ao link da página atual → sublinhado azul */
 .navbar__link.ativo {
   color: #fff;
-  border-bottom-color: var(--cor-destaque);
+  border-bottom-color: var(--cor-marca);
 }
 
-/* Círculo do avatar (link para o Perfil): foto ou iniciais */
-.navbar__avatar {
+.navbar__entrar {
+  align-self: center;
+  margin-left: 8px;
+  padding: 10px 20px;
+  background: var(--cor-destaque);
   color: #fff;
+  font-weight: 700;
+  font-size: 15px;
   text-decoration: none;
-  overflow: hidden;
-  border: 2px solid transparent;
-  width: 36px;
-  height: 36px;
+}
+
+.navbar__entrar:hover {
+  filter: brightness(1.1);
+}
+
+.navbar__avatar {
+  align-self: center;
+  width: 38px;
+  height: 38px;
+  margin-left: 8px;
   border-radius: 50%;
   background: #3a3a3a;
+  color: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
-  margin-left: 8px;
+  text-decoration: none;
+  overflow: hidden;
+  border: 2px solid transparent;
 }
 
-
 .navbar__avatar:hover {
-  border-color: #d6d6d6;
+  border-color: var(--cor-marca);
 }
 
 .navbar__avatar img {
@@ -111,13 +90,9 @@
   object-fit: cover;
 }
 
-/* Link de texto "Perfil": escondido no computador (usa-se o avatar) */
 .navbar__perfil {
   display: none;
 }
-
-
-/* ---------- Botão ☰ (escondido no computador) ---------- */
 
 .navbar__menu-botao {
   display: none;
@@ -132,23 +107,16 @@
   cursor: pointer;
 }
 
-
-/* ============================================================
- * TELEMÓVEL (ecrãs até 760px)
- * O menu fica escondido e só aparece com a classe --aberto
- * ============================================================ */
-@media (max-width: 760px) {
+@media (max-width: 820px) {
   .navbar__barra {
-    min-height: 60px;
+    min-height: 64px;
     gap: 0;
   }
 
-  /* Mostra o botão ☰ */
   .navbar__menu-botao {
     display: inline-flex;
   }
 
-  /* Menu em coluna e escondido por defeito */
   .navbar__nav {
     display: none;
     width: 100%;
@@ -159,28 +127,47 @@
     padding-bottom: 12px;
   }
 
-  /* Quando o navbar.js junta esta classe, o menu aparece */
   .navbar__nav--aberto {
     display: flex;
   }
 
-  /* No telemóvel o indicador azul fica à esquerda, não em baixo */
   .navbar__link {
-    text-align: left;
+    min-height: 48px;
     border-bottom: 0;
     border-left: 3px solid transparent;
   }
 
   .navbar__link.ativo {
-    border-left-color: var(--cor-destaque);
+    border-left-color: var(--cor-marca);
   }
 
-  /* No telemóvel: esconde o avatar e mostra o link "Perfil" */
   .navbar__nav .navbar__avatar {
     display: none;
   }
 
   .navbar__nav .navbar__perfil {
-    display: block;
+    display: flex;
   }
+
+  .navbar__entrar {
+    align-self: stretch;
+    text-align: center;
+    margin: 8px 0 0;
+  }
+}
+
+.navbar__bolinha {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: var(--cor-marca);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: 2px;
 }
