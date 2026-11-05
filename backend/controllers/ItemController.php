@@ -7,20 +7,23 @@ require_once __DIR__ . '/../helpers/resposta.php';
 require_once __DIR__ . '/../middleware/autenticacao.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../middleware/administrador.php';
-
+require_once __DIR__ . '/../validators/ItemValidator.php';
+require_once __DIR__ . '/../models/IaJob.php';
 class ItemController
 {
     private PDO $pdo;
     private Item $artigos;
 
-    public function __construct(PDO $pdo)
+     private IaJob $filaIa;
+
+     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
         $this->artigos = new Item($pdo);
+        $this->filaIa = new IaJob($pdo);
     }
 
-
-    // Devolve os artigos pertencentes ao utilizador autenticado.
+   // Devolve os artigos pertencentes ao utilizador autenticado.
     public function listarMeus(): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -35,219 +38,57 @@ class ItemController
         ]);
     }
 
-    // Permite à equipa administradora consultar todos os artigos.
-    public function listarTodos(): void
-    {
-        exigirAdministrador($this->pdo);
-
-        $artigos = $this->artigos->listarTodos();
-
-        responderJson([
-            'estado' => 'ok',
-            'artigos' => $artigos
-        ]);
-    }
-
-
-        // Lê e valida os dados usados no registo de um artigo.
-    private function lerDadosArtigo(bool $exigirPontoRecolha = false): array
-    {
-        $tipoConteudo = strtolower(
-            trim(explode(';', $_SERVER['CONTENT_TYPE'] ?? '')[0])
-        );
-
-        if ($tipoConteudo !== 'application/json') {
-            responderJson([
-                'erro' => 'O pedido deve usar Content-Type: application/json.'
-            ], 415);
-        }
-
-        // Converte o JSON recebido num array.
-        try {
-            $dados = json_decode(
-                file_get_contents('php://input'),
-                true,
-                32,
-                JSON_THROW_ON_ERROR
-            );
-        } catch (JsonException $erro) {
-            responderJson([
-                'erro' => 'O JSON enviado é inválido.'
-            ], 400);
-        }
-
-        // Confirma a presença e os tipos dos campos obrigatórios.
-        if (
-            !is_array($dados)
-            || !isset(
-                $dados['titulo'],
-                $dados['descricao'],
-                $dados['category_id'],
-                $dados['location_id'],
-                $dados['data_ocorrencia']
-            )
-            || !is_string($dados['titulo'])
-            || !is_string($dados['descricao'])
-            || !is_int($dados['category_id'])
-            || !is_int($dados['location_id'])
-            || !is_string($dados['data_ocorrencia'])
-        ) {
-            responderJson([
-                'erro' => 'Envia título, descrição, categoria, local e data. '
-                    . 'Os identificadores devem ser números inteiros.'
-            ], 422);
-        }
-
-        $titulo = trim($dados['titulo']);
-        $descricao = trim($dados['descricao']);
-
-        // Valida os textos e os identificadores.
-        if (
-            preg_match('/\A[^\r\n]{1,150}\z/u', $titulo) !== 1
-            || preg_match('/\A.{1,5000}\z/us', $descricao) !== 1
-        ) {
-            responderJson([
-                'erro' => 'O título deve ter entre 1 e 150 caracteres '
-                    . 'e a descrição entre 1 e 5000.'
-            ], 422);
-        }
-
-        if ($dados['category_id'] <= 0 || $dados['location_id'] <= 0) {
-            responderJson([
-                'erro' => 'Seleciona uma categoria e um local válidos.'
-            ], 422);
-        }
-
-        // Nos achados, exige um ponto de recolha.
-        if (
-            $exigirPontoRecolha
-            && (
-                !isset($dados['ponto_recolha_id'])
-                || !is_int($dados['ponto_recolha_id'])
-                || $dados['ponto_recolha_id'] <= 0
-            )
-        ) {
-            responderJson([
-                'erro' => 'Seleciona um ponto de recolha válido.'
-            ], 422);
-        }
-
-        // Verifica o formato e a validade da data.
-        $dataTexto = $dados['data_ocorrencia'];
-
-        if (preg_match('/\A[0-9]{4}-[0-9]{2}-[0-9]{2}\z/', $dataTexto) !== 1) {
-            responderJson([
-                'erro' => 'A data deve usar o formato AAAA-MM-DD.'
-            ], 422);
-        }
-
-        $fusoHorario = new DateTimeZone('Europe/Lisbon');
-
-        $data = DateTimeImmutable::createFromFormat(
-            '!Y-m-d',
-            $dataTexto,
-            $fusoHorario
-        );
-
-        $hoje = new DateTimeImmutable('today', $fusoHorario);
-
-        if (
-            $data === false
-            || $data->format('Y-m-d') !== $dataTexto
-            || $dataTexto < '1000-01-01'
-            || $data > $hoje
-        ) {
-            responderJson([
-                'erro' => 'Indica uma data válida que não seja futura.'
-            ], 422);
-        }
-
-        // Devolve apenas os campos permitidos, já validados.
-        return [
-            'titulo' => $titulo,
-            'descricao' => $descricao,
-            'category_id' => $dados['category_id'],
-            'location_id' => $dados['location_id'],
-            'data_ocorrencia' => $dataTexto,
-            'ponto_recolha_id' => $exigirPontoRecolha
-                ? $dados['ponto_recolha_id']
-                : null,
-        ];
-    }
-
-
         // Regista um objeto perdido associado ao utilizador autenticado.
-    public function criarPerdido(): void
-    {
-        $utilizador = exigirAutenticacao($this->pdo);
-        exigirCsrf();
+    // Guarda o perdido e agenda a sua análise na mesma transação.
+public function criarPerdido(): void
+{
+    $utilizador = exigirAutenticacao($this->pdo);
+    exigirCsrf();
 
-        $dados = $this->lerDadosArtigo();
+    $dados = ItemValidator::lerDadosArtigo();
 
-        try {
-            $id = $this->artigos->criarPerdido(
-                $utilizador['id'],
-                $dados
-            );
-        } catch (PDOException $erro) {
-            if ((int) ($erro->errorInfo[1] ?? 0) === 1452) {
-                responderJson([
-                    'erro' => 'Não foi possível associar o registo. '
-                        . 'Confirma a categoria e o local selecionados.'
-                ], 422);
-            }
+    try {
+        $this->pdo->beginTransaction();
 
-            throw $erro;
+        $id = $this->artigos->criarPerdido(
+            $utilizador['id'],
+            $dados
+        );
+
+        // Os novos artigos começam na versão 1.
+        $this->filaIa->agendar($id, 1);
+
+        $this->pdo->commit();
+
+    } catch (Throwable $erro) {
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
         }
 
-        responderJson([
-            'estado' => 'ok',
-            'mensagem' => 'Objeto perdido registado.',
-            'item' => [
-                'id' => $id,
-                'tipo' => 'lost',
-                'estado' => 'ativo',
-                'ia_estado' => 'pendente',
-            ]
-        ], 201);
-    }
-
-        // Regista um objeto achado, com acesso reservado à equipa.
-    public function criarAchado(): void
-    {
-        $utilizador = exigirAdministrador($this->pdo);
-        exigirCsrf();
-
-        // Exige também um ponto de recolha.
-        $dados = $this->lerDadosArtigo(true);
-
-        try {
-            $id = $this->artigos->criarAchado(
-                $utilizador['id'],
-                $dados
-            );
-        } catch (PDOException $erro) {
-            if ((int) ($erro->errorInfo[1] ?? 0) === 1452) {
-                responderJson([
-                    'erro' => 'Não foi possível associar o registo. '
-                        . 'Confirma a categoria, o local e o ponto de recolha.'
-                ], 422);
-            }
-
-            throw $erro;
+        if (
+            $erro instanceof PDOException
+            && (int) ($erro->errorInfo[1] ?? 0) === 1452
+        ) {
+            responderJson([
+                'erro' => 'Não foi possível associar o registo. '
+                    . 'Confirma a categoria e o local selecionados.'
+            ], 422);
         }
 
-        responderJson([
-            'estado' => 'ok',
-            'mensagem' => 'Objeto achado registado.',
-            'item' => [
-                'id' => $id,
-                'tipo' => 'found',
-                'estado' => 'ativo',
-                'ia_estado' => 'pendente',
-            ]
-        ], 201);
+        throw $erro;
     }
+
+    responderJson([
+        'estado' => 'ok',
+        'mensagem' => 'Objeto perdido registado.',
+        'item' => [
+            'id' => $id,
+            'tipo' => 'lost',
+            'estado' => 'ativo',
+            'ia_estado' => 'pendente',
+        ]
+    ], 201);
+}
 
         // Permite ao autor marcar o seu objeto perdido como resolvido.
     public function resolver(int $id): void
@@ -306,7 +147,7 @@ class ItemController
         ]);
     }
 
-        // Devolve um artigo ao seu autor ou à equipa administradora.
+         // Devolve o detalhe respeitando as permissões de consulta.
     public function mostrar(int $id): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -320,20 +161,181 @@ class ItemController
         }
 
         $pertenceAoUtilizador =
-            (int) $artigo['user_id'] === $utilizador['id'];
+            (int) $artigo['user_id'] === (int) $utilizador['id'];
 
         $eAdministrador = $utilizador['role'] === 'admin';
 
-        // Usa também 404 para não revelar artigos de outras pessoas.
-        if (!$pertenceAoUtilizador && !$eAdministrador) {
+               $eArtigoDisponivel =
+            $artigo['estado'] === 'ativo'
+            && (
+                $artigo['tipo'] === 'lost'
+                || (
+                    $artigo['tipo'] === 'found'
+                    && $artigo['estado_recepcao'] === 'na_recepcao'
+                )
+            );
+
+        if (
+            !$pertenceAoUtilizador
+            && !$eAdministrador
+                       && !$eArtigoDisponivel
+        ) {
             responderJson([
                 'erro' => 'Artigo não encontrado.'
             ], 404);
         }
 
+        // Limita os campos apresentados a outros alunos.
+        if (!$pertenceAoUtilizador && !$eAdministrador) {
+                        $camposVisiveis = array_flip([
+                'id',
+                'tipo',
+                'titulo',
+                'descricao',
+                'category_id',
+                'categoria',
+                'location_id',
+                'local',
+                'ponto_recolha_id',
+                'ponto_recolha',
+                'data_ocorrencia',
+                'estado',
+                'estado_recepcao',
+                'pergunta_secreta',
+                'criado_em',
+                'atualizado_em',
+
+            ]);
+
+            $artigo = array_intersect_key(
+                $artigo,
+                $camposVisiveis
+            );
+        }
+
         responderJson([
             'estado' => 'ok',
-            'artigo' => $artigo
+            'artigo' => $artigo,
         ]);
     }
+
+        // Permite aos utilizadores autenticados consultar os perdidos ativos.
+    public function listarPerdidos(): void
+    {
+        exigirAutenticacao($this->pdo);
+
+        $pagina = filter_var(
+            $_GET['pagina'] ?? '1',
+            FILTER_VALIDATE_INT,
+            ['options' => [
+                'min_range' => 1,
+                'max_range' => 1000000,
+            ]]
+        );
+
+        if ($pagina === false) {
+            responderJson([
+                'erro' => 'Página inválida.'
+            ], 422);
+        }
+
+        $limite = 20;
+        $offset = ($pagina - 1) * $limite;
+
+        $artigos = $this->artigos->listarPerdidosAtivos(
+            $limite,
+            $offset
+        );
+
+        responderJson([
+            'estado' => 'ok',
+            'artigos' => $artigos,
+            'paginacao' => [
+                'pagina' => $pagina,
+                'por_pagina' => $limite,
+            ],
+        ]);
+    }
+
+    // Lista os achados disponíveis para utilizadores autenticados.
+public function listarAchados(): void
+{
+    exigirAutenticacao($this->pdo);
+
+    $pagina = filter_var(
+        $_GET['pagina'] ?? '1',
+        FILTER_VALIDATE_INT,
+        ['options' => [
+            'min_range' => 1,
+            'max_range' => 1000000,
+        ]]
+    );
+
+    if ($pagina === false) {
+        responderJson([
+            'erro' => 'Página inválida.'
+        ], 422);
+
+        return;
+    }
+
+    $limite = 20;
+    $offset = ($pagina - 1) * $limite;
+
+    $artigos = $this->artigos->listarAchadosDisponiveis(
+        $limite,
+        $offset
+    );
+
+    responderJson([
+        'estado' => 'ok',
+        'artigos' => $artigos,
+        'paginacao' => [
+            'pagina' => $pagina,
+            'por_pagina' => $limite,
+        ],
+    ]);
+}
+
+
+        // Regista um achado que o aluno ainda vai entregar à equipa.
+    public function criarAchado(): void
+    {
+        $utilizador = exigirAutenticacao($this->pdo);
+        exigirCsrf();
+
+        // O aluno regista o objeto; a equipa define os dados de verificação.
+        $dados = ItemValidator::lerDadosArtigo();
+
+        try {
+            $id = $this->artigos->criarAchadoPorAluno(
+                (int) $utilizador['id'],
+                $dados
+            );
+        } catch (PDOException $erro) {
+            if ((int) ($erro->errorInfo[1] ?? 0) === 1452) {
+                responderJson([
+                    'erro' => 'Não foi possível associar o registo. '
+                        . 'Confirma a categoria e o local selecionados.'
+                ], 422);
+
+                return;
+            }
+
+            throw $erro;
+        }
+
+        responderJson([
+            'estado' => 'ok',
+            'mensagem' => 'Objeto registado. Entrega-o à equipa '
+                . 'para confirmar a entrada na receção.',
+            'item' => [
+                'id' => $id,
+                'tipo' => 'found',
+                'estado' => 'ativo',
+                'estado_recepcao' => 'por_entregar',
+            ],
+        ], 201);
+    }
+
 }
