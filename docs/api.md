@@ -121,6 +121,71 @@ O autor pode adicionar/remover fotos dos seus perdidos ativos e dos seus achados
 
 ## Artigos
 
+### Referência de um perdido
+
+Ao reportar uma perda, a API devolve `referencia` dentro de `item`, além do `id` que já existia. Por exemplo, um perdido com ID `37` recebe `PER-000037`:
+
+```json
+{
+  "estado": "ok",
+  "mensagem": "Objeto perdido registado.",
+  "item": {
+    "id": 37,
+    "referencia": "PER-000037",
+    "tipo": "lost",
+    "estado": "ativo",
+    "ia_estado": "pendente"
+  }
+}
+```
+
+O frontend pode mostrar **“Referência do teu registo: PER-000037”** na confirmação e nos detalhes do perdido. O backend fornece o campo; a interface terá de o apresentar.
+
+A mesma referência aparece nos perdidos das listas `/api/items/mine`, `/api/items/lost` e `/api/admin/items`, nos detalhes `/api/items/{id}` e `/api/admin/items/{id}`, e ao resolver o perdido. Continua igual depois de editar ou mudar o estado. Também é calculada para registos antigos. Os achados recebidos pela equipa usam uma referência de inventário própria, descrita abaixo.
+
+A referência é o ID com o prefixo `PER-` e pelo menos seis algarismos. IDs maiores não são cortados: `1000000` fica `PER-1000000`. Não é necessário acrescentar uma coluna à BD e o cliente não pode escolher o valor.
+
+### Referência de inventário de um achado
+
+Quando a equipa confirma a entrada por `POST /api/admin/items/{id}/receive`, a resposta inclui `item.referencia`, por exemplo `ACH-000242` para o achado de ID `242`. O registo direto por `POST /api/admin/items/found` também a devolve, porque o objeto já fica recebido na receção.
+
+```json
+{
+  "estado": "ok",
+  "mensagem": "Entrada na receção confirmada.",
+  "item": {
+    "id": 242,
+    "referencia": "ACH-000242",
+    "tipo": "found",
+    "estado": "ativo",
+    "estado_recepcao": "na_recepcao",
+    "ponto_recolha_id": 1,
+    "localizacao_stock": "Prateleira C1",
+    "recebido_por": 1,
+    "versao": 2,
+    "ia_estado": "pendente"
+  },
+  "ia_agendada": true
+}
+```
+
+A referência é calculada com o prefixo `ACH-` (de «achado») e pelo menos seis algarismos. IDs maiores não são cortados: `1000000` fica `ACH-1000000`. É o ID do artigo, não um contador separado de receções, pelo que pode haver intervalos na numeração.
+
+Um achado `por_entregar` não tem este campo. Depois de ficar `na_recepcao`, a referência aparece no catálogo de achados, nos artigos próprios, no inventário da equipa e nos detalhes autorizados. Mantém-se após edição, arquivo ou devolução. Os achados antigos já marcados `na_recepcao` também a recebem, mesmo quando o registo antigo não tem a data ou o responsável pela receção preenchidos.
+
+### Apresentar o ecrã «Objeto recebido na receção»
+
+- Mostra o ecrã apenas depois de a operação administrativa ter sucesso. Usa `item.referencia`; se quiseres o aspeto do mockup, apresenta `ACH-000242` como **ACH · 000242**, preservando os algarismos.
+- O botão «Ver objeto no inventário» usa o `item.id` numérico para abrir o detalhe administrativo. O backend não criou uma rota de pesquisa pelo texto da referência.
+- Mostra a localização de stock apenas à equipa. Os dados internos continuam fora das respostas do catálogo dos alunos.
+- «Disponível no site» corresponde ao achado ativo e `na_recepcao` que já pode aparecer no catálogo; não significa que já exista uma correspondência encontrada pela IA.
+- Se `ia_agendada` for `true`, mostra **«Análise da IA agendada»**. O trabalho foi colocado na fila; a análise pode ainda estar pendente.
+- Não marques **«Aluno notificado»** como concluído: esta operação não cria uma notificação de receção. As notificações de correspondência da IA pertencem a outro momento do processo.
+
+**As referências PER e ACH identificam registos; não são senhas nem códigos de levantamento.** As permissões de consulta continuam a ser verificadas. As rotas continuam a receber o ID numérico, por exemplo `/api/items/37`; não foi criada uma pesquisa pelo texto `PER-000037` ou `ACH-000242`.
+
+### Dados enviados no registo
+
 Os POST de artigos e o PUT usam JSON. Campos básicos obrigatórios:
 
 | Campo | Regra |

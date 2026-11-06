@@ -84,6 +84,7 @@ class ItemController
             'mensagem' => 'Objeto perdido registado.',
             'item' => [
                 'id' => $id,
+                'referencia' => Item::formatarReferenciaPerdido($id),
                 'tipo' => 'lost',
                 'estado' => 'ativo',
                 'ia_estado' => 'pendente',
@@ -144,6 +145,7 @@ class ItemController
             'mensagem' => 'Objeto perdido marcado como resolvido.',
             'item' => [
                 'id' => $id,
+                'referencia' => Item::formatarReferenciaPerdido($id),
                 'estado' => 'resolvido',
             ]
         ]);
@@ -191,6 +193,7 @@ class ItemController
         if (!$pertenceAoUtilizador && !$eAdministrador) {
             $camposVisiveis = array_flip([
                 'id',
+                'referencia',
                 'tipo',
                 'titulo',
                 'descricao',

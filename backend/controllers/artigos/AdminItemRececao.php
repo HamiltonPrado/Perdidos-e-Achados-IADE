@@ -49,10 +49,13 @@ trait AdminItemRececao
             'mensagem' => 'Objeto achado registado.',
             'item' => [
                 'id' => $id,
+                'referencia' => Item::formatarReferenciaAchado($id),
                 'tipo' => 'found',
                 'estado' => 'ativo',
+                'estado_recepcao' => 'na_recepcao',
                 'ia_estado' => 'pendente',
-            ]
+            ],
+            'ia_agendada' => true,
         ], 201);
     }
     // Confirma a entrada do achado e agenda a análise da IA.
@@ -153,6 +156,7 @@ trait AdminItemRececao
             'mensagem' => 'Entrada na receção confirmada.',
             'item' => [
                 'id' => $id,
+                'referencia' => Item::formatarReferenciaAchado($id),
                 'tipo' => 'found',
                 'estado' => 'ativo',
                 'estado_recepcao' => 'na_recepcao',
@@ -162,6 +166,7 @@ trait AdminItemRececao
                 'versao' => $novaVersao,
                 'ia_estado' => 'pendente',
             ],
+            'ia_agendada' => true,
         ]);
     }
 

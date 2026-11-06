@@ -39,7 +39,7 @@ trait ItemConsultas
             'user_id' => $userId,
         ]);
 
-        return $consulta->fetchAll();
+        return array_map([$this, 'adicionarReferencia'], $consulta->fetchAll());
     }
 
     // Lista todos os artigos para a gestão pela equipa.
@@ -75,7 +75,7 @@ trait ItemConsultas
 
         $consulta = $this->pdo->query($sql);
 
-        return $consulta->fetchAll();
+        return array_map([$this, 'adicionarReferencia'], $consulta->fetchAll());
     }
     // Procura um artigo pelo identificador.
     public function procurarPorId(int $id): ?array
@@ -116,7 +116,7 @@ trait ItemConsultas
 
         $artigo = $consulta->fetch();
 
-        return $artigo === false ? null : $artigo;
+        return $artigo === false ? null : $this->adicionarReferencia($artigo);
     }
 
     // Consulta o artigo e impede outras operações de o alterarem
@@ -175,7 +175,7 @@ trait ItemConsultas
 
         $consulta->execute();
 
-        return $consulta->fetchAll();
+        return array_map([$this, 'adicionarReferencia'], $consulta->fetchAll());
     }
 
     // Lista apenas achados ativos já entregues à receção, para quem tem sessão iniciada.
@@ -229,7 +229,7 @@ trait ItemConsultas
 
         $consulta->execute();
 
-        return $consulta->fetchAll();
+        return array_map([$this, 'adicionarReferencia'], $consulta->fetchAll());
     }
 
     // Lê os dados internos de que a equipa precisa para gerir o artigo.
@@ -278,7 +278,7 @@ trait ItemConsultas
 
         $artigo = $consulta->fetch();
 
-        return $artigo === false ? null : $artigo;
+        return $artigo === false ? null : $this->adicionarReferencia($artigo);
     }
 
 }
