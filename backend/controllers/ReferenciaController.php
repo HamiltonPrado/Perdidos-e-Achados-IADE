@@ -17,7 +17,7 @@ class ReferenciaController
     {
         $this->categorias = new Category($pdo);
         $this->locais = new Location($pdo);
-       $this->pontosRecolha = new PontoRecolha($pdo);
+        $this->pontosRecolha = new PontoRecolha($pdo);
     }
 
     public function listarCategorias(): void
@@ -40,7 +40,7 @@ class ReferenciaController
         ]);
     }
 
-     public function listarPontosRecolha(): void
+    public function listarPontosRecolha(): void
     {
         $pontosRecolha = $this->pontosRecolha->listar();
 

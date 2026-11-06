@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-
-
 // Envia uma reclamação de propriedade sobre um achado disponível.
 if (
     $metodo === 'POST'

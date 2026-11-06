@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 trait ReclamacaoCriacao
 {
-
     public function criar(int $achadoId): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -24,7 +23,7 @@ trait ReclamacaoCriacao
         try {
             $this->pdo->beginTransaction();
 
-            // Bloqueia os artigos pela mesma ordem em todos os pedidos.
+            // Bloqueia os artigos por ordem do ID para reduzir conflitos entre operações simultâneas.
             $ids = [$achadoId];
 
             if ($perdidoId !== null) {
@@ -94,55 +93,55 @@ trait ReclamacaoCriacao
                 }
             }
 
-           $existente = $this->reclamacoes->procurarPorAlunoEAchado(
-    (int) $utilizador['id'],
-    $achadoId
-);
+            $existente = $this->reclamacoes->procurarPorAlunoEAchado(
+                (int) $utilizador['id'],
+                $achadoId
+            );
 
-if ($existente === null) {
-    $id = $this->reclamacoes->criar(
-        (int) $utilizador['id'],
-        $achado,
-        $dados
-    );
+            if ($existente === null) {
+                $id = $this->reclamacoes->criar(
+                    (int) $utilizador['id'],
+                    $achado,
+                    $dados
+                );
 
-    $codigoHttp = 201;
-} else {
-    if ($existente['estado'] === 'recusada') {
-        throw new DomainException(
-            'A tua reclamação foi recusada. Consulta o motivo '
-                . 'e fala presencialmente com a equipa da receção.',
-            409
-        );
-    }
+                $codigoHttp = 201;
+            } else {
+                if ($existente['estado'] === 'recusada') {
+                    throw new DomainException(
+                        'A tua reclamação foi recusada. Consulta o motivo '
+                            . 'e fala presencialmente com a equipa da receção.',
+                        409
+                    );
+                }
 
-    if ($existente['estado'] === 'cancelada') {
-        throw new DomainException(
-            'Esta reclamação foi cancelada. '
-                . 'Contacta a equipa da receção.',
-            409
-        );
-    }
+                if ($existente['estado'] === 'cancelada') {
+                    throw new DomainException(
+                        'Esta reclamação foi cancelada. '
+                            . 'Contacta a equipa da receção.',
+                        409
+                    );
+                }
 
-    $id = (int) $existente['id'];
+                $id = (int) $existente['id'];
 
-    $reenviada = $this->reclamacoes->reenviarDesatualizada(
-        $id,
-        (int) $utilizador['id'],
-        $achado,
-        $dados
-    );
+                $reenviada = $this->reclamacoes->reenviarDesatualizada(
+                    $id,
+                    (int) $utilizador['id'],
+                    $achado,
+                    $dados
+                );
 
-    if (!$reenviada) {
-        throw new DomainException(
-            'Já existe uma reclamação tua para este objeto '
-                . 'e a pergunta não foi alterada.',
-            409
-        );
-    }
+                if (!$reenviada) {
+                    throw new DomainException(
+                        'Já existe uma reclamação tua para este objeto '
+                            . 'e a pergunta não foi alterada.',
+                        409
+                    );
+                }
 
-    $codigoHttp = 200;
-}
+                $codigoHttp = 200;
+            }
 
             $this->pdo->commit();
 
@@ -194,7 +193,7 @@ if ($existente === null) {
                 'id' => $id,
                 'item_achado_id' => $achadoId,
                 'item_perdido_id' => $perdidoId,
-                                'estado' => 'pendente',
+                'estado' => 'pendente',
             ],
         ], $codigoHttp);
     }

@@ -32,7 +32,7 @@ class ReclamacaoController
         $this->reclamacoes = new Reclamacao($pdo);
     }
 
-        // A resposta esperada só é apresentada à equipa administradora.
+    // A resposta esperada só é apresentada à equipa administradora.
     public function listarTodos(): void
     {
         exigirAdministrador($this->pdo);
@@ -46,23 +46,21 @@ class ReclamacaoController
             'reclamacoes' => $reclamacoes,
         ]);
     }
-// Devolve as reclamações do utilizador autenticado.
-public function listarMinhas(): void
-{
-    $utilizador = exigirAutenticacao($this->pdo);
+    // Devolve as reclamações do utilizador autenticado.
+    public function listarMinhas(): void
+    {
+        $utilizador = exigirAutenticacao($this->pdo);
 
-    header('Cache-Control: private, no-store');
+        header('Cache-Control: private, no-store');
 
-    $reclamacoes = $this->reclamacoes->listarPorUtilizador(
-        (int) $utilizador['id']
-    );
+        $reclamacoes = $this->reclamacoes->listarPorUtilizador(
+            (int) $utilizador['id']
+        );
 
-    responderJson([
-        'estado' => 'ok',
-        'reclamacoes' => $reclamacoes,
-    ]);
-}
-
-
+        responderJson([
+            'estado' => 'ok',
+            'reclamacoes' => $reclamacoes,
+        ]);
+    }
 
 }

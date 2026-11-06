@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 trait ItemGestao
 {
-
-        // Marca um perdido ativo como resolvido pelo próprio utilizador.
+    // Marca um perdido ativo como resolvido pelo próprio utilizador.
     public function marcarResolvido(int $id, int $userId): bool
     {
         $sql = "
@@ -27,30 +26,30 @@ trait ItemGestao
         return $consulta->rowCount() === 1;
     }
 
-
     // Arquiva um artigo apenas se ainda estiver ativo.
-public function arquivar(int $id): bool
-{
-    $consulta = $this->pdo->prepare(
-        "UPDATE items
+    public function arquivar(int $id): bool
+    {
+        $consulta = $this->pdo->prepare(
+            "UPDATE items
          SET estado = 'arquivado'
          WHERE id = :id
            AND estado = 'ativo'"
-    );
+        );
 
-    $consulta->execute([
-        'id' => $id
-    ]);
+        $consulta->execute([
+            'id' => $id
+        ]);
 
-    return $consulta->rowCount() === 1;
-}
+        return $consulta->rowCount() === 1;
+    }
 
-// Invalida a análise anterior após alterar as fotografias.
-// Deve ser chamado numa transação, com o artigo bloqueado.
-public function marcarAnalisePendente(int $id): void
-{
-    $consulta = $this->pdo->prepare(
-        "UPDATE items
+    // Depois de alterar as fotos, deixa de usar a análise anterior da IA.
+    // Executa este método depois de bloquear o artigo na base de dados,
+    // dentro da transação que guarda as alterações em conjunto.
+    public function marcarAnalisePendente(int $id): void
+    {
+        $consulta = $this->pdo->prepare(
+            "UPDATE items
          SET versao = versao + 1,
              ia_estado = 'pendente',
              ia_erro = NULL,
@@ -58,37 +57,37 @@ public function marcarAnalisePendente(int $id): void
              embedding_modelo = NULL
          WHERE id = :id
            AND estado = 'ativo'"
-    );
-
-    $consulta->execute([
-        'id' => $id
-    ]);
-
-    if ($consulta->rowCount() !== 1) {
-        throw new RuntimeException(
-            'Não foi possível preparar a nova análise do artigo.'
         );
+
+        $consulta->execute([
+            'id' => $id
+        ]);
+
+        if ($consulta->rowCount() !== 1) {
+            throw new RuntimeException(
+                'Não foi possível preparar a nova análise do artigo.'
+            );
+        }
     }
-}
 
     // Marca um artigo como devolvido apenas se ainda estiver ativo.
-public function marcarDevolvido(int $id): bool
-{
-    $consulta = $this->pdo->prepare(
-        "UPDATE items
+    public function marcarDevolvido(int $id): bool
+    {
+        $consulta = $this->pdo->prepare(
+            "UPDATE items
          SET estado = 'devolvido'
          WHERE id = :id
            AND estado = 'ativo'"
-    );
+        );
 
-    $consulta->execute([
-        'id' => $id
-    ]);
+        $consulta->execute([
+            'id' => $id
+        ]);
 
-    return $consulta->rowCount() === 1;
-}
+        return $consulta->rowCount() === 1;
+    }
 
-        // Confirma a entrada física de um achado entregue à equipa.
+    // Regista que a equipa recebeu fisicamente o objeto na receção.
     public function confirmarEntrada(
         int $id,
         int $adminId,
@@ -136,158 +135,160 @@ public function marcarDevolvido(int $id): bool
         return $consulta->rowCount() === 1;
     }
 
-public function atualizarPelaEquipa(int $id, array $dados): array
-{
-    if (!$this->pdo->inTransaction()) {
-        throw new LogicException(
-            'A edição do artigo exige uma transação.'
-        );
-    }
+    public function atualizarPelaEquipa(int $id, array $dados): array
+    {
+        if (!$this->pdo->inTransaction()) {
+            throw new LogicException(
+                'A edição do artigo exige uma transação.'
+            );
+        }
 
-    $atual = $this->procurarParaGestao($id, true);
+        $atual = $this->procurarParaGestao($id, true);
 
-    if ($atual === null) {
-        throw new DomainException('Artigo não encontrado.', 404);
-    }
+        if ($atual === null) {
+            throw new DomainException('Artigo não encontrado.', 404);
+        }
 
-    if ($atual['estado'] !== 'ativo') {
-        throw new DomainException(
-            'Só é possível editar artigos ativos.',
-            409
-        );
-    }
+        if ($atual['estado'] !== 'ativo') {
+            throw new DomainException(
+                'Só é possível editar artigos ativos.',
+                409
+            );
+        }
 
-    $eAchado = $atual['tipo'] === 'found';
+        $eAchado = $atual['tipo'] === 'found';
 
-    $eAchadoRecebido =
-        $eAchado
-        && $atual['estado_recepcao'] === 'na_recepcao';
+        $eAchadoRecebido =
+            $eAchado
+            && $atual['estado_recepcao'] === 'na_recepcao';
 
-    $camposStock = [
-        'localizacao_stock',
-        'observacoes_internas',
-    ];
-
-    if (
-        !$eAchadoRecebido
-        && array_intersect($camposStock, array_keys($dados))
-    ) {
-        throw new DomainException(
-            'Os dados de stock aplicam-se a achados já recebidos.',
-            409
-        );
-    }
-
-    $campos = [
-        'titulo',
-        'descricao',
-        'category_id',
-        'location_id',
-        'data_ocorrencia',
-    ];
-
-    if ($eAchado) {
-        $campos = array_merge($campos, [
-            'pergunta_secreta',
-            'resposta_esperada',
+        $camposStock = [
             'localizacao_stock',
             'observacoes_internas',
-        ]);
-    }
+        ];
 
-    // Os campos opcionais omitidos mantêm o valor atual.
-    $novos = array_intersect_key(
-        $dados,
-        array_flip($campos)
-    );
-
-    $novos['ponto_recolha_id'] = $eAchadoRecebido
-        ? $dados['ponto_recolha_id']
-        : null;
-
-    $alteracoes = [];
-
-    foreach ($novos as $campo => $valor) {
-        $anterior = $atual[$campo];
-
-        if (in_array(
-            $campo,
-            ['category_id', 'location_id', 'ponto_recolha_id'],
-            true
-        )) {
-            $anterior = $anterior === null ? null : (int) $anterior;
-            $valor = $valor === null ? null : (int) $valor;
+        if (
+            !$eAchadoRecebido
+            && array_intersect($camposStock, array_keys($dados))
+        ) {
+            throw new DomainException(
+                'Os dados de stock aplicam-se a achados já recebidos.',
+                409
+            );
         }
 
-        if ($anterior !== $valor) {
-            $alteracoes[$campo] = $valor;
+        $campos = [
+            'titulo',
+            'descricao',
+            'category_id',
+            'location_id',
+            'data_ocorrencia',
+        ];
+
+        if ($eAchado) {
+            $campos = array_merge($campos, [
+                'pergunta_secreta',
+                'resposta_esperada',
+                'localizacao_stock',
+                'observacoes_internas',
+            ]);
         }
-    }
 
-    // Alterações exclusivamente de stock preservam a versão.
-    $mudouVersao = count(
-        array_diff(array_keys($alteracoes), $camposStock)
-    ) > 0;
+        // Mantém os valores guardados dos campos opcionais que não foram enviados.
+        $novos = array_intersect_key(
+            $dados,
+            array_flip($campos)
+        );
 
-    $versaoAnterior = (int) $atual['versao'];
-    $novaVersao = $versaoAnterior + ($mudouVersao ? 1 : 0);
+        $novos['ponto_recolha_id'] = $eAchadoRecebido
+            ? $dados['ponto_recolha_id']
+            : null;
 
-    $resultado = [
-        'alterado' => $alteracoes !== [],
-        'versao_anterior' => $versaoAnterior,
-        'versao' => $novaVersao,
-        'versao_alterada' => $mudouVersao,
-        'pergunta_alterada' => array_key_exists(
-            'pergunta_secreta',
-            $alteracoes
-        ),
-        'ia_estado' => $mudouVersao
-            ? 'pendente'
-            : $atual['ia_estado'],
-        'reagendar_ia' => $mudouVersao
-            && ($atual['tipo'] === 'lost' || $eAchadoRecebido),
-    ];
+        $alteracoes = [];
 
-    if ($alteracoes === []) {
-        return $resultado;
-    }
+        foreach ($novos as $campo => $valor) {
+            $anterior = $atual[$campo];
 
-    $atribuicoes = [];
-    $parametros = ['id' => $id];
+            if (in_array(
+                $campo,
+                ['category_id', 'location_id', 'ponto_recolha_id'],
+                true
+            )) {
+                $anterior = $anterior === null ? null : (int) $anterior;
+                $valor = $valor === null ? null : (int) $valor;
+            }
 
-    // Os nomes das colunas vêm da lista fixa acima.
-    foreach ($alteracoes as $campo => $valor) {
-        $atribuicoes[] = $campo . ' = :' . $campo;
-        $parametros[$campo] = $valor;
-    }
+            if ($anterior !== $valor) {
+                $alteracoes[$campo] = $valor;
+            }
+        }
 
-    if ($mudouVersao) {
-        $atribuicoes = array_merge($atribuicoes, [
-            'versao = versao + 1',
-            "ia_estado = 'pendente'",
-            'ia_erro = NULL',
-            'embedding_texto = NULL',
-            'embedding_modelo = NULL',
-        ]);
-    }
+        // Se só mudar a localização de stock ou as notas internas,
+        // mantém o número da versão do artigo: o conteúdo analisado não mudou.
+        $mudouVersao = count(
+            array_diff(array_keys($alteracoes), $camposStock)
+        ) > 0;
 
-    $consulta = $this->pdo->prepare(
-        'UPDATE items
+        $versaoAnterior = (int) $atual['versao'];
+        $novaVersao = $versaoAnterior + ($mudouVersao ? 1 : 0);
+
+        $resultado = [
+            'alterado' => $alteracoes !== [],
+            'versao_anterior' => $versaoAnterior,
+            'versao' => $novaVersao,
+            'versao_alterada' => $mudouVersao,
+            'pergunta_alterada' => array_key_exists(
+                'pergunta_secreta',
+                $alteracoes
+            ),
+            'ia_estado' => $mudouVersao
+                ? 'pendente'
+                : $atual['ia_estado'],
+            'reagendar_ia' => $mudouVersao
+                && ($atual['tipo'] === 'lost' || $eAchadoRecebido),
+        ];
+
+        if ($alteracoes === []) {
+            return $resultado;
+        }
+
+        $atribuicoes = [];
+        $parametros = ['id' => $id];
+
+        // Só altera as colunas permitidas na lista acima;
+        // os nomes das colunas não são escolhidos por quem envia o pedido.
+        foreach ($alteracoes as $campo => $valor) {
+            $atribuicoes[] = $campo . ' = :' . $campo;
+            $parametros[$campo] = $valor;
+        }
+
+        if ($mudouVersao) {
+            $atribuicoes = array_merge($atribuicoes, [
+                'versao = versao + 1',
+                "ia_estado = 'pendente'",
+                'ia_erro = NULL',
+                'embedding_texto = NULL',
+                'embedding_modelo = NULL',
+            ]);
+        }
+
+        $consulta = $this->pdo->prepare(
+            'UPDATE items
          SET ' . implode(', ', $atribuicoes) . "
          WHERE id = :id
            AND estado = 'ativo'"
-    );
-
-    $consulta->execute($parametros);
-
-    if ($consulta->rowCount() !== 1) {
-        throw new DomainException(
-            'Não foi possível atualizar o artigo.',
-            409
         );
-    }
 
-    return $resultado;
-}
+        $consulta->execute($parametros);
+
+        if ($consulta->rowCount() !== 1) {
+            throw new DomainException(
+                'Não foi possível atualizar o artigo.',
+                409
+            );
+        }
+
+        return $resultado;
+    }
 
 }

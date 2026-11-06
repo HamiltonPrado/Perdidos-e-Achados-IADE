@@ -17,13 +17,13 @@ class PhotoController
     private ItemPhoto $fotografias;
     private IaJob $filaIa;
 
-   public function __construct(PDO $pdo)
-{
-    $this->pdo = $pdo;
-    $this->artigos = new Item($pdo);
-    $this->fotografias = new ItemPhoto($pdo);
-    $this->filaIa = new IaJob($pdo);
-}
+    public function __construct(PDO $pdo)
+    {
+        $this->pdo = $pdo;
+        $this->artigos = new Item($pdo);
+        $this->fotografias = new ItemPhoto($pdo);
+        $this->filaIa = new IaJob($pdo);
+    }
 
     // Adiciona uma fotografia a um artigo ativo.
     public function adicionar(int $itemId): void
@@ -31,13 +31,13 @@ class PhotoController
         $utilizador = exigirAutenticacao($this->pdo);
         exigirCsrf();
 
-        // Valida o ficheiro antes de abrir a transação.
+        // Verifica a fotografia antes de iniciar as alterações na base de dados.
         $foto = PhotoValidator::lerFotografia();
 
         try {
             $this->pdo->beginTransaction();
 
-            // Bloqueia o artigo até terminar a operação.
+            // Impede outras operações de alterarem o artigo enquanto esta guarda a fotografia.
             $artigo = $this->artigos->procurarParaAtualizacao(
                 $itemId
             );
@@ -55,7 +55,7 @@ class PhotoController
             // ou dos seus achados ainda por entregar.
             $eAdministrador = $utilizador['role'] === 'admin';
 
-                        $eArtigoDoUtilizador =
+            $eArtigoDoUtilizador =
                 (int) $artigo['user_id'] === (int) $utilizador['id']
                 && (
                     $artigo['tipo'] === 'lost'
@@ -82,28 +82,29 @@ class PhotoController
                 ], 409);
             }
 
-            // Guarda a fotografia e solicita uma nova análise da IA.
+            // Guarda a fotografia; mais abaixo decide se já pode agendar a análise da IA.
             $fotoId = $this->fotografias->criar(
                 $itemId,
                 $foto['mime'],
                 $foto['dados']
             );
 
-                   $this->artigos->marcarAnalisePendente($itemId);
+            $this->artigos->marcarAnalisePendente($itemId);
 
-        $novaVersao = (int) $artigo['versao'] + 1;
+            $novaVersao = (int) $artigo['versao'] + 1;
 
-        // Achados por entregar só serão analisados após a receção.
-        $podeAgendarIa =
-            $artigo['tipo'] === 'lost'
-            || (
-                $artigo['tipo'] === 'found'
-                && $artigo['estado_recepcao'] === 'na_recepcao'
-            );
+            // Não agenda a IA para achados ainda por entregar;
+            // a análise fica para depois da confirmação da receção.
+            $podeAgendarIa =
+                $artigo['tipo'] === 'lost'
+                || (
+                    $artigo['tipo'] === 'found'
+                    && $artigo['estado_recepcao'] === 'na_recepcao'
+                );
 
-        if ($podeAgendarIa) {
-            $this->filaIa->agendar($itemId, $novaVersao);
-        }
+            if ($podeAgendarIa) {
+                $this->filaIa->agendar($itemId, $novaVersao);
+            }
             $this->pdo->commit();
 
         } catch (Throwable $erro) {
@@ -126,172 +127,172 @@ class PhotoController
     }
 
     // Lista as fotografias de um artigo acessível ao utilizador.
-public function listar(int $itemId): void
-{
-    $utilizador = exigirAutenticacao($this->pdo);
+    public function listar(int $itemId): void
+    {
+        $utilizador = exigirAutenticacao($this->pdo);
 
-    $artigo = $this->artigos->procurarPorId($itemId);
+        $artigo = $this->artigos->procurarPorId($itemId);
 
         if (!$this->podeConsultarArtigo($artigo, $utilizador)) {
+            responderJson([
+                'erro' => 'Artigo não encontrado.'
+            ], 404);
+        }
+
+        $fotos = $this->fotografias->listarPorArtigo($itemId);
+
         responderJson([
-            'erro' => 'Artigo não encontrado.'
-        ], 404);
+            'estado' => 'ok',
+            'fotos' => $fotos
+        ]);
     }
 
-    $fotos = $this->fotografias->listarPorArtigo($itemId);
+    // Mostra a imagem apenas a quem tem permissão para consultar o artigo.
+    public function mostrar(int $id): void
+    {
+        $utilizador = exigirAutenticacao($this->pdo);
 
-    responderJson([
-        'estado' => 'ok',
-        'fotos' => $fotos
-    ]);
-}
+        $foto = $this->fotografias->procurarPorId($id);
 
-// Devolve a imagem ao autor do artigo ou à equipa.
-public function mostrar(int $id): void
-{
-    $utilizador = exigirAutenticacao($this->pdo);
-
-    $foto = $this->fotografias->procurarPorId($id);
-
-    if ($foto === null) {
-        responderJson([
-            'erro' => 'Fotografia não encontrada.'
-        ], 404);
-    }
-
-    $artigo = $this->artigos->procurarPorId(
-        (int) $foto['item_id']
-    );
-
-       if (!$this->podeConsultarArtigo($artigo, $utilizador)) {
-        responderJson([
-            'erro' => 'Fotografia não encontrada.'
-        ], 404);
-    }
-
-
-    // Substitui o Content-Type JSON pelo tipo da imagem.
-    http_response_code(200);
-    header('Content-Type: ' . $foto['mime']);
-    header('Content-Disposition: inline');
-    header('Cache-Control: private, no-store');
-    header('X-Content-Type-Options: nosniff');
-
-    echo $foto['dados'];
-    exit;
-}
-
-// Remove uma fotografia de um artigo ativo.
-public function apagar(int $id): void
-{
-    $utilizador = exigirAutenticacao($this->pdo);
-    exigirCsrf();
-
-    $foto = $this->fotografias->procurarPorId($id);
-
-    if ($foto === null) {
-        responderJson([
-            'erro' => 'Fotografia não encontrada.'
-        ], 404);
-    }
-
-    $itemId = (int) $foto['item_id'];
-
-    try {
-        $this->pdo->beginTransaction();
-
-        // Bloqueia o artigo enquanto verifica e executa a remoção.
-        $artigo = $this->artigos->procurarParaAtualizacao(
-            $itemId
-        );
-
-        if ($artigo === null) {
-            $this->pdo->rollBack();
-
+        if ($foto === null) {
             responderJson([
                 'erro' => 'Fotografia não encontrada.'
             ], 404);
         }
 
-        // Aplica as mesmas permissões usadas no upload.
-                $eAdministrador = $utilizador['role'] === 'admin';
+        $artigo = $this->artigos->procurarPorId(
+            (int) $foto['item_id']
+        );
 
-        $eArtigoDoUtilizador =
-            (int) $artigo['user_id'] === (int) $utilizador['id']
-            && (
+        if (!$this->podeConsultarArtigo($artigo, $utilizador)) {
+            responderJson([
+                'erro' => 'Fotografia não encontrada.'
+            ], 404);
+        }
+
+        // Indica ao browser que a resposta é uma imagem, em vez de texto JSON.
+        http_response_code(200);
+        header('Content-Type: ' . $foto['mime']);
+        header('Content-Disposition: inline');
+        header('Cache-Control: private, no-store');
+        header('X-Content-Type-Options: nosniff');
+
+        echo $foto['dados'];
+        exit;
+    }
+
+    // Remove uma fotografia de um artigo ativo.
+    public function apagar(int $id): void
+    {
+        $utilizador = exigirAutenticacao($this->pdo);
+        exigirCsrf();
+
+        $foto = $this->fotografias->procurarPorId($id);
+
+        if ($foto === null) {
+            responderJson([
+                'erro' => 'Fotografia não encontrada.'
+            ], 404);
+        }
+
+        $itemId = (int) $foto['item_id'];
+
+        try {
+            $this->pdo->beginTransaction();
+
+            // Impede outras operações de alterarem o artigo enquanto remove a fotografia.
+            $artigo = $this->artigos->procurarParaAtualizacao(
+                $itemId
+            );
+
+            if ($artigo === null) {
+                $this->pdo->rollBack();
+
+                responderJson([
+                    'erro' => 'Fotografia não encontrada.'
+                ], 404);
+            }
+
+            // Só a equipa ou um autor com permissão para adicionar fotos pode removê-las.
+            $eAdministrador = $utilizador['role'] === 'admin';
+
+            $eArtigoDoUtilizador =
+                (int) $artigo['user_id'] === (int) $utilizador['id']
+                && (
+                    $artigo['tipo'] === 'lost'
+                    || (
+                        $artigo['tipo'] === 'found'
+                        && $artigo['estado_recepcao'] === 'por_entregar'
+                    )
+                );
+
+            if (!$eAdministrador && !$eArtigoDoUtilizador) {
+                $this->pdo->rollBack();
+
+                responderJson([
+                    'erro' => 'Fotografia não encontrada.'
+                ], 404);
+            }
+
+            if ($artigo['estado'] !== 'ativo') {
+                $this->pdo->rollBack();
+
+                responderJson([
+                    'erro' => 'Só é possível remover fotografias '
+                        . 'de artigos ativos.'
+                ], 409);
+            }
+
+            $apagada = $this->fotografias->apagar($id, $itemId);
+
+            // Se outra operação já apagou esta fotografia, não regista uma segunda remoção.
+            if (!$apagada) {
+                $this->pdo->rollBack();
+
+                responderJson([
+                    'erro' => 'Fotografia não encontrada.'
+                ], 404);
+            }
+
+            // Prepara uma nova análise com as fotos que ficaram;
+            // o agendamento abaixo respeita o estado de receção do objeto.
+            $this->artigos->marcarAnalisePendente($itemId);
+
+            $novaVersao = (int) $artigo['versao'] + 1;
+
+            // Não agenda a IA para achados ainda por entregar;
+            // a análise fica para depois da confirmação da receção.
+            $podeAgendarIa =
                 $artigo['tipo'] === 'lost'
                 || (
                     $artigo['tipo'] === 'found'
-                    && $artigo['estado_recepcao'] === 'por_entregar'
-                )
-            );
+                    && $artigo['estado_recepcao'] === 'na_recepcao'
+                );
 
-               if (!$eAdministrador && !$eArtigoDoUtilizador) {
-            $this->pdo->rollBack();
+            if ($podeAgendarIa) {
+                $this->filaIa->agendar($itemId, $novaVersao);
+            }
+            $this->pdo->commit();
 
-            responderJson([
-                'erro' => 'Fotografia não encontrada.'
-            ], 404);
+        } catch (Throwable $erro) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+
+            throw $erro;
         }
 
-        if ($artigo['estado'] !== 'ativo') {
-            $this->pdo->rollBack();
-
-            responderJson([
-                'erro' => 'Só é possível remover fotografias '
-                    . 'de artigos ativos.'
-            ], 409);
-        }
-
-        $apagada = $this->fotografias->apagar($id, $itemId);
-
-        // A fotografia pode ter sido removida por outro pedido.
-        if (!$apagada) {
-            $this->pdo->rollBack();
-
-            responderJson([
-                'erro' => 'Fotografia não encontrada.'
-            ], 404);
-        }
-
-        // Solicita uma nova análise com as fotografias restantes.
-               $this->artigos->marcarAnalisePendente($itemId);
-
-        $novaVersao = (int) $artigo['versao'] + 1;
-
-        // Achados por entregar só serão analisados após a receção.
-        $podeAgendarIa =
-            $artigo['tipo'] === 'lost'
-            || (
-                $artigo['tipo'] === 'found'
-                && $artigo['estado_recepcao'] === 'na_recepcao'
-            );
-
-        if ($podeAgendarIa) {
-            $this->filaIa->agendar($itemId, $novaVersao);
-        }
-        $this->pdo->commit();
-
-    } catch (Throwable $erro) {
-        if ($this->pdo->inTransaction()) {
-            $this->pdo->rollBack();
-        }
-
-        throw $erro;
+        responderJson([
+            'estado' => 'ok',
+            'mensagem' => 'Fotografia removida.',
+            'foto' => [
+                'id' => $id,
+                'item_id' => $itemId,
+            ]
+        ]);
     }
 
-    responderJson([
-        'estado' => 'ok',
-        'mensagem' => 'Fotografia removida.',
-        'foto' => [
-            'id' => $id,
-            'item_id' => $itemId,
-        ]
-    ]);
-}
-
-
-        // Autoriza a consulta pelo autor, pela equipa ou pelo catálogo.
+    // Permite consultar a foto ao autor, à equipa e a quem pode ver o artigo no catálogo.
     private function podeConsultarArtigo(
         ?array $artigo,
         array $utilizador

@@ -25,7 +25,7 @@ class DevolucaoController
     private User $utilizadores;
     private Devolucao $devolucoes;
     private Correspondencia $correspondencias;
-     private PedidoLevantamento $pedidosLevantamento;
+    private PedidoLevantamento $pedidosLevantamento;
 
     public function __construct(PDO $pdo)
     {
@@ -37,7 +37,7 @@ class DevolucaoController
         $this->pedidosLevantamento = new PedidoLevantamento($pdo);
     }
 
-    // Bloqueia os artigos envolvidos, dentro de uma transação.
+    // Impede outras operações de alterarem os artigos enquanto prepara a entrega.
     private function bloquearArtigos(
         int $achadoId,
         ?int $perdidoId
@@ -55,7 +55,8 @@ class DevolucaoController
             $ids[] = $perdidoId;
         }
 
-        // Todos os pedidos bloqueiam os artigos pela mesma ordem.
+        // Bloqueia os artigos por ordem do ID para reduzir conflitos
+        // quando duas entregas são processadas ao mesmo tempo.
         sort($ids, SORT_NUMERIC);
 
         $artigos = [];
@@ -77,16 +78,16 @@ class DevolucaoController
     }
 
     // Permite à equipa consultar o histórico de devoluções.
-public function listarTodos(): void
-{
-    exigirAdministrador($this->pdo);
+    public function listarTodos(): void
+    {
+        exigirAdministrador($this->pdo);
 
-    $devolucoes = $this->devolucoes->listarTodos();
+        $devolucoes = $this->devolucoes->listarTodos();
 
-    responderJson([
-        'estado' => 'ok',
-        'devolucoes' => $devolucoes
-    ]);
-}
+        responderJson([
+            'estado' => 'ok',
+            'devolucoes' => $devolucoes
+        ]);
+    }
 
 }

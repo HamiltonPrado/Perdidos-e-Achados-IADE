@@ -30,7 +30,7 @@ class PhotoValidator
             ], 422);
         }
 
-        // Trata os limites de tamanho aplicados pelo PHP.
+        // Verifica se o PHP recusou a fotografia por exceder o tamanho permitido.
         if (
             $erroUpload === UPLOAD_ERR_INI_SIZE
             || $erroUpload === UPLOAD_ERR_FORM_SIZE
@@ -54,7 +54,7 @@ class PhotoValidator
 
         $caminho = $ficheiro['tmp_name'] ?? null;
 
-        // Confirma que o ficheiro veio de um upload HTTP.
+        // Confirma que a fotografia foi enviada neste pedido à API.
         if (
             !is_string($caminho)
             || !is_uploaded_file($caminho)
@@ -64,7 +64,7 @@ class PhotoValidator
             ], 422);
         }
 
-        // Limita o tamanho real do ficheiro a 2 MB.
+        // Recusa fotografias com mais de 2 MiB (2 × 1024 × 1024 bytes).
         $tamanho = filesize($caminho);
 
         if ($tamanho === false) {
@@ -85,7 +85,7 @@ class PhotoValidator
             ], 413);
         }
 
-        // Deteta o tipo pelo conteúdo, independentemente do nome.
+        // Verifica se o conteúdo é JPEG ou PNG; a extensão do nome não é suficiente.
         $detetor = new finfo(FILEINFO_MIME_TYPE);
         $mime = $detetor->file($caminho);
 
@@ -95,7 +95,7 @@ class PhotoValidator
             ], 422);
         }
 
-        // Lê os dados binários que serão guardados na BD.
+        // Lê o conteúdo da fotografia para o guardar na base de dados.
         $dados = file_get_contents($caminho);
 
         if ($dados === false) {

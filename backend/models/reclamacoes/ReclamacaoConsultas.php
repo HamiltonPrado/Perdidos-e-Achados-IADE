@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 trait ReclamacaoConsultas
 {
-
     // Procura uma reclamação do próprio aluno para o achado indicado.
     public function procurarPorAlunoEAchado(
         int $userId,
@@ -28,7 +27,7 @@ trait ReclamacaoConsultas
         return $reclamacao === false ? null : $reclamacao;
     }
 
-        // Obtém os dados necessários à análise pela equipa.
+    // Obtém os dados necessários à análise pela equipa.
     public function listarParaEquipa(): array
     {
         $sql = '
@@ -70,7 +69,7 @@ trait ReclamacaoConsultas
         return $consulta->fetchAll();
     }
 
-        public function procurarPorId(
+    public function procurarPorId(
         int $id,
         bool $bloquear = false
     ): ?array {
@@ -99,7 +98,7 @@ trait ReclamacaoConsultas
         return $reclamacao === false ? null : $reclamacao;
     }
 
-        public function existeOutraAprovada(
+    public function existeOutraAprovada(
         int $achadoId,
         int $reclamacaoId
     ): bool {
@@ -128,9 +127,9 @@ trait ReclamacaoConsultas
     }
 
     // Lista apenas as reclamações do aluno indicado.
-public function listarPorUtilizador(int $userId): array
-{
-    $sql = '
+    public function listarPorUtilizador(int $userId): array
+    {
+        $sql = '
         SELECT
             r.id,
             r.item_achado_id,
@@ -159,13 +158,13 @@ public function listarPorUtilizador(int $userId): array
         ORDER BY r.criado_em DESC, r.id DESC
     ';
 
-    $consulta = $this->pdo->prepare($sql);
+        $consulta = $this->pdo->prepare($sql);
 
-    $consulta->execute([
-        'user_id' => $userId,
-    ]);
+        $consulta->execute([
+            'user_id' => $userId,
+        ]);
 
-    return $consulta->fetchAll();
-}
+        return $consulta->fetchAll();
+    }
 
 }

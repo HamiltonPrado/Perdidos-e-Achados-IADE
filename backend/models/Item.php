@@ -21,5 +21,4 @@ class Item
         $this->pdo = $pdo;
     }
 
-
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 trait DevolucaoPorCodigo
 {
-
-    // Confirma a entrega presencial e consome o código numa transação.
+    // Regista a entrega presencial e marca o código como utilizado.
+    // Guarda as alterações em conjunto: se alguma falhar, desfaz a operação.
     public function confirmarPorCodigo(string $codigo): void
     {
         $admin = exigirAdministrador($this->pdo);
@@ -17,7 +17,7 @@ trait DevolucaoPorCodigo
             str_replace(['-', ' '], '', trim($codigo))
         );
 
-                       $alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
         if (
             strlen($codigo) !== 8
@@ -27,7 +27,7 @@ trait DevolucaoPorCodigo
                 'erro' => 'Indica um código válido de 8 caracteres.'
             ], 422);
         }
-        // Obtém os IDs para bloquear os artigos pela ordem habitual.
+        // Lê os IDs do achado e do perdido, se existir, para os bloquear por ordem.
         $referencia = $this->pedidosLevantamento
             ->procurarValidoPorCodigo($codigo);
 
@@ -38,9 +38,9 @@ trait DevolucaoPorCodigo
         }
 
         $achadoId = (int) $referencia['item_achado_id'];
-            $perdidoId = $referencia['item_perdido_id'] === null
-            ? null
-            : (int) $referencia['item_perdido_id'];
+        $perdidoId = $referencia['item_perdido_id'] === null
+        ? null
+        : (int) $referencia['item_perdido_id'];
 
         for ($tentativa = 0; $tentativa < 3; $tentativa++) {
             try {
@@ -48,7 +48,8 @@ trait DevolucaoPorCodigo
 
                 $this->bloquearArtigos($achadoId, $perdidoId);
 
-                // Volta a validar com os registos bloqueados.
+                // Depois de bloquear os registos, confirma novamente que o código
+                // e os objetos continuam disponíveis para esta entrega.
                 $pedido = $this->pedidosLevantamento
                     ->procurarValidoPorCodigo($codigo, true);
 
@@ -56,10 +57,10 @@ trait DevolucaoPorCodigo
                     $pedido === null
                     || (int) $pedido['item_achado_id'] !== $achadoId
                                         || (
-                        $pedido['item_perdido_id'] === null
+                                            $pedido['item_perdido_id'] === null
                             ? null
                             : (int) $pedido['item_perdido_id']
-                    ) !== $perdidoId
+                                        ) !== $perdidoId
                 ) {
                     throw new DomainException(
                         'O código ou os artigos já não estão disponíveis.',
@@ -95,7 +96,7 @@ trait DevolucaoPorCodigo
                     ]
                 );
 
-                  if (
+                if (
                     !$this->artigos->marcarDevolvido($achadoId)
                     || (
                         $perdidoId !== null
@@ -108,7 +109,7 @@ trait DevolucaoPorCodigo
                     );
                 }
 
-                    if (
+                if (
                     $matchId !== null
                     && !$this->correspondencias->concluir($matchId)
                 ) {
@@ -118,7 +119,7 @@ trait DevolucaoPorCodigo
                     );
                 }
 
-                         // Cancela os outros pedidos dos artigos entregues.
+                // Cancela os outros pedidos de levantamento destes objetos, que já foram entregues.
                 $this->pedidosLevantamento->cancelarOutrosPedidos(
                     $achadoId,
                     $perdidoId,

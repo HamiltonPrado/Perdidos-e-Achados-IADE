@@ -11,7 +11,8 @@ class Correspondencia
         $this->pdo = $pdo;
     }
 
-    // Consulta e bloqueia uma correspondência dentro de uma transação.
+    // Consulta a sugestão da IA que liga um perdido a um achado.
+    // Impede outras operações de a alterarem até a transação terminar.
     public function procurarParaAtualizacao(int $id): ?array
     {
         $consulta = $this->pdo->prepare(
@@ -39,7 +40,7 @@ class Correspondencia
             : $correspondencia;
     }
 
-    // Conclui uma sugestão quando a entrega presencial é confirmada.
+    // Marca a sugestão da IA como concluída depois de a equipa confirmar a entrega.
     public function concluir(int $id): bool
     {
         $consulta = $this->pdo->prepare(

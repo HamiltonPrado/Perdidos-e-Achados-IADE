@@ -4,57 +4,57 @@ declare(strict_types=1);
 
 trait AdminItemRececao
 {
+    // Guarda o achado e o trabalho da IA em conjunto;
+    // se uma das gravações falhar, nenhuma das duas fica guardada.
+    public function criarAchado(): void
+    {
+        $utilizador = exigirAdministrador($this->pdo);
+        exigirCsrf();
 
-    // Guarda o achado e agenda a sua análise na mesma transação.
-public function criarAchado(): void
-{
-    $utilizador = exigirAdministrador($this->pdo);
-    exigirCsrf();
+        $dados = ItemValidator::lerDadosArtigo(true, true);
 
-    $dados = ItemValidator::lerDadosArtigo(true, true);
+        try {
+            $this->pdo->beginTransaction();
 
-    try {
-        $this->pdo->beginTransaction();
+            $id = $this->artigos->criarAchado(
+                $utilizador['id'],
+                $dados
+            );
 
-        $id = $this->artigos->criarAchado(
-            $utilizador['id'],
-            $dados
-        );
+            // Os novos artigos começam na versão 1.
+            $this->filaIa->agendar($id, 1);
 
-        // Os novos artigos começam na versão 1.
-        $this->filaIa->agendar($id, 1);
+            $this->pdo->commit();
 
-        $this->pdo->commit();
+        } catch (Throwable $erro) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
 
-    } catch (Throwable $erro) {
-        if ($this->pdo->inTransaction()) {
-            $this->pdo->rollBack();
+            if (
+                $erro instanceof PDOException
+                && (int) ($erro->errorInfo[1] ?? 0) === 1452
+            ) {
+                responderJson([
+                    'erro' => 'Não foi possível associar o registo. '
+                        . 'Confirma a categoria, o local e o ponto de recolha.'
+                ], 422);
+            }
+
+            throw $erro;
         }
 
-        if (
-            $erro instanceof PDOException
-            && (int) ($erro->errorInfo[1] ?? 0) === 1452
-        ) {
-            responderJson([
-                'erro' => 'Não foi possível associar o registo. '
-                    . 'Confirma a categoria, o local e o ponto de recolha.'
-            ], 422);
-        }
-
-        throw $erro;
+        responderJson([
+            'estado' => 'ok',
+            'mensagem' => 'Objeto achado registado.',
+            'item' => [
+                'id' => $id,
+                'tipo' => 'found',
+                'estado' => 'ativo',
+                'ia_estado' => 'pendente',
+            ]
+        ], 201);
     }
-
-    responderJson([
-        'estado' => 'ok',
-        'mensagem' => 'Objeto achado registado.',
-        'item' => [
-            'id' => $id,
-            'tipo' => 'found',
-            'estado' => 'ativo',
-            'ia_estado' => 'pendente',
-        ]
-    ], 201);
-}
     // Confirma a entrada do achado e agenda a análise da IA.
     public function confirmarEntrada(int $id): void
     {
@@ -111,7 +111,8 @@ public function criarAchado(): void
 
             $novaVersao = (int) $artigo['versao'] + 1;
 
-            // A entrada e o trabalho da IA são guardados em conjunto.
+            // Confirma a entrada na receção e guarda o trabalho da IA na mesma transação;
+            // se uma parte falhar, desfaz também a outra.
             $this->filaIa->agendar($id, $novaVersao);
 
             $this->pdo->commit();

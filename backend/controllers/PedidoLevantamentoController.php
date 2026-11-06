@@ -25,18 +25,19 @@ class PedidoLevantamentoController
         $this->reclamacoes = new Reclamacao($pdo);
     }
 
-       // A emissão de códigos passa pelas reclamações aprovadas.
-public function criar(int $notificacaoId): void
-{
-    exigirAutenticacao($this->pdo);
-    exigirCsrf();
+    // Bloqueia a antiga emissão de códigos por notificação:
+    // o aluno tem agora de usar uma reclamação aprovada pela equipa.
+    public function criar(int $notificacaoId): void
+    {
+        exigirAutenticacao($this->pdo);
+        exigirCsrf();
 
-    responderJson([
- 'erro' => 'O código deve ser solicitado através '
-   . 'de uma reclamação aprovada pela equipa.',
-    ], 409);
-}
-        // Permite à equipa consultar um código antes da entrega presencial.
+        responderJson([
+            'erro' => 'O código deve ser solicitado através '
+              . 'de uma reclamação aprovada pela equipa.',
+        ], 409);
+    }
+    // Permite à equipa consultar um código antes da entrega presencial.
     public function consultar(string $codigo): void
     {
         exigirAdministrador($this->pdo);
@@ -83,12 +84,12 @@ public function criar(int $notificacaoId): void
                     'id' => (int) $pedido['item_achado_id'],
                     'titulo' => $pedido['achado_titulo'],
                 ],
-             'perdido' => $pedido['item_perdido_id'] === null
-                    ? null
-                    : [
-                    'id' => (int) $pedido['item_perdido_id'],
-                    'titulo' => $pedido['perdido_titulo'],
-                    ],
+                'perdido' => $pedido['item_perdido_id'] === null
+                       ? null
+                       : [
+                           'id' => (int) $pedido['item_perdido_id'],
+                           'titulo' => $pedido['perdido_titulo'],
+                       ],
                 'ponto_recolha' => [
                     'id' => (int) $pedido['ponto_recolha_id'],
                     'nome' => $pedido['ponto_recolha'],
@@ -97,7 +98,7 @@ public function criar(int $notificacaoId): void
         ]);
     }
 
-        // Emite ou recupera o código de uma reclamação aprovada.
+    // Emite ou recupera o código de uma reclamação aprovada.
     public function criarPorReclamacao(int $reclamacaoId): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -248,7 +249,8 @@ public function criar(int $notificacaoId): void
                 }
             }
 
-            // Confirma aprovação, versão, disponibilidade e associações.
+            // Antes de devolver o código, confirma que a reclamação continua aprovada,
+            // o objeto não mudou e os dados associados ao levantamento ainda são válidos.
             $pedido = $this->pedidos->procurarValidoPorCodigo(
                 $codigo,
                 true

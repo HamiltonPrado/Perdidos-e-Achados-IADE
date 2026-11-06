@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 trait ReclamacaoDecisao
 {
-
-        public function decidir(int $id): void
+    public function decidir(int $id): void
     {
         $admin = exigirAdministrador($this->pdo);
         exigirCsrf();
@@ -31,7 +30,8 @@ trait ReclamacaoDecisao
         try {
             $this->pdo->beginTransaction();
 
-            // Mantém a ordem de bloqueio usada nas outras operações.
+            // Bloqueia os artigos por ordem do ID, como nas outras operações,
+            // para reduzir conflitos quando existem pedidos ao mesmo tempo.
             $ids = [$achadoId];
 
             if ($perdidoId !== null) {
