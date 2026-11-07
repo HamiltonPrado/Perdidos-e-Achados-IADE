@@ -23,12 +23,12 @@ class AdminItemController
 
     private IaJob $filaIa;
 
-  public function __construct(PDO $pdo)
-{
-    $this->pdo = $pdo;
-    $this->artigos = new Item($pdo);
-    $this->filaIa = new IaJob($pdo);
-}
+    public function __construct(PDO $pdo)
+    {
+        $this->pdo = $pdo;
+        $this->artigos = new Item($pdo);
+        $this->filaIa = new IaJob($pdo);
+    }
     // Permite à equipa administradora consultar todos os artigos.
     public function listarTodos(): void
     {
@@ -43,26 +43,26 @@ class AdminItemController
     }
 
     // Devolve os dados completos de gestão à equipa.
-public function mostrar(int $id): void
-{
-    exigirAdministrador($this->pdo);
+    public function mostrar(int $id): void
+    {
+        exigirAdministrador($this->pdo);
 
-    header('Cache-Control: private, no-store');
+        header('Cache-Control: private, no-store');
 
-    $artigo = $this->artigos->procurarParaGestao($id);
+        $artigo = $this->artigos->procurarParaGestao($id);
 
-    if ($artigo === null) {
+        if ($artigo === null) {
+            responderJson([
+                'erro' => 'Artigo não encontrado.',
+            ], 404);
+
+            return;
+        }
+
         responderJson([
-            'erro' => 'Artigo não encontrado.',
-        ], 404);
-
-        return;
+            'estado' => 'ok',
+            'artigo' => $artigo,
+        ]);
     }
-
-    responderJson([
-        'estado' => 'ok',
-        'artigo' => $artigo,
-    ]);
-}
 
 }

@@ -11,7 +11,7 @@ class PedidoLevantamento
         $this->pdo = $pdo;
     }
 
-    // Gera um código aleatório sem caracteres fáceis de confundir.
+    // Gera o código de levantamento sem letras e números parecidos, como O e 0.
     public function gerarCodigo(): string
     {
         $alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -25,24 +25,24 @@ class PedidoLevantamento
         return $codigo;
     }
 
-    // Guarda um pedido com validade de 24 horas.
-    // Guarda um código associado a uma reclamação aprovada.
-public function criar(
-    int $userId,
-    int $itemAchadoId,
-    string $codigo,
-    int $reclamacaoId,
-    ?int $itemPerdidoId = null,
-    ?int $matchId = null
-): int {
-    if (!$this->pdo->inTransaction()) {
-        throw new LogicException(
-            'A criação do código exige uma transação.'
-        );
-    }
+    // Guarda um pedido de levantamento com um código válido durante 24 horas.
+    // Liga o código à reclamação aprovada que permite levantar este objeto.
+    public function criar(
+        int $userId,
+        int $itemAchadoId,
+        string $codigo,
+        int $reclamacaoId,
+        ?int $itemPerdidoId = null,
+        ?int $matchId = null
+    ): int {
+        if (!$this->pdo->inTransaction()) {
+            throw new LogicException(
+                'A criação do código exige uma transação.'
+            );
+        }
 
-    $consulta = $this->pdo->prepare(
-        "INSERT INTO pedidos_levantamento (
+        $consulta = $this->pdo->prepare(
+            "INSERT INTO pedidos_levantamento (
             user_id,
             item_achado_id,
             item_perdido_id,
@@ -59,20 +59,20 @@ public function criar(
             :codigo,
             DATE_ADD(NOW(), INTERVAL 24 HOUR)
         )"
-    );
+        );
 
-    $consulta->execute([
-        'user_id' => $userId,
-        'item_achado_id' => $itemAchadoId,
-        'item_perdido_id' => $itemPerdidoId,
-        'match_id' => $matchId,
-        'reclamacao_id' => $reclamacaoId,
-        'codigo' => $codigo,
-    ]);
+        $consulta->execute([
+            'user_id' => $userId,
+            'item_achado_id' => $itemAchadoId,
+            'item_perdido_id' => $itemPerdidoId,
+            'match_id' => $matchId,
+            'reclamacao_id' => $reclamacaoId,
+            'codigo' => $codigo,
+        ]);
 
-    return (int) $this->pdo->lastInsertId();
-}
-    // Procura um pedido existente do aluno para o mesmo achado.
+        return (int) $this->pdo->lastInsertId();
+    }
+    // Verifica se este aluno já tem um pedido de levantamento para este achado.
     public function procurarPorAlunoEAchado(
         int $userId,
         int $itemAchadoId
@@ -118,8 +118,10 @@ public function criar(
         return $pedido === false ? null : $pedido;
     }
 
-        // Valida e bloqueia a notificação e os artigos associados.
-    // Deve ser chamado dentro de uma transação.
+    // Confirma que a notificação pertence ao aluno e ainda liga artigos válidos.
+    // Bloqueia os registos na base de dados enquanto a operação os utiliza.
+    // Este método deve ser executado dentro de uma transação,
+    // para manter os registos bloqueados até guardar ou desfazer a operação.
     public function procurarNotificacaoValida(
         int $notificacaoId,
         int $userId
@@ -165,7 +167,7 @@ public function criar(
         return $resultado === false ? null : $resultado;
     }
 
-       // Renova um código ainda não utilizado.
+    // Substitui um código que ainda não foi usado e atribui mais 24 horas de validade.
     public function renovar(
         int $id,
         string $codigo,
@@ -204,7 +206,8 @@ public function criar(
         return $consulta->rowCount() === 1;
     }
 
-          // Consulta um código associado a uma reclamação ainda válida.
+    // Procura um código não usado e dentro do prazo.
+    // Confirma também que a reclamação está aprovada e o objeto pode ser entregue.
     public function procurarValidoPorCodigo(
         string $codigo,
         bool $bloquear = false
@@ -300,7 +303,8 @@ public function criar(
         return $pedido === false ? null : $pedido;
     }
 
-        // Consome um código válido dentro da transação da entrega.
+    // Marca o código como utilizado para impedir uma segunda entrega com o mesmo código.
+    // Esta alteração é guardada juntamente com o registo da entrega.
     public function marcarUtilizado(int $id): bool
     {
         if (!$this->pdo->inTransaction()) {
@@ -326,8 +330,8 @@ public function criar(
         return $consulta->rowCount() === 1;
     }
 
-    // Cancela outros pedidos relativos aos artigos já entregues.
-        public function cancelarOutrosPedidos(
+    // Cancela os outros pedidos de levantamento dos objetos que já foram entregues.
+    public function cancelarOutrosPedidos(
         int $achadoId,
         ?int $perdidoId,
         ?int $pedidoUtilizadoId = null
@@ -355,6 +359,5 @@ public function criar(
             'perdido_id' => $perdidoId,
         ]);
     }
-
 
 }

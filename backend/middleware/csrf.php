@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers/resposta.php';
 
-// Confirma que o pedido apresenta o token CSRF da sessão.
+// Compara o X-CSRF-Token recebido com o código guardado no login.
+// Se não corresponderem, impede a alteração pedida à API.
 function exigirCsrf(): void
 {
     $tokenSessao = $_SESSION['csrf_token'] ?? '';

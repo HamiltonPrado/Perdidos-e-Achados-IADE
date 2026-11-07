@@ -45,10 +45,10 @@ class Devolucao
     }
 
     // Lista as devoluções, começando pelas mais recentes.
-public function listarTodos(): array
-{
-    $consulta = $this->pdo->query(
-        'SELECT
+    public function listarTodos(): array
+    {
+        $consulta = $this->pdo->query(
+            'SELECT
             d.id,
             d.match_id,
             d.item_achado_id,
@@ -74,9 +74,9 @@ public function listarTodos(): array
          INNER JOIN pontos_recolha AS ponto
             ON ponto.id = d.ponto_recolha_id
          ORDER BY d.devolvido_em DESC, d.id DESC'
-    );
+        );
 
-    return $consulta->fetchAll();
-}
+        return $consulta->fetchAll();
+    }
 
 }

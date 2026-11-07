@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-
-
 // Verifica se o PHP está a responder, sem abrir ligação à BD.
 if ($metodo === 'GET' && $caminho === '/api/health') {
     responderJson([

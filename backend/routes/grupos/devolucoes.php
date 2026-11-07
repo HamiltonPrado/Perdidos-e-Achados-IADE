@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-
-
 // Regista uma devolução presencial confirmada pela equipa.
 if (
     $metodo === 'POST'

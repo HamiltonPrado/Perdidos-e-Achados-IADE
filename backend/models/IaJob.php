@@ -11,8 +11,9 @@ class IaJob
         $this->pdo = $pdo;
     }
 
-    // Agenda a análise de uma versão do artigo.
-    // Deve ser chamado na mesma transação que guarda o artigo.
+    // Coloca na fila um trabalho para a IA analisar esta versão do artigo.
+    // Guarda o trabalho da IA e o artigo na mesma transação:
+    // se uma das gravações falhar, nenhuma das duas fica guardada.
     public function agendar(int $itemId, int $versao): void
     {
         $consulta = $this->pdo->prepare(

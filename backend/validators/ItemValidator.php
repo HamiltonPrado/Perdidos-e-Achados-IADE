@@ -9,11 +9,11 @@ require_once __DIR__ . '/StockValidator.php';
 class ItemValidator
 {
     // Lê o JSON e valida os dados necessários para registar um artigo.
-        public static function lerDadosArtigo(
-    bool $exigirPontoRecolha = false,
-    bool $exigirVerificacao = false,
-    bool $permitirDadosStock = false
-): array {
+    public static function lerDadosArtigo(
+        bool $exigirPontoRecolha = false,
+        bool $exigirVerificacao = false,
+        bool $permitirDadosStock = false
+    ): array {
         $tipoConteudo = strtolower(
             trim(explode(';', $_SERVER['CONTENT_TYPE'] ?? '')[0])
         );
@@ -24,7 +24,7 @@ class ItemValidator
             ], 415);
         }
 
-        // Converte o JSON recebido num array.
+        // Transforma o texto JSON do pedido num array que o PHP consegue consultar.
         try {
             $dados = json_decode(
                 file_get_contents('php://input'),
@@ -38,7 +38,8 @@ class ItemValidator
             ], 400);
         }
 
-        // Confirma a presença e os tipos dos campos obrigatórios.
+        // Verifica se chegaram todos os campos obrigatórios e se têm o tipo certo:
+        // por exemplo, título como texto e category_id como número inteiro.
         if (
             !is_array($dados)
             || !isset(
@@ -74,14 +75,14 @@ class ItemValidator
             ], 422);
         }
 
-        // Os identificadores devem ser inteiros positivos.
+        // Os IDs da categoria e do local têm de ser números inteiros maiores que zero.
         if ($dados['category_id'] <= 0 || $dados['location_id'] <= 0) {
             responderJson([
                 'erro' => 'Seleciona uma categoria e um local válidos.'
             ], 422);
         }
 
-        // Nos achados, exige também um ponto de recolha.
+        // Quando esta operação exige um ponto de recolha, valida ponto_recolha_id.
         if (
             $exigirPontoRecolha
             && (
@@ -119,7 +120,7 @@ class ItemValidator
 
         $hoje = new DateTimeImmutable('today', $fusoHorario);
 
-        // Rejeita datas inexistentes, anteriores ao limite ou futuras.
+        // Recusa datas impossíveis, anteriores a 1000-01-01 ou posteriores a hoje.
         if (
             $data === false
             || $data->format('Y-m-d') !== $dataTexto
@@ -131,24 +132,24 @@ class ItemValidator
             ], 422);
         }
 
-        // Devolve apenas os campos permitidos e já validados.
-                    $verificacao = $exigirVerificacao
+        // Entrega ao controller apenas os campos autorizados que passaram nas verificações.
+        $verificacao = $exigirVerificacao
     ? VerificacaoValidator::validar($dados)
     : [];
 
-$stock = $permitirDadosStock
-    ? StockValidator::validar($dados)
-    : [];
+        $stock = $permitirDadosStock
+            ? StockValidator::validar($dados)
+            : [];
 
-return array_merge([
-    'titulo' => $titulo,
-    'descricao' => $descricao,
-    'category_id' => $dados['category_id'],
-    'location_id' => $dados['location_id'],
-    'data_ocorrencia' => $dataTexto,
-    'ponto_recolha_id' => $exigirPontoRecolha
-        ? $dados['ponto_recolha_id']
-        : null,
-], $verificacao, $stock);
+        return array_merge([
+            'titulo' => $titulo,
+            'descricao' => $descricao,
+            'category_id' => $dados['category_id'],
+            'location_id' => $dados['location_id'],
+            'data_ocorrencia' => $dataTexto,
+            'ponto_recolha_id' => $exigirPontoRecolha
+                ? $dados['ponto_recolha_id']
+                : null,
+        ], $verificacao, $stock);
     }
 }

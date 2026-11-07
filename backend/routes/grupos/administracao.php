@@ -2,23 +2,21 @@
 
 declare(strict_types=1);
 
-
-
-// Encaminha a listagem global para o controller da equipa.
+// Pede ao controller da equipa a lista completa dos artigos.
 if ($metodo === 'GET' && $caminho === '/api/admin/items') {
     $controller = new AdminItemController(obterLigacao());
 
     $controller->listarTodos();
 }
 
-// Encaminha o registo de achados para o controller da equipa.
+// Pede ao controller para registar um achado recebido diretamente pela equipa.
 if ($metodo === 'POST' && $caminho === '/api/admin/items/found') {
     $controller = new AdminItemController(obterLigacao());
 
     $controller->criarAchado();
 }
 
-// Encaminha o arquivo de um artigo para o controller da equipa.
+// Pede ao controller da equipa para arquivar o artigo indicado pelo ID.
 if (
     $metodo === 'PATCH'
     && preg_match(
@@ -44,7 +42,7 @@ if (
     $controller->arquivar($id);
 }
 
-// Encaminha a edição de um artigo para o controller da equipa.
+// Pede ao controller da equipa para guardar as alterações ao artigo indicado.
 if (
     $metodo === 'PUT'
     && preg_match(
@@ -96,7 +94,7 @@ if (
     $controller->confirmarEntrada($id);
 }
 
-// Consulta os dados de gestão de um artigo, com acesso da equipa.
+// Permite à equipa consultar o artigo, incluindo os dados internos da receção.
 if (
     $metodo === 'GET'
     && preg_match(

@@ -33,7 +33,7 @@ class NotificationController
         ]);
     }
 
-        // Marca uma notificação como lida pelo seu destinatário.
+    // Marca uma notificação como lida pelo seu destinatário.
     public function marcarLida(int $id): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -59,5 +59,5 @@ class NotificationController
             ]
         ]);
     }
-    
+
 }

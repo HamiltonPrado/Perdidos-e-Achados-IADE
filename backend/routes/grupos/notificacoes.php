@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-
-
 // Lista as notificações do utilizador autenticado.
 if ($metodo === 'GET' && $caminho === '/api/notifications') {
     $controller = new NotificationController(obterLigacao());
@@ -15,7 +13,7 @@ if ($metodo === 'GET' && $caminho === '/api/notifications') {
 if (
     $metodo === 'PATCH'
     && preg_match(
-                '~\A/api/notifications/([1-9][0-9]*)/read\z~',
+        '~\A/api/notifications/([1-9][0-9]*)/read\z~',
         $caminho,
         $parametros
     ) === 1

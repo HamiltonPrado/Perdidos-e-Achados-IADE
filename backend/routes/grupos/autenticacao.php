@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-
-
 // Encaminha o login para o controller.
 if ($metodo === 'POST' && $caminho === '/api/login') {
     $controller = new AuthController(obterLigacao());
@@ -11,14 +9,14 @@ if ($metodo === 'POST' && $caminho === '/api/login') {
     $controller->login();
 }
 
-// Encaminha a consulta da conta autenticada para o controller.
+// Pede ao controller os dados da conta que tem sessão iniciada.
 if ($metodo === 'GET' && $caminho === '/api/me') {
     $controller = new AuthController(obterLigacao());
 
     $controller->me();
 }
 
-// Encaminha o encerramento da sessão para o controller.
+// Pede ao controller para terminar a sessão da conta (logout).
 if ($metodo === 'POST' && $caminho === '/api/logout') {
     $controller = new AuthController(obterLigacao());
 

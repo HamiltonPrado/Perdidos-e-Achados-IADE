@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 trait ItemRegistos
 {
-
-
-    // Guarda um objeto perdido associado ao utilizador autenticado.
+    // Guarda o perdido com o ID da conta que tem sessão iniciada.
     public function criarPerdido(int $userId, array $dados): int
     {
         $sql = "
@@ -46,10 +44,10 @@ trait ItemRegistos
         return (int) $this->pdo->lastInsertId();
     }
 
-        // Guarda um objeto achado registado por um membro da equipa.
-  public function criarAchado(int $userId, array $dados): int
-{
-    $sql = "
+    // Guarda um achado registado pela equipa, já recebido na receção.
+    public function criarAchado(int $userId, array $dados): int
+    {
+        $sql = "
         INSERT INTO items (
             user_id,
             tipo,
@@ -82,25 +80,26 @@ trait ItemRegistos
         )
     ";
 
-    $consulta = $this->pdo->prepare($sql);
+        $consulta = $this->pdo->prepare($sql);
 
-    $consulta->execute([
-        'user_id' => $userId,
-        'titulo' => $dados['titulo'],
-        'descricao' => $dados['descricao'],
-        'category_id' => $dados['category_id'],
-        'location_id' => $dados['location_id'],
-        'ponto_recolha_id' => $dados['ponto_recolha_id'],
-        'data_ocorrencia' => $dados['data_ocorrencia'],
-        'pergunta_secreta' => $dados['pergunta_secreta'],
-        'resposta_esperada' => $dados['resposta_esperada'],
-        'recebido_por' => $userId,
-    ]);
+        $consulta->execute([
+            'user_id' => $userId,
+            'titulo' => $dados['titulo'],
+            'descricao' => $dados['descricao'],
+            'category_id' => $dados['category_id'],
+            'location_id' => $dados['location_id'],
+            'ponto_recolha_id' => $dados['ponto_recolha_id'],
+            'data_ocorrencia' => $dados['data_ocorrencia'],
+            'pergunta_secreta' => $dados['pergunta_secreta'],
+            'resposta_esperada' => $dados['resposta_esperada'],
+            'recebido_por' => $userId,
+        ]);
 
-    return (int) $this->pdo->lastInsertId();
-}
+        return (int) $this->pdo->lastInsertId();
+    }
 
-        // Regista um achado do aluno, a aguardar entrega na receção.
+    // Guarda o achado registado pelo aluno como por_entregar;
+    // a equipa ainda terá de confirmar que recebeu o objeto.
     public function criarAchadoPorAluno(
         int $userId,
         array $dados

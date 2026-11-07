@@ -6,7 +6,7 @@ require_once __DIR__ . '/../helpers/resposta.php';
 
 class StockValidator
 {
-    // Valida apenas os campos de stock enviados pela equipa.
+    // Verifica os campos localizacao_stock e observacoes_internas enviados pela equipa.
     public static function validar(array $dados): array
     {
         $resultado = [];
@@ -17,7 +17,7 @@ class StockValidator
         ];
 
         foreach ($campos as $campo => $limite) {
-            // Um campo omitido mantém o valor atual.
+            // Se a equipa não enviar este campo, mantém o que já está guardado.
             if (!array_key_exists($campo, $dados)) {
                 continue;
             }
@@ -38,7 +38,7 @@ class StockValidator
 
             $valor = trim($valor);
 
-            // Texto vazio permite limpar o campo.
+            // Se a equipa enviar texto vazio, apaga o valor que estava neste campo.
             if ($valor === '') {
                 $resultado[$campo] = null;
                 continue;

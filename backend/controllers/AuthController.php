@@ -74,7 +74,7 @@ class AuthController
             responderJson([
                 'erro' => 'Email ou password incorretos.'
             ], 401);
-            
+
         }
 
         try {
@@ -119,7 +119,7 @@ class AuthController
         ]);
     }
 
-    // Devolve os dados da conta associada à sessão atual.
+    // Devolve os dados da conta que está com sessão iniciada neste browser.
     public function me(): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -130,8 +130,7 @@ class AuthController
         ]);
     }
 
-
-        // Valida o token CSRF e termina a sessão atual.
+    // Confirma o código de segurança CSRF recebido e faz logout da conta.
     public function logout(): void
     {
         iniciarSessao($this->pdo);
@@ -146,7 +145,7 @@ class AuthController
             ], 401);
         }
 
-        // Compara o token recebido com o token guardado na sessão.
+        // Confirma que o código CSRF recebido é o que foi criado no login desta sessão.
         $tokenSessao = $_SESSION['csrf_token'] ?? '';
         $tokenPedido = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
 
@@ -165,7 +164,7 @@ class AuthController
         $parametros = session_get_cookie_params();
         $nomeCookie = session_name();
 
-        // Limpa os dados em memória e elimina a sessão na BD.
+        // Apaga os dados da sessão no PHP e na base de dados, terminando o login.
         $_SESSION = [];
 
         if (!session_destroy()) {
@@ -174,7 +173,7 @@ class AuthController
             );
         }
 
-        // Remove o cookie usando os mesmos parâmetros da sua criação.
+        // Pede ao browser para apagar o cookie que identificava esta sessão.
         $cookieRemovido = setcookie($nomeCookie, '', [
             'expires' => time() - 3600,
             'path' => $parametros['path'],
@@ -196,7 +195,6 @@ class AuthController
         ]);
     }
 
-    
     public function autenticar(string $email, string $password): ?array
     {
         $email = strtolower(trim($email));

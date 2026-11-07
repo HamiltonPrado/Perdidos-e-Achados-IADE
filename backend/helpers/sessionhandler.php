@@ -9,7 +9,7 @@ class DatabaseSessionHandler implements
     private PDO $pdo;
     private int $duracao;
 
-    // Regista quais as sessões que já existiam quando foram lidas.
+    // Guarda os IDs das sessões encontradas na base de dados ao serem lidas.
     private array $existentes = [];
 
     public function __construct(PDO $pdo, int $duracao = 3600)
@@ -95,7 +95,7 @@ class DatabaseSessionHandler implements
 
         $consulta->execute([$id]);
 
-        // Impede que este pedido volte a inserir a sessão eliminada.
+        // Evita voltar a guardar nesta operação uma sessão que já foi apagada.
         $this->existentes[$id] = true;
 
         return true;
@@ -112,7 +112,8 @@ class DatabaseSessionHandler implements
         return $consulta->rowCount();
     }
 
-    // Valida o formato do ID e confirma que a sessão não expirou.
+    // Verifica se o identificador da sessão tem um formato permitido
+    // e se a sessão ainda está dentro do prazo de validade.
     public function validateId(string $id): bool
     {
         $tamanho = strlen($id);

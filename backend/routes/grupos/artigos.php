@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-
-
 // Regista um objeto perdido associado ao utilizador autenticado.
 if ($metodo === 'POST' && $caminho === '/api/items/lost') {
     $controller = new ItemController(obterLigacao());
@@ -18,13 +16,12 @@ if ($metodo === 'POST' && $caminho === '/api/items/found') {
     $controller->criarAchado();
 }
 
-// Lista os achados disponíveis para os alunos autenticados.
+// Lista apenas achados ativos já entregues à receção, para quem tem sessão iniciada.
 if ($metodo === 'GET' && $caminho === '/api/items/found') {
     $controller = new ItemController(obterLigacao());
 
     $controller->listarAchados();
 }
-
 
 // Lista os artigos do utilizador autenticado.
 if ($metodo === 'GET' && $caminho === '/api/items/mine') {

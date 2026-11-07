@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-// Obtém a ligação PDO, reutilizando-a durante o mesmo pedido.
+// Abre a ligação à base de dados através do PDO.
+// Se este pedido já abriu uma ligação, usa a mesma.
 function obterLigacao(): PDO
 {
     static $pdo = null;

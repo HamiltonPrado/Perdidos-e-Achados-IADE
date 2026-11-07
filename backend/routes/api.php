@@ -13,7 +13,7 @@ require_once __DIR__ . '/../controllers/NotificationController.php';
 require_once __DIR__ . '/../controllers/PedidoLevantamentoController.php';
 require_once __DIR__ . '/../controllers/ReclamacaoController.php';
 
-// Encaminha os pedidos por funcionalidade.
+// Carrega os grupos de rotas: cada grupo trata uma área, como artigos ou reclamações.
 require __DIR__ . '/grupos/saude.php';
 require __DIR__ . '/grupos/autenticacao.php';
 require __DIR__ . '/grupos/referencias.php';
@@ -25,7 +25,7 @@ require __DIR__ . '/grupos/notificacoes.php';
 require __DIR__ . '/grupos/levantamentos.php';
 require __DIR__ . '/grupos/reclamacoes.php';
 
-// Responde quando nenhuma rota corresponde ao pedido.
+// Se o endereço e o método pedidos não existem na API, devolve o erro 404.
 responderJson([
     'erro' => 'Rota não encontrada.'
 ], 404);

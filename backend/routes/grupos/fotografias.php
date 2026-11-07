@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-
-
 // Adiciona uma fotografia a um artigo.
 if (
     $metodo === 'POST'

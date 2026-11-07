@@ -56,7 +56,7 @@ class Notification
         return $consulta->fetchAll();
     }
 
-        // Marca uma notificação do utilizador como lida.
+    // Marca uma notificação do utilizador como lida.
     public function marcarLida(int $id, int $userId): bool
     {
         $consulta = $this->pdo->prepare(
@@ -77,7 +77,7 @@ class Notification
             return true;
         }
 
-        // Uma notificação já lida também representa sucesso.
+        // Se a notificação já estava lida, continua a tratar o pedido como bem-sucedido.
         $consulta = $this->pdo->prepare(
             'SELECT id
              FROM notifications

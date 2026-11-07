@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 trait ItemConsultas
 {
-
     // Lista apenas os artigos do utilizador indicado.
-public function listarPorUtilizador(int $userId): array
-{
-    $consulta = $this->pdo->prepare(
-        'SELECT
+    public function listarPorUtilizador(int $userId): array
+    {
+        $consulta = $this->pdo->prepare(
+            'SELECT
             i.id,
             i.user_id,
             i.tipo,
@@ -34,17 +33,17 @@ public function listarPorUtilizador(int $userId): array
             ON p.id = i.ponto_recolha_id
          WHERE i.user_id = :user_id
          ORDER BY i.criado_em DESC, i.id DESC'
-    );
+        );
 
-    $consulta->execute([
-        'user_id' => $userId,
-    ]);
+        $consulta->execute([
+            'user_id' => $userId,
+        ]);
 
-    return $consulta->fetchAll();
-}
+        return array_map([$this, 'adicionarReferencia'], $consulta->fetchAll());
+    }
 
-        // Lista todos os artigos para a gestão pela equipa.
-        public function listarTodos(): array
+    // Lista todos os artigos para a gestão pela equipa.
+    public function listarTodos(): array
     {
         $sql = '
             SELECT
@@ -76,9 +75,9 @@ public function listarPorUtilizador(int $userId): array
 
         $consulta = $this->pdo->query($sql);
 
-        return $consulta->fetchAll();
+        return array_map([$this, 'adicionarReferencia'], $consulta->fetchAll());
     }
-        // Procura um artigo pelo identificador.
+    // Procura um artigo pelo identificador.
     public function procurarPorId(int $id): ?array
     {
         $sql = '
@@ -117,29 +116,30 @@ public function listarPorUtilizador(int $userId): array
 
         $artigo = $consulta->fetch();
 
-        return $artigo === false ? null : $artigo;
+        return $artigo === false ? null : $this->adicionarReferencia($artigo);
     }
 
-// Consulta e bloqueia o artigo durante uma transação.
-public function procurarParaAtualizacao(int $id): ?array
-{
-    $consulta = $this->pdo->prepare(
-               'SELECT id, user_id, tipo, estado, estado_recepcao,
+    // Consulta o artigo e impede outras operações de o alterarem
+    // até esta transação terminar.
+    public function procurarParaAtualizacao(int $id): ?array
+    {
+        $consulta = $this->pdo->prepare(
+            'SELECT id, user_id, tipo, estado, estado_recepcao,
                 ponto_recolha_id, versao, pergunta_secreta
          FROM items
          WHERE id = :id
          LIMIT 1
          FOR UPDATE'
-    );
+        );
 
-    $consulta->execute([
-        'id' => $id
-    ]);
+        $consulta->execute([
+            'id' => $id
+        ]);
 
-    $artigo = $consulta->fetch();
+        $artigo = $consulta->fetch();
 
-    return $artigo === false ? null : $artigo;
-}
+        return $artigo === false ? null : $artigo;
+    }
 
     // Lista os perdidos ativos para consulta pelos alunos.
     public function listarPerdidosAtivos(
@@ -175,10 +175,10 @@ public function procurarParaAtualizacao(int $id): ?array
 
         $consulta->execute();
 
-        return $consulta->fetchAll();
+        return array_map([$this, 'adicionarReferencia'], $consulta->fetchAll());
     }
 
-        // Lista os achados disponíveis para os alunos autenticados.
+    // Lista apenas achados ativos já entregues à receção, para quem tem sessão iniciada.
     public function listarAchadosDisponiveis(
         int $limite = 20,
         int $offset = 0
@@ -229,21 +229,21 @@ public function procurarParaAtualizacao(int $id): ?array
 
         $consulta->execute();
 
-        return $consulta->fetchAll();
+        return array_map([$this, 'adicionarReferencia'], $consulta->fetchAll());
     }
 
-    // Obtém os dados de gestão para operações autorizadas da equipa.
-public function procurarParaGestao(
-    int $id,
-    bool $bloquear = false
-): ?array {
-    if ($bloquear && !$this->pdo->inTransaction()) {
-        throw new LogicException(
-            'O bloqueio do artigo exige uma transação.'
-        );
-    }
+    // Lê os dados internos de que a equipa precisa para gerir o artigo.
+    public function procurarParaGestao(
+        int $id,
+        bool $bloquear = false
+    ): ?array {
+        if ($bloquear && !$this->pdo->inTransaction()) {
+            throw new LogicException(
+                'O bloqueio do artigo exige uma transação.'
+            );
+        }
 
-    $sql = '
+        $sql = '
         SELECT
             id,
             user_id,
@@ -269,16 +269,16 @@ public function procurarParaGestao(
         LIMIT 1
     ';
 
-    if ($bloquear) {
-        $sql .= ' FOR UPDATE';
+        if ($bloquear) {
+            $sql .= ' FOR UPDATE';
+        }
+
+        $consulta = $this->pdo->prepare($sql);
+        $consulta->execute(['id' => $id]);
+
+        $artigo = $consulta->fetch();
+
+        return $artigo === false ? null : $this->adicionarReferencia($artigo);
     }
-
-    $consulta = $this->pdo->prepare($sql);
-    $consulta->execute(['id' => $id]);
-
-    $artigo = $consulta->fetch();
-
-    return $artigo === false ? null : $artigo;
-}
 
 }

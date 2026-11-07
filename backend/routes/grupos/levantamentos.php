@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-
-
-// Solicita um código através de uma notificação do utilizador.
+// Mantém o endereço antigo para informar que o código deve ser pedido
+// através de uma reclamação aprovada; esta rota já não emite códigos.
 if (
     $metodo === 'POST'
     && preg_match(

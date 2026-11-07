@@ -52,57 +52,57 @@ class ItemPhoto
         return (int) $this->pdo->lastInsertId();
     }
 
-    // Lista as fotografias de um artigo sem carregar os dados binários.
-public function listarPorArtigo(int $itemId): array
-{
-    $consulta = $this->pdo->prepare(
-        'SELECT id, item_id, mime, criado_em
+    // Lista os dados das fotografias, sem ler o conteúdo das imagens.
+    public function listarPorArtigo(int $itemId): array
+    {
+        $consulta = $this->pdo->prepare(
+            'SELECT id, item_id, mime, criado_em
          FROM item_photos
          WHERE item_id = :item_id
          ORDER BY criado_em ASC, id ASC'
-    );
+        );
 
-    $consulta->execute([
-        'item_id' => $itemId
-    ]);
+        $consulta->execute([
+            'item_id' => $itemId
+        ]);
 
-    return $consulta->fetchAll();
-}
+        return $consulta->fetchAll();
+    }
 
-// Obtém uma fotografia com os dados necessários para a visualizar.
-public function procurarPorId(int $id): ?array
-{
-    $consulta = $this->pdo->prepare(
-        'SELECT id, item_id, mime, dados
+    // Lê o conteúdo da fotografia e o seu tipo de imagem para a mostrar.
+    public function procurarPorId(int $id): ?array
+    {
+        $consulta = $this->pdo->prepare(
+            'SELECT id, item_id, mime, dados
          FROM item_photos
          WHERE id = :id
          LIMIT 1'
-    );
+        );
 
-    $consulta->execute([
-        'id' => $id
-    ]);
+        $consulta->execute([
+            'id' => $id
+        ]);
 
-    $foto = $consulta->fetch();
+        $foto = $consulta->fetch();
 
-    return $foto === false ? null : $foto;
-}
+        return $foto === false ? null : $foto;
+    }
 
-// Remove uma fotografia associada ao artigo indicado.
-public function apagar(int $id, int $itemId): bool
-{
-    $consulta = $this->pdo->prepare(
-        'DELETE FROM item_photos
+    // Remove uma fotografia associada ao artigo indicado.
+    public function apagar(int $id, int $itemId): bool
+    {
+        $consulta = $this->pdo->prepare(
+            'DELETE FROM item_photos
          WHERE id = :id
            AND item_id = :item_id'
-    );
+        );
 
-    $consulta->execute([
-        'id' => $id,
-        'item_id' => $itemId,
-    ]);
+        $consulta->execute([
+            'id' => $id,
+            'item_id' => $itemId,
+        ]);
 
-    return $consulta->rowCount() === 1;
-}
+        return $consulta->rowCount() === 1;
+    }
 
 }

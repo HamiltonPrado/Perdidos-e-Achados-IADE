@@ -17,7 +17,8 @@ class Reclamacao
         $this->pdo = $pdo;
     }
 
-    // Guarda a reclamação com a pergunta e versão obtidas do artigo.
+    // Guarda a resposta do aluno juntamente com a pergunta e a versão atuais do achado,
+    // para a equipa saber a que dados o aluno respondeu.
     public function criar(
         int $userId,
         array $artigo,
@@ -68,6 +69,5 @@ class Reclamacao
 
         return (int) $this->pdo->lastInsertId();
     }
-
 
 }

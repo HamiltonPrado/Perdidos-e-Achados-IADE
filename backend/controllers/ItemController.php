@@ -14,16 +14,16 @@ class ItemController
     private PDO $pdo;
     private Item $artigos;
 
-     private IaJob $filaIa;
+    private IaJob $filaIa;
 
-     public function __construct(PDO $pdo)
+    public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
         $this->artigos = new Item($pdo);
         $this->filaIa = new IaJob($pdo);
     }
 
-   // Devolve os artigos pertencentes ao utilizador autenticado.
+    // Devolve os artigos pertencentes ao utilizador autenticado.
     public function listarMeus(): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -38,59 +38,61 @@ class ItemController
         ]);
     }
 
-        // Regista um objeto perdido associado ao utilizador autenticado.
-    // Guarda o perdido e agenda a sua análise na mesma transação.
-public function criarPerdido(): void
-{
-    $utilizador = exigirAutenticacao($this->pdo);
-    exigirCsrf();
+    // Regista um objeto perdido associado ao utilizador autenticado.
+    // Guarda o perdido e o trabalho da IA em conjunto;
+    // se uma das gravações falhar, nenhuma das duas fica guardada.
+    public function criarPerdido(): void
+    {
+        $utilizador = exigirAutenticacao($this->pdo);
+        exigirCsrf();
 
-    $dados = ItemValidator::lerDadosArtigo();
+        $dados = ItemValidator::lerDadosArtigo();
 
-    try {
-        $this->pdo->beginTransaction();
+        try {
+            $this->pdo->beginTransaction();
 
-        $id = $this->artigos->criarPerdido(
-            $utilizador['id'],
-            $dados
-        );
+            $id = $this->artigos->criarPerdido(
+                $utilizador['id'],
+                $dados
+            );
 
-        // Os novos artigos começam na versão 1.
-        $this->filaIa->agendar($id, 1);
+            // Os novos artigos começam na versão 1.
+            $this->filaIa->agendar($id, 1);
 
-        $this->pdo->commit();
+            $this->pdo->commit();
 
-    } catch (Throwable $erro) {
-        if ($this->pdo->inTransaction()) {
-            $this->pdo->rollBack();
+        } catch (Throwable $erro) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+
+            if (
+                $erro instanceof PDOException
+                && (int) ($erro->errorInfo[1] ?? 0) === 1452
+            ) {
+                responderJson([
+                    'erro' => 'Não foi possível associar o registo. '
+                        . 'Confirma a categoria e o local selecionados.'
+                ], 422);
+            }
+
+            throw $erro;
         }
 
-        if (
-            $erro instanceof PDOException
-            && (int) ($erro->errorInfo[1] ?? 0) === 1452
-        ) {
-            responderJson([
-                'erro' => 'Não foi possível associar o registo. '
-                    . 'Confirma a categoria e o local selecionados.'
-            ], 422);
-        }
-
-        throw $erro;
+        responderJson([
+            'estado' => 'ok',
+            'mensagem' => 'Objeto perdido registado.',
+            'item' => [
+                'id' => $id,
+                'referencia' => Item::formatarReferenciaPerdido($id),
+                'tipo' => 'lost',
+                'estado' => 'ativo',
+                'ia_estado' => 'pendente',
+            ]
+        ], 201);
     }
 
-    responderJson([
-        'estado' => 'ok',
-        'mensagem' => 'Objeto perdido registado.',
-        'item' => [
-            'id' => $id,
-            'tipo' => 'lost',
-            'estado' => 'ativo',
-            'ia_estado' => 'pendente',
-        ]
-    ], 201);
-}
-
-        // Permite ao autor marcar o seu objeto perdido como resolvido.
+    // Permite ao autor marcar o seu objeto perdido como resolvido.
     public function resolver(int $id): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -115,7 +117,7 @@ public function criarPerdido(): void
             ], 409);
         }
 
-        // Uma repetição do pedido mantém o resultado já alcançado.
+        // Se o perdido já foi marcado como resolvido, responde com sucesso sem o alterar.
         if ($artigo['estado'] !== 'resolvido') {
             if ($artigo['estado'] !== 'ativo') {
                 responderJson([
@@ -128,7 +130,8 @@ public function criarPerdido(): void
                 $utilizador['id']
             );
 
-            // O estado pode ter mudado entre a consulta e a atualização.
+            // Outra operação pode ter alterado o estado depois da consulta;
+            // confirma o resultado antes de responder ao utilizador.
             if (!$alterado) {
                 responderJson([
                     'erro' => 'O artigo foi alterado entretanto. '
@@ -142,12 +145,13 @@ public function criarPerdido(): void
             'mensagem' => 'Objeto perdido marcado como resolvido.',
             'item' => [
                 'id' => $id,
+                'referencia' => Item::formatarReferenciaPerdido($id),
                 'estado' => 'resolvido',
             ]
         ]);
     }
 
-         // Devolve o detalhe respeitando as permissões de consulta.
+    // Devolve o detalhe respeitando as permissões de consulta.
     public function mostrar(int $id): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -165,7 +169,7 @@ public function criarPerdido(): void
 
         $eAdministrador = $utilizador['role'] === 'admin';
 
-               $eArtigoDisponivel =
+        $eArtigoDisponivel =
             $artigo['estado'] === 'ativo'
             && (
                 $artigo['tipo'] === 'lost'
@@ -185,10 +189,11 @@ public function criarPerdido(): void
             ], 404);
         }
 
-        // Limita os campos apresentados a outros alunos.
+        // Seleciona os campos que um aluno pode consultar, deixando de fora os dados internos.
         if (!$pertenceAoUtilizador && !$eAdministrador) {
-                        $camposVisiveis = array_flip([
+            $camposVisiveis = array_flip([
                 'id',
+                'referencia',
                 'tipo',
                 'titulo',
                 'descricao',
@@ -219,7 +224,7 @@ public function criarPerdido(): void
         ]);
     }
 
-        // Permite aos utilizadores autenticados consultar os perdidos ativos.
+    // Permite aos utilizadores autenticados consultar os perdidos ativos.
     public function listarPerdidos(): void
     {
         exigirAutenticacao($this->pdo);
@@ -258,47 +263,46 @@ public function criarPerdido(): void
     }
 
     // Lista os achados disponíveis para utilizadores autenticados.
-public function listarAchados(): void
-{
-    exigirAutenticacao($this->pdo);
+    public function listarAchados(): void
+    {
+        exigirAutenticacao($this->pdo);
 
-    $pagina = filter_var(
-        $_GET['pagina'] ?? '1',
-        FILTER_VALIDATE_INT,
-        ['options' => [
-            'min_range' => 1,
-            'max_range' => 1000000,
-        ]]
-    );
+        $pagina = filter_var(
+            $_GET['pagina'] ?? '1',
+            FILTER_VALIDATE_INT,
+            ['options' => [
+                'min_range' => 1,
+                'max_range' => 1000000,
+            ]]
+        );
 
-    if ($pagina === false) {
+        if ($pagina === false) {
+            responderJson([
+                'erro' => 'Página inválida.'
+            ], 422);
+
+            return;
+        }
+
+        $limite = 20;
+        $offset = ($pagina - 1) * $limite;
+
+        $artigos = $this->artigos->listarAchadosDisponiveis(
+            $limite,
+            $offset
+        );
+
         responderJson([
-            'erro' => 'Página inválida.'
-        ], 422);
-
-        return;
+            'estado' => 'ok',
+            'artigos' => $artigos,
+            'paginacao' => [
+                'pagina' => $pagina,
+                'por_pagina' => $limite,
+            ],
+        ]);
     }
 
-    $limite = 20;
-    $offset = ($pagina - 1) * $limite;
-
-    $artigos = $this->artigos->listarAchadosDisponiveis(
-        $limite,
-        $offset
-    );
-
-    responderJson([
-        'estado' => 'ok',
-        'artigos' => $artigos,
-        'paginacao' => [
-            'pagina' => $pagina,
-            'por_pagina' => $limite,
-        ],
-    ]);
-}
-
-
-        // Regista um achado que o aluno ainda vai entregar à equipa.
+    // Regista um achado que o aluno ainda vai entregar à equipa.
     public function criarAchado(): void
     {
         $utilizador = exigirAutenticacao($this->pdo);

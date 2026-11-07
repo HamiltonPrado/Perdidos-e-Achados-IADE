@@ -32,7 +32,7 @@ class DevolucaoValidator
             ], 400);
         }
 
-        // A pessoa que recebe o objeto é obrigatória.
+        // recebido_por deve indicar o ID da pessoa a quem a equipa entrega o objeto.
         if (
             !is_array($dados)
             || !isset($dados['recebido_por'])
@@ -44,7 +44,8 @@ class DevolucaoValidator
             ], 422);
         }
 
-        // Os identificadores opcionais podem ser omitidos ou enviados a null.
+        // item_perdido_id e match_id são opcionais: podes não os enviar
+        // ou enviar null para indicar que não existe essa associação.
         foreach (['item_perdido_id', 'match_id'] as $campo) {
             $valor = $dados[$campo] ?? null;
 
@@ -62,7 +63,8 @@ class DevolucaoValidator
         $perdidoId = $dados['item_perdido_id'] ?? null;
         $matchId = $dados['match_id'] ?? null;
 
-        // Uma correspondência tem de identificar também o perdido.
+        // Se enviares uma correspondência da IA (match_id), indica também
+        // o objeto perdido a que ela se refere (item_perdido_id).
         if ($matchId !== null && $perdidoId === null) {
             responderJson([
                 'erro' => 'Indica item_perdido_id quando enviares match_id.'

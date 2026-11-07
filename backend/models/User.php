@@ -32,20 +32,20 @@ class User
     }
 
     public function procurarPorId(int $id): ?array
-{
-    $consulta = $this->pdo->prepare(
-        'SELECT id, nome, email, role, ativo
+    {
+        $consulta = $this->pdo->prepare(
+            'SELECT id, nome, email, role, ativo
          FROM users
          WHERE id = :id
          LIMIT 1'
-    );
+        );
 
-    $consulta->execute([
-        'id' => $id
-    ]);
+        $consulta->execute([
+            'id' => $id
+        ]);
 
-    $utilizador = $consulta->fetch();
+        $utilizador = $consulta->fetch();
 
-    return $utilizador === false ? null : $utilizador;
-}
+        return $utilizador === false ? null : $utilizador;
+    }
 }

@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-
-
 // Encaminha a listagem das categorias para o controller.
 if ($metodo === 'GET' && $caminho === '/api/categories') {
     $controller = new ReferenciaController(obterLigacao());
