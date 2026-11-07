@@ -581,3 +581,45 @@ h3 {
   color: var(--cor-texto-secundario);
   line-height: 1.6;
 }
+
+.separadores {
+  display: flex;
+  gap: 28px;
+  border-bottom: 1px solid var(--cor-borda);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.separador {
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  padding: 0 0 12px;
+  margin-bottom: -1px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--cor-texto-secundario);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.separador span {
+  display: inline-block;
+  min-width: 22px;
+  padding: 1px 7px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: var(--cor-cinza-suave);
+  font-size: 12px;
+  text-align: center;
+}
+
+.separador.ativo {
+  color: var(--cor-texto);
+  border-bottom-color: var(--cor-marca);
+}
+
+.separador.ativo span {
+  background: var(--cor-marca);
+  color: #fff;
+}

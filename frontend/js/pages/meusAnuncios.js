@@ -56,7 +56,7 @@ async function iniciar() {
     const aviso = document.getElementById('aviso-entregar');
     aviso.hidden = !(separador === 'por_entregar' && contagem.por_entregar > 0);
     aviso.innerHTML = `<span class="aviso__rotulo">Entrega pendente</span>
-      Leva os objetos à ${esc(RECECAO.responsavel)} (${esc(RECECAO.local)}, ${esc(RECECAO.horario)}) e indica a referência de cada um.`;
+      Leva os objetos à receção (${esc(RECECAO.local)}, ${esc(RECECAO.horario)}) e indica a referência de cada um.`;
 
     const doGrupo = itens.filter((i) => (GRUPO[i.estado] ?? 'na_rececao') === separador);
     lista.innerHTML = doGrupo.length
