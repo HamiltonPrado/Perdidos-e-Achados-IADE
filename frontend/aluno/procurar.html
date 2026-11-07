@@ -9,21 +9,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
 
-  <link rel="stylesheet" href="assets/css/variables.css">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/components/navbar.css">
-  <link rel="stylesheet" href="assets/css/components/footer.css">
-  <link rel="stylesheet" href="assets/css/components/item-card.css">
-  <link rel="stylesheet" href="assets/css/pages/procurar.css">
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components/navbar.css">
+  <link rel="stylesheet" href="../assets/css/components/footer.css">
+  <link rel="stylesheet" href="../assets/css/components/item-card.css">
+  <link rel="stylesheet" href="../assets/css/pages/procurar.css">
 </head>
 <body>
   <header class="navbar" id="navbar"></header>
 
   <main class="contentor procurar">
     <section id="ecra-formulario">
-      <a href="index.html" class="voltar">← Voltar a explorar</a>
+      <a href="../index.html" class="voltar">← Voltar a explorar</a>
 
-      <p class="sobretitulo procurar__sobretitulo">Pedido de procura</p>
       <h1 class="procurar__titulo">Encontrar o meu objeto</h1>
       <p class="procurar__intro">Descreve o que perdeste. Vamos comparar o teu pedido com os objetos entregues na receção.</p>
 
@@ -71,7 +70,6 @@
         <label for="fotos" class="upload upload--compacto">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
           <span class="upload__titulo">Adicionar fotografia de referência</span>
-          <span class="ajuda">Opcional · não será publicada</span>
           <input id="fotos" type="file" accept="image/*" multiple class="so-leitor">
         </label>
         <div class="miniaturas-upload" id="miniaturas-fotos" aria-live="polite"></div>
@@ -102,13 +100,13 @@
       </div>
 
       <div class="procurar__acoes procurar__acoes--centro">
-        <a href="index.html" class="botao botao--contorno">Ver todos os objetos</a>
+        <a href="../index.html" class="botao botao--contorno">Ver todos os objetos</a>
       </div>
     </section>
   </main>
 
   <footer class="footer" id="footer"></footer>
 
-  <script type="module" src="js/pages/procurar.js"></script>
+  <script type="module" src="../js/pages/procurar.js"></script>
 </body>
 </html>
