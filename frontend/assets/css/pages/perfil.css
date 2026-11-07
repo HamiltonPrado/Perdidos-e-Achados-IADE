@@ -42,3 +42,19 @@
 .perfil .mensagem {
   margin-right: auto;
 }
+
+.perfil__sessao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.perfil__sessao-titulo {
+  font-size: 1.1rem;
+  margin: 0 0 2px;
+}

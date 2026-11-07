@@ -1,7 +1,9 @@
 import { requerLogin, getUser, atualizarUser } from '../utilities/auth.js';
+import { url } from '../utilities/caminhos.js';
 import { montarNavBar } from '../components/navbar.js';
 import { montarFooter } from '../components/footer.js';
 import { userService } from '../services/userService.js';
+import { authService } from '../services/authService.js';
 import { esc, iniciais, nomeCurto, lerImagem } from '../utilities/tools.js';
 
 const $ = (id) => document.getElementById(id);
@@ -41,6 +43,11 @@ async function iniciar() {
   $('nome').addEventListener('input', () => {
     $('guardado').hidden = true;
     desenhar();
+  });
+
+  $('terminar-sessao').addEventListener('click', async () => {
+    await authService.sair();
+    window.location.href = url('index.html');
   });
 
   $('form-perfil').addEventListener('submit', async (e) => {
