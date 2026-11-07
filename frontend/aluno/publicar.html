@@ -9,21 +9,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
 
-  <link rel="stylesheet" href="assets/css/variables.css">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/components/navbar.css">
-  <link rel="stylesheet" href="assets/css/components/footer.css">
-  <link rel="stylesheet" href="assets/css/pages/publicar.css">
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components/navbar.css">
+  <link rel="stylesheet" href="../assets/css/components/footer.css">
+  <link rel="stylesheet" href="../assets/css/pages/publicar.css">
 </head>
 <body>
   <header class="navbar" id="navbar"></header>
 
   <main class="contentor publicar">
-    <a href="index.html" class="voltar">← Voltar a explorar</a>
+    <a href="../index.html" class="voltar">← Voltar a explorar</a>
 
     <p class="sobretitulo publicar__sobretitulo">Registar objeto </p>
     <h1 class="publicar__titulo">Encontraste alguma coisa?</h1>
-    <p class="publicar__intro" id="intro">Regista o objeto e entrega-o na receção da Universidade Europeia.</p>
+    <p class="publicar__intro" id="intro">Regista o objeto e entrega-o na receção.</p>
 
     <form id="form-publicar" novalidate>
 
@@ -49,7 +49,7 @@
           <h2 class="passo__titulo">Sobre o objeto</h2>
           <div class="duas-colunas">
             <div class="grupo">
-              <label for="titulo" class="rotulo">Nome do objeto</label>
+              <label for="titulo" class="rotulo">Nome do artigo</label>
               <input id="titulo" type="text" class="campo" maxlength="80" placeholder="Ex.: Auscultadores pretos">
               <span class="erro" id="erro-titulo" hidden>Dá um nome ao objeto.</span>
             </div>
@@ -92,22 +92,10 @@
       <section class="passo">
         <span class="passo__numero">04</span>
         <div class="passo__conteudo">
-          <h2 class="passo__titulo">Pergunta secreta</h2>
-          <p class="ajuda passo__ajuda">Será apresentada a quem reclamar e validada pela equipa da receção.</p>
-          <div class="grupo">
-            <label for="pergunta" class="rotulo">Pergunta</label>
-            <input id="pergunta" type="text" class="campo" placeholder="Ex.: Qual é a marca dos auscultadores?">
-            <span class="erro" id="erro-pergunta" hidden>Escreve uma pergunta que só o dono saiba responder.</span>
-          </div>
-          <div class="grupo">
-            <label for="resposta" class="rotulo">Resposta esperada · <span class="rotulo__opcional">apenas para a receção</span></label>
-            <input id="resposta" type="text" class="campo" placeholder="Ex.: Apple" autocomplete="off">
-            <span class="erro" id="erro-resposta" hidden>Escreve a resposta certa, para a receção a poder comparar.</span>
-          </div>
+          <h2 class="passo__titulo">Entrega na receção</h2>
+          <p class="ajuda passo__ajuda">É na receção que a equipa guarda o objeto e entrega o artigo no dono.</p>
 
           <div class="publicar__nota">
-            <b>Próximo passo</b>
-            <span id="nota-proximo">Depois de registares, entrega o objeto na receção.</span>
           </div>
 
           <p class="erro" id="erro-geral" role="alert" hidden></p>
@@ -122,6 +110,6 @@
 
   <footer class="footer" id="footer"></footer>
 
-  <script type="module" src="js/pages/publicar.js"></script>
+  <script type="module" src="../js/pages/publicar.js"></script>
 </body>
 </html>

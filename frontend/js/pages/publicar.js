@@ -16,7 +16,7 @@ if (requerLogin()) {
 }
 
 async function iniciar() {
-  $('nota-proximo').textContent = `Depois de registares, entrega o objeto à ${RECECAO.responsavel} na receção.`;
+  $('nota-proximo').textContent = `Leva o objeto à receção (${RECECAO.local}, ${RECECAO.horario}) e indica a referência que vais receber.`;
 
   const categorias = await categoriasService.getAll();
   const locais = await locaisService.getAll();
@@ -26,6 +26,9 @@ async function iniciar() {
 
   const fotos = seletorDeFotos($('fotos'), $('miniaturas-fotos'), 5, () => {
     $('erro-fotos').hidden = false;
+  });
+  $('fotos').addEventListener('change', () => {
+    $('erro-foto-falta').hidden = true;
   });
 
   $('descricao').addEventListener('input', () => {
@@ -39,14 +42,19 @@ async function iniciar() {
       titulo: !$('titulo').value.trim(),
       categoria: !$('categoria').value,
       local: !$('local').value,
-      pergunta: !$('pergunta').value.trim(),
-      resposta: !$('resposta').value.trim(),
     };
     Object.entries(erros).forEach(([campo, temErro]) => {
       $(`erro-${campo}`).hidden = !temErro;
     });
 
+    const semFoto = fotos.ficheiros.length === 0;
+    $('erro-foto-falta').hidden = !semFoto;
+
     const primeiroErro = Object.keys(erros).find((campo) => erros[campo]);
+    if (semFoto) {
+      $('fotos').closest('.passo').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     if (primeiroErro) {
       $(primeiroErro).focus();
       return;
@@ -64,8 +72,6 @@ async function iniciar() {
           categoriaId: $('categoria').value,
           localId: $('local').value,
           dataEncontrado: $('data').value ? new Date($('data').value).toISOString() : new Date().toISOString(),
-          pergunta: $('pergunta').value.trim(),
-          respostaEsperada: $('resposta').value.trim(),
           fotos: fotos.ficheiros,
         },
         categorias,
