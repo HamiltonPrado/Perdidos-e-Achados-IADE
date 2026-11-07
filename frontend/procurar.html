@@ -13,25 +13,102 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/components/navbar.css">
   <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/components/item-card.css">
+  <link rel="stylesheet" href="assets/css/pages/procurar.css">
 </head>
 <body>
   <header class="navbar" id="navbar"></header>
 
-  <main class="contentor contentor--estreito pagina">
-    <a href="index.html" class="voltar">← Voltar a explorar</a>
-    <p class="sobretitulo" style="margin-top: 24px">Pedido de procura</p>
-    <h1 class="titulo-pagina">Encontrar o meu objeto</h1>
-    <p class="intro">Em breve vais poder descrever o que perdeste. Vamos comparar o teu pedido com os objetos entregues na receção.</p>
-    <a href="index.html" class="botao botao--destaque">Ver objetos encontrados →</a>
+  <main class="contentor procurar">
+    <section id="ecra-formulario">
+      <a href="index.html" class="voltar">← Voltar a explorar</a>
+
+      <p class="sobretitulo procurar__sobretitulo">Pedido de procura</p>
+      <h1 class="procurar__titulo">Encontrar o meu objeto</h1>
+      <p class="procurar__intro">Descreve o que perdeste. Vamos comparar o teu pedido com os objetos entregues na receção.</p>
+
+      <form id="form-procurar" class="procurar__form" novalidate>
+        <div class="duas-colunas">
+          <div class="grupo">
+            <label for="titulo" class="rotulo">Objeto perdido</label>
+            <input id="titulo" type="text" class="campo" maxlength="80" placeholder="Ex.: iPhone 13 preto">
+            <span class="erro" id="erro-titulo" hidden>Indica o que perdeste.</span>
+          </div>
+          <div class="grupo">
+            <label for="categoria" class="rotulo">Categoria</label>
+            <select id="categoria" class="campo">
+              <option value="">Escolher…</option>
+            </select>
+            <span class="erro" id="erro-categoria" hidden>Escolhe uma categoria.</span>
+          </div>
+        </div>
+
+        <div class="grupo">
+          <label for="descricao" class="rotulo">Descrição detalhada</label>
+          <textarea id="descricao" class="campo" rows="3" maxlength="500" placeholder="Ex.: capa transparente, pequeno risco junto à câmara…"></textarea>
+        </div>
+
+        <div class="duas-colunas">
+          <div class="grupo">
+            <label for="local" class="rotulo">Onde o viste pela última vez?</label>
+            <select id="local" class="campo">
+              <option value="">Escolher local…</option>
+            </select>
+            <span class="erro" id="erro-local" hidden>Escolhe o local.</span>
+          </div>
+          <div class="grupo">
+            <label for="data" class="rotulo">Quando?</label>
+            <input id="data" type="datetime-local" class="campo">
+          </div>
+        </div>
+
+        <div class="grupo">
+          <label for="detalhe" class="rotulo">Detalhe que só o proprietário conhece</label>
+          <input id="detalhe" type="text" class="campo" placeholder="Ex.: imagem do ecrã bloqueado, autocolante ou marca…" autocomplete="off">
+          <span class="ajuda">Só a receção vê este detalhe. Ajuda a confirmar que o objeto é teu.</span>
+        </div>
+
+        <label for="fotos" class="upload upload--compacto">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+          <span class="upload__titulo">Adicionar fotografia de referência</span>
+          <span class="ajuda">Opcional · não será publicada</span>
+          <input id="fotos" type="file" accept="image/*" multiple class="so-leitor">
+        </label>
+        <div class="miniaturas-upload" id="miniaturas-fotos" aria-live="polite"></div>
+        <span class="erro" id="erro-fotos" hidden>Só podes juntar até 3 fotos.</span>
+
+        <p class="erro" id="erro-geral" role="alert" hidden></p>
+
+        <div class="procurar__acoes">
+          <button type="submit" class="botao botao--destaque" id="botao-enviar">Publicar pedido de procura →</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="ecra-enviado" hidden>
+      <div class="sucesso">
+        <div class="sucesso__icone" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"></path></svg>
+        </div>
+        <p class="sobretitulo">Pedido de procura registado</p>
+        <h1>Vamos estar atentos.</h1>
+        <p>Quando a receção receber um objeto parecido, vais ser avisado.</p>
+      </div>
+
+      <div class="procurar__parecidos">
+        <h2 id="parecidos-titulo">Objetos parecidos já na receção</h2>
+        <div class="grelha" id="parecidos"></div>
+        <p class="ajuda" id="sem-parecidos" hidden>Ainda não há objetos parecidos na receção.</p>
+      </div>
+
+      <div class="procurar__acoes procurar__acoes--centro">
+        <a href="index.html" class="botao botao--contorno">Ver todos os objetos</a>
+      </div>
+    </section>
   </main>
 
   <footer class="footer" id="footer"></footer>
 
-  <script type="module">
-    import { montarNavBar } from './js/components/navbar.js';
-    import { montarFooter } from './js/components/footer.js';
-    montarNavBar('procurar');
-    montarFooter();
-  </script>
+  <script type="module" src="js/pages/procurar.js"></script>
 </body>
 </html>
