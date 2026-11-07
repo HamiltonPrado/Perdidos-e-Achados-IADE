@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Objeto · Receção · Perdidos &amp; Achados</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components/admin-header.css">
+  <link rel="stylesheet" href="../assets/css/components/footer.css">
+  <link rel="stylesheet" href="../assets/css/pages/admin.css">
+</head>
+<body>
+  <header class="admin-header" id="admin-header"></header>
+
+  <main class="contentor admin">
+    <a href="objetos.html" class="voltar">← Voltar aos objetos</a>
+
+    <div class="vazio" id="nao-encontrado" hidden>
+      <p>Não encontrámos este objeto.</p>
+      <a href="objetos.html" class="botao botao--contorno">Ver todos os objetos</a>
+    </div>
+
+    <section id="conteudo" hidden>
+      <div class="admin__topo">
+        <div>
+          <p class="sobretitulo" id="referencia"></p>
+          <h1 id="titulo"></h1>
+          <span id="estado"></span>
+        </div>
+        <a href="#" class="botao botao--destaque" id="botao-entrada" hidden>Confirmar entrada →</a>
+      </div>
+
+      <div class="admin-grelha">
+        <section class="caixa">
+          <div class="objeto-foto" id="foto"></div>
+          <div>
+            <span class="rotulo-pequeno">Descrição</span>
+            <p id="descricao" style="margin: 0"></p>
+          </div>
+          <dl class="dados">
+            <div><dt class="rotulo-pequeno">Categoria</dt><dd id="categoria"></dd></div>
+            <div><dt class="rotulo-pequeno">Encontrado em</dt><dd id="encontrado"></dd></div>
+            <div><dt class="rotulo-pequeno">Registado por</dt><dd id="registado-por"></dd></div>
+          </dl>
+        </section>
+
+        <section class="caixa">
+          <h2>Gestão interna</h2>
+          <dl class="dados">
+            <div><dt class="rotulo-pequeno">Prateleira</dt><dd id="prateleira"></dd></div>
+            <div><dt class="rotulo-pequeno">Ponto de recolha</dt><dd id="ponto"></dd></div>
+            <div><dt class="rotulo-pequeno">Recebido em</dt><dd id="recebido"></dd></div>
+          </dl>
+          <div class="nota-cinza">
+            <span class="rotulo-pequeno">Pergunta secreta</span>
+            <p id="pergunta"></p>
+            <p id="resposta"></p>
+          </div>
+          <div>
+            <span class="rotulo-pequeno">Observações internas</span>
+            <p id="observacoes" style="margin: 0"></p>
+          </div>
+        </section>
+      </div>
+
+      <section class="caixa objeto-pedidos">
+        <div class="caixa__titulo"><h2>Pedidos deste objeto</h2></div>
+        <div id="pedidos"></div>
+      </section>
+
+      <section class="caixa objeto-pedidos" id="bloco-devolucao" hidden>
+        <div class="caixa__titulo"><h2>Devolução</h2></div>
+        <dl class="dados" id="devolucao"></dl>
+      </section>
+    </section>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script type="module" src="../js/pages/adminObjeto.js"></script>
+</body>
+</html>

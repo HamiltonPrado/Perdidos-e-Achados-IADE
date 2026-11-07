@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validar pedido · Receção · Perdidos &amp; Achados</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components/admin-header.css">
+  <link rel="stylesheet" href="../assets/css/components/footer.css">
+  <link rel="stylesheet" href="../assets/css/pages/admin.css">
+</head>
+<body>
+  <header class="admin-header" id="admin-header"></header>
+
+  <main class="contentor admin">
+    <div class="pedido">
+      <a href="objetos.html?separador=pedidos" class="voltar">← Voltar aos pedidos</a>
+
+      <div class="vazio" id="nao-encontrado" hidden>
+        <p>Não encontrámos este pedido.</p>
+        <a href="objetos.html?separador=pedidos" class="botao botao--contorno">Ver pedidos</a>
+      </div>
+
+      <section id="conteudo" hidden>
+        <div class="pedido__cabecalho">
+          <span class="avatar" id="avatar"></span>
+          <div>
+            <b id="aluno-nome"></b>
+            <span id="aluno-email"></span>
+          </div>
+          <span class="pedido__ref" id="referencia"></span>
+        </div>
+
+        <div class="pedido__conversa">
+          <p class="pedido__data" id="data-pedido"></p>
+          <div class="objeto-resumo" id="resumo"></div>
+          <div class="mensagem-aluno" id="mensagem-aluno" hidden>
+            <span class="avatar" id="avatar-mensagem"></span>
+            <div class="mensagem-aluno__balao">
+              <b id="aluno-nome-mensagem"></b>
+              <p id="informacao"></p>
+            </div>
+          </div>
+          <div class="validacao" id="validacao">
+            <span class="rotulo-pequeno">Validação da pergunta secreta</span>
+            <span id="pergunta"></span>
+            <span class="validacao__resposta" id="resposta"></span>
+            <span id="esperada"></span>
+          </div>
+          <div id="bloco-fotos" hidden>
+            <span class="rotulo-pequeno">Fotos de prova</span>
+            <div class="fotos-prova" id="fotos"></div>
+          </div>
+        </div>
+
+        <div class="decisao" id="decisao">
+          <div>
+            <b>Validar este pedido de levantamento?</b>
+            <p>Ao validar, o aluno recebe um código para levantar o objeto na receção.</p>
+          </div>
+          <div class="decisao__acoes" id="decisao-acoes">
+            <button type="button" class="botao botao--perigo" id="botao-recusar">Recusar pedido</button>
+            <button type="button" class="botao botao--destaque" id="botao-aprovar">Validar proprietário</button>
+          </div>
+          <form class="recusa" id="form-recusa" hidden novalidate>
+            <label for="motivo" class="rotulo">Motivo da recusa</label>
+            <textarea id="motivo" class="campo" rows="3" placeholder="Ex.: a resposta não corresponde ao objeto."></textarea>
+            <span class="erro" id="erro-motivo" hidden>Indica o motivo, para o aluno perceber a decisão.</span>
+            <div class="acoes-fim">
+              <button type="button" class="link-simples" id="cancelar-recusa">Cancelar</button>
+              <button type="submit" class="botao botao--preto">Confirmar recusa</button>
+            </div>
+          </form>
+          <p class="erro" id="erro-geral" role="alert" hidden></p>
+        </div>
+
+        <div class="decisao" id="resultado" hidden></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script type="module" src="../js/pages/adminPedido.js"></script>
+</body>
+</html>

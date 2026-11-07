@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel · Receção · Perdidos &amp; Achados</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components/admin-header.css">
+  <link rel="stylesheet" href="../assets/css/components/footer.css">
+  <link rel="stylesheet" href="../assets/css/pages/admin.css">
+</head>
+<body>
+  <header class="admin-header" id="admin-header"></header>
+
+  <main class="contentor admin">
+    <div class="admin__topo">
+      <div>
+        <p class="sobretitulo">Painel administrativo</p>
+        <h1 id="saudacao">Bom dia.</h1>
+      </div>
+      <a href="publicar.html" class="botao botao--destaque">Publicar objeto</a>
+    </div>
+
+    <div class="estatisticas" id="estatisticas"></div>
+
+    <div class="painel-colunas">
+      <section class="caixa">
+        <div class="caixa__titulo">
+          <h2>Pedidos por validar</h2>
+          <a href="objetos.html?separador=pedidos">Ver todos →</a>
+        </div>
+        <div id="lista-pedidos"><p class="ajuda">A carregar…</p></div>
+      </section>
+
+      <section class="caixa">
+        <div class="caixa__titulo">
+          <h2>Por receber</h2>
+          <a href="objetos.html?separador=receber">Ver todos →</a>
+        </div>
+        <div id="lista-receber"><p class="ajuda">A carregar…</p></div>
+      </section>
+    </div>
+
+    <div class="painel-colunas painel-acoes">
+    <section class="caixa">
+      <div class="caixa__titulo">
+        <h2>Receber objeto</h2>
+      </div>
+      <form class="levantamento__form" id="form-receber" novalidate>
+        <label for="ref" class="so-leitor">Referência do objeto</label>
+        <input id="ref" class="campo" placeholder="Ex.: UE-0248" autocomplete="off">
+        <button type="submit" class="botao botao--preto">Procurar</button>
+      </form>
+      <p class="erro" id="erro-receber" role="alert" hidden></p>
+    </section>
+
+    <section class="caixa">
+      <div class="caixa__titulo">
+        <h2>Registar levantamento</h2>
+      </div>
+      <form class="levantamento__form" id="form-codigo" novalidate>
+        <label for="codigo" class="so-leitor">Código de levantamento</label>
+        <input id="codigo" class="campo" maxlength="12" placeholder="Ex.: K7M2Q9XA" autocomplete="off">
+        <button type="submit" class="botao botao--preto">Procurar código</button>
+      </form>
+      <p class="erro" id="erro-codigo" role="alert" hidden></p>
+      <div class="levantamento__resultado" id="resultado-codigo" hidden></div>
+    </section>
+    </div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script type="module" src="../js/pages/adminPainel.js"></script>
+</body>
+</html>

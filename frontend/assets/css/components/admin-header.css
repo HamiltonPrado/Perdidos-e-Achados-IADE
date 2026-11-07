@@ -1,0 +1,107 @@
+.admin-header {
+  background: var(--cor-preto);
+  color: #fff;
+}
+
+.admin-header__barra {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 72px;
+  flex-wrap: wrap;
+}
+
+.admin-header__marca {
+  color: #fff;
+  text-decoration: none;
+}
+
+.admin-header__rotulo {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cor-marca);
+  border: 1px solid var(--cor-marca);
+  padding: 4px 8px;
+}
+
+.admin-header__nav {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.admin-header__link {
+  color: #d7d7d2;
+  text-decoration: none;
+  padding: 24px 12px;
+  border-bottom: 3px solid transparent;
+}
+
+.admin-header__link:hover,
+.admin-header__link.ativo {
+  color: #fff;
+}
+
+.admin-header__link.ativo {
+  border-bottom-color: var(--cor-marca);
+}
+
+.admin-header__conta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.admin-header__site,
+.admin-header__sair {
+  color: #d7d7d2;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.admin-header__site:hover,
+.admin-header__sair:hover {
+  color: #fff;
+}
+
+.admin-header__avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--cor-marca);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+@media (max-width: 900px) {
+  .admin-header__barra {
+    gap: 12px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .admin-header__nav {
+    order: 3;
+    width: 100%;
+    margin: 0;
+    overflow-x: auto;
+  }
+
+  .admin-header__link {
+    padding: 10px 12px;
+  }
+
+  .admin-header__site {
+    display: none;
+  }
+}

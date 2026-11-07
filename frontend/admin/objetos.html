@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Objetos · Receção · Perdidos &amp; Achados</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components/admin-header.css">
+  <link rel="stylesheet" href="../assets/css/components/footer.css">
+  <link rel="stylesheet" href="../assets/css/pages/admin.css">
+</head>
+<body>
+  <header class="admin-header" id="admin-header"></header>
+
+  <main class="contentor admin">
+    <a href="index.html" class="voltar">← Voltar ao painel</a>
+
+    <div class="admin__topo">
+      <div>
+        <p class="sobretitulo">Gestão de objetos</p>
+        <h1 id="titulo">Todos os objetos</h1>
+        <p>Consulta e atualiza os objetos registados na receção.</p>
+      </div>
+      <a href="publicar.html" class="botao botao--destaque">+ Publicar objeto</a>
+    </div>
+
+    <p class="mensagem admin__mensagem" id="mensagem" hidden></p>
+
+    <div class="ferramentas">
+      <label for="pesquisa" class="so-leitor">Pesquisar</label>
+      <input id="pesquisa" type="search" class="campo" placeholder="Pesquisar por objeto, aluno ou referência…">
+    </div>
+
+    <div class="separadores" role="tablist" aria-label="Estado">
+      <button type="button" class="separador" role="tab" data-separador="todos">Todos <span data-contagem="todos">0</span></button>
+      <button type="button" class="separador" role="tab" data-separador="rececao">Na receção <span data-contagem="rececao">0</span></button>
+      <button type="button" class="separador" role="tab" data-separador="receber">Por receber <span data-contagem="receber">0</span></button>
+      <button type="button" class="separador" role="tab" data-separador="pedidos">Pedidos <span data-contagem="pedidos">0</span></button>
+      <button type="button" class="separador" role="tab" data-separador="devolvidos">Devolvidos <span data-contagem="devolvidos">0</span></button>
+    </div>
+
+    <div class="tabela-contentor" id="tabela"><p class="ajuda">A carregar…</p></div>
+    <p class="admin__contagem" id="contagem"></p>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script type="module" src="../js/pages/adminObjetos.js"></script>
+</body>
+</html>

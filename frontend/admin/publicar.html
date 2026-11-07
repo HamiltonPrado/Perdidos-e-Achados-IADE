@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publicar objeto · Receção · Perdidos &amp; Achados</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components/admin-header.css">
+  <link rel="stylesheet" href="../assets/css/components/footer.css">
+  <link rel="stylesheet" href="../assets/css/pages/admin.css">
+</head>
+<body>
+  <header class="admin-header" id="admin-header"></header>
+
+  <main class="contentor admin">
+    <a href="objetos.html" class="voltar">← Voltar a Todos os objetos</a>
+
+    <div class="admin__topo">
+      <div>
+        <p class="sobretitulo">Novo objeto · Receção</p>
+        <h1>Publicar objeto encontrado</h1>
+        <p>Para objetos entregues diretamente na receção, sem registo prévio do aluno.</p>
+      </div>
+    </div>
+
+    <form class="admin-grelha" id="form-publicar" novalidate>
+      <section class="caixa">
+        <h2>Informação pública</h2>
+        <label for="fotos" class="upload upload--compacto">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+          <span class="upload__titulo">Adicionar fotografia</span>
+          <input id="fotos" type="file" accept="image/*" multiple class="so-leitor">
+        </label>
+        <div class="miniaturas-upload" id="miniaturas-fotos" aria-live="polite"></div>
+        <span class="erro" id="erro-fotos" hidden>Junta pelo menos uma fotografia.</span>
+        <div class="duas-colunas">
+          <div class="grupo">
+            <label for="titulo" class="rotulo">Nome do objeto</label>
+            <input id="titulo" class="campo" maxlength="80" placeholder="Ex.: iPhone preto">
+            <span class="erro" id="erro-titulo" hidden>Dá um nome ao objeto.</span>
+          </div>
+          <div class="grupo">
+            <label for="categoria" class="rotulo">Categoria</label>
+            <select id="categoria" class="campo"><option value="">Escolher…</option></select>
+            <span class="erro" id="erro-categoria" hidden>Escolhe uma categoria.</span>
+          </div>
+        </div>
+        <div class="grupo">
+          <label for="descricao" class="rotulo">Descrição</label>
+          <textarea id="descricao" class="campo" rows="3" maxlength="500" placeholder="Ex.: telemóvel preto, capa transparente…"></textarea>
+          <span class="erro" id="erro-descricao" hidden>Escreve uma descrição curta.</span>
+        </div>
+        <div class="duas-colunas">
+          <div class="grupo">
+            <label for="local" class="rotulo">Local onde foi encontrado</label>
+            <select id="local" class="campo"><option value="">Escolher local…</option></select>
+            <span class="erro" id="erro-local" hidden>Escolhe o local.</span>
+          </div>
+          <div class="grupo">
+            <label for="data" class="rotulo">Data</label>
+            <input id="data" type="datetime-local" class="campo">
+          </div>
+        </div>
+      </section>
+
+      <section class="caixa">
+        <h2>Gestão interna</h2>
+        <div class="duas-colunas">
+          <div class="grupo">
+            <label for="ponto" class="rotulo">Ponto de recolha</label>
+            <select id="ponto" class="campo"></select>
+          </div>
+          <div class="grupo">
+            <label for="stock" class="rotulo">Localização física</label>
+            <select id="stock" class="campo"></select>
+            <span class="ajuda" id="ajuda-stock"></span>
+            <span class="erro" id="erro-stock" hidden>Escolhe a prateleira.</span>
+          </div>
+        </div>
+        <div class="grupo">
+          <label for="entregue" class="rotulo">Entregue por:<span class="rotulo__opcional"></span></label>
+          <input id="entregue" class="campo" placeholder="Ex.: aluno não identificado">
+        </div>
+        </div>
+        <div class="grupo">
+          <label for="pergunta" class="rotulo">Pergunta secreta</label>
+          <input id="pergunta" class="campo" placeholder="Ex.: Qual é a imagem do ecrã bloqueado?">
+          <span class="erro" id="erro-pergunta" hidden>Escreve a pergunta secreta.</span>
+        </div>
+        <div class="grupo">
+          <label for="resposta" class="rotulo">Resposta esperada</label>
+          <input id="resposta" class="campo" autocomplete="off" placeholder="Ex.: Fotografia de um cão">
+          <span class="erro" id="erro-resposta" hidden>Escreve a resposta esperada.</span>
+        </div>
+        
+        </div>
+        <p class="erro" id="erro-geral" role="alert" hidden></p>
+        <div class="acoes-fim">
+          <a href="objetos.html" class="link-simples">Cancelar</a>
+          <button type="submit" class="botao botao--destaque" id="botao-publicar" disabled>Publicar objeto →</button>
+        </div>
+      </section>
+    </form>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script type="module" src="../js/pages/adminPublicar.js"></script>
+</body>
+</html>
