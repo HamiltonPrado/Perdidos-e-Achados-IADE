@@ -1,10 +1,11 @@
+import { url } from '../utilities/caminhos.js';
 import { esc, formatarData, fotoVazia } from '../utilities/tools.js';
 
 export function cartaoItem(item) {
   const foto = item.fotos[0];
 
   return `
-    <a href="detalhe.html?id=${item.id}" class="cartao">
+    <a href="${url('aluno/detalhe.html')}?id=${item.id}" class="cartao">
       <div class="cartao__foto">
         ${foto ? `<img src="${esc(foto)}" alt="" loading="lazy">` : fotoVazia()}
         <span class="cartao__categoria">${esc(item.categoria)}</span>
