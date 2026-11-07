@@ -1,3 +1,5 @@
+import { url } from '../utilities/caminhos.js';
+
 function haDias(dias, hora, minuto) {
   const d = new Date();
   d.setDate(d.getDate() - dias);
@@ -8,9 +10,27 @@ function haDias(dias, hora, minuto) {
 const ANA = { id: 7, nome: 'Ana S.' };
 const RUI = { id: 8, nome: 'Rui F.' };
 const JOAO = { id: 9, nome: 'João T.' };
+const MARIANA = { id: 10, nome: 'Mariana Costa', email: 'mariana.costa@universidadeeuropeia.pt' };
+const JOAO_COMPLETO = { id: 9, nome: 'João Teixeira', email: 'joao.teixeira@universidadeeuropeia.pt' };
+const INES = { id: 11, nome: 'Inês Martins', email: 'ines.martins@universidadeeuropeia.pt' };
+const ANA_COMPLETO = { id: 7, nome: 'Ana Silva', email: 'ana.silva@universidadeeuropeia.pt' };
+
+const DADOS_RECECAO = {
+  1: { respostaEsperada: 'Apple', localizacaoStock: 'Prateleira A2', recebidoEm: haDias(0, 11, 0) },
+  2: { respostaEsperada: 'Cartão de estudante e 10 euros', localizacaoStock: 'Prateleira A3', recebidoEm: haDias(1, 16, 30) },
+  3: { respostaEsperada: 'Rita', localizacaoStock: 'Prateleira C1', recebidoEm: haDias(2, 15, 0) },
+  4: { respostaEsperada: 'Anker', localizacaoStock: 'Prateleira B3', recebidoEm: haDias(3, 10, 0) },
+  5: { respostaEsperada: 'Estrela', localizacaoStock: 'Prateleira B1', recebidoEm: haDias(1, 9, 0) },
+  6: { respostaEsperada: 'Zara', localizacaoStock: 'Prateleira D4', recebidoEm: haDias(4, 12, 0) },
+  7: { respostaEsperada: '2024', localizacaoStock: 'Prateleira A1', recebidoEm: haDias(6, 9, 0) },
+};
+
+function completarRececao(lista) {
+  return lista.map((item) => ({ pontoRecolha: 'Receção principal', ...DADOS_RECECAO[item.id], ...item }));
+}
 
 export function itemsIniciais() {
-  return [
+  return completarRececao([
     {
       id: 1,
       referencia: 'UE-0241',
@@ -21,7 +41,7 @@ export function itemsIniciais() {
       dataEncontrado: haDias(0, 10, 40),
       ondeEsta: 'secretaria', estado: 'por_reclamar',
       pergunta: 'Qual é a marca dos auscultadores?',
-      fotos: ['assets/images/auscultadores.jpg'], publicadoPor: RUI,
+      fotos: [url('assets/images/auscultadores.jpg')], publicadoPor: RUI,
     },
     {
       id: 2,
@@ -33,7 +53,7 @@ export function itemsIniciais() {
       dataEncontrado: haDias(1, 16, 5),
       ondeEsta: 'secretaria', estado: 'por_reclamar',
       pergunta: 'O que estava dentro da carteira?',
-      fotos: ['assets/images/carteira.jpg'], publicadoPor: JOAO,
+      fotos: [url('assets/images/carteira.jpg')], publicadoPor: JOAO,
     },
     {
       id: 3,
@@ -45,7 +65,7 @@ export function itemsIniciais() {
       dataEncontrado: haDias(2, 14, 20),
       ondeEsta: 'secretaria', estado: 'por_reclamar',
       pergunta: 'O que tem escrito por dentro do estojo?',
-      fotos: ['assets/images/estojo-laranja.jpg'], publicadoPor: RUI,
+      fotos: [url('assets/images/estojo-laranja.jpg')], publicadoPor: RUI,
     },
     {
       id: 4,
@@ -57,7 +77,7 @@ export function itemsIniciais() {
       dataEncontrado: haDias(3, 9, 15),
       ondeEsta: 'secretaria', estado: 'por_reclamar',
       pergunta: 'Que marca é o carregador?',
-      fotos: ['assets/images/carregador.jpg'], publicadoPor: JOAO,
+      fotos: [url('assets/images/carregador.jpg')], publicadoPor: JOAO,
     },
     {
       id: 5,
@@ -104,25 +124,55 @@ export function itemsIniciais() {
       local: 'Entrada principal', localId: 'entrada',
       dataEncontrado: haDias(0, 8, 50),
       ondeEsta: 'com_quem_encontrou', estado: 'por_receber',
-      pergunta: 'Que autocolantes tem a garrafa?',
       fotos: [], publicadoPor: ANA,
     },
-  ];
+  ]);
 }
 
 export function reclamacoesIniciais() {
   return [
     {
       id: 1,
-      referencia: 'UE-0241',
       itemId: 5,
       resposta: 'Tem a forma de uma estrela',
       informacao: 'Uma das chaves tem uma fita vermelha.',
-      fotos: ['exemplo'],
-      legendas: ['Comigo'],
+      fotos: [],
       estado: 'pendente',
       criadoEm: haDias(1, 13, 0),
-      reclamadoPor: JOAO,
+      reclamadoPor: JOAO_COMPLETO,
+    },
+    {
+      id: 2,
+      itemId: 1,
+      resposta: 'Apple',
+      informacao: 'Creio que são meus. Deixei-os ontem na biblioteca, junto à janela.',
+      fotos: [],
+      estado: 'pendente',
+      criadoEm: haDias(0, 14, 32),
+      reclamadoPor: MARIANA,
+    },
+    {
+      id: 3,
+      itemId: 3,
+      resposta: 'Inês',
+      informacao: 'Perdi-o na aula de quarta-feira.',
+      fotos: [],
+      estado: 'pendente',
+      criadoEm: haDias(1, 17, 40),
+      reclamadoPor: INES,
+    },
+  ];
+}
+
+export function devolucoesIniciais() {
+  return [
+    {
+      id: 1,
+      itemId: 7,
+      entregueA: ANA_COMPLETO,
+      confirmadoPor: 'Equipa da receção',
+      pontoRecolha: 'Receção principal',
+      devolvidoEm: haDias(5, 15, 20),
     },
   ];
 }

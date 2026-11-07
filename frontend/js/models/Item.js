@@ -14,10 +14,17 @@ export class Item {
 
     this.ondeEsta = data.ondeEsta ?? 'secretaria';
     this.estado = data.estado ?? 'por_receber';
-    this.referencia = data.referencia ?? '';          
+    this.referencia = data.referencia ?? '';
 
     this.pergunta = data.pergunta ?? '';
-    this.fotos = data.fotos ?? [];                    
-    this.publicadoPor = data.publicadoPor ?? null;   
+    this.fotos = data.fotos ?? [];
+    this.publicadoPor = data.publicadoPor ?? null;
+
+    this.respostaEsperada = data.respostaEsperada ?? '';
+    this.pontoRecolha = data.pontoRecolha ?? '';
+    this.localizacaoStock = data.localizacaoStock ?? '';
+    this.observacoes = data.observacoes ?? '';
+    this.recebidoEm = data.recebidoEm ?? null;
+    this.criadoEm = data.criadoEm ?? null;
   }
 }

@@ -1,6 +1,6 @@
-import { itemsIniciais, reclamacoesIniciais } from './items.js';
+import { itemsIniciais, reclamacoesIniciais, devolucoesIniciais } from './items.js';
 
-const CHAVE = 'achados-mock-db-v3';
+const CHAVE = 'achados-mock-db-v6';
 
 function carregar() {
   try {
@@ -8,7 +8,7 @@ function carregar() {
     if (guardado) return guardado;
   } catch {
   }
-  return { items: itemsIniciais(), reclamacoes: reclamacoesIniciais() };
+  return { items: itemsIniciais(), reclamacoes: reclamacoesIniciais(), devolucoes: devolucoesIniciais(), procuras: [] };
 }
 
 export const db = carregar();

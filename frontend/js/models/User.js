@@ -4,5 +4,6 @@ export class User {
     this.nome = data.nome ?? '';
     this.email = data.email ?? '';
     this.foto = data.foto ?? null;
+    this.role = data.role ?? 'user';
   }
 }
