@@ -26,7 +26,7 @@ async function iniciar() {
     por_receber: {
       sobretitulo: lerParametro('novo') ? 'Objeto registado' : 'Por entregar',
       titulo: 'Agora entrega-o na receção.',
-      texto: `Procura a ${RECECAO.responsavel} e indica a referência ${item.referencia}. O anúncio ficará disponível após a entrega.`,
+      texto: `Leva o objeto à receção (${RECECAO.local}) e indica a referência ${item.referencia}. O anúncio fica disponível depois da entrega.`,
     },
     por_reclamar: {
       sobretitulo: 'Na receção',

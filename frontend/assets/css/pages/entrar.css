@@ -69,21 +69,6 @@
   min-height: 56px;
 }
 
-.entrar__nota {
-  margin-top: 24px;
-  background: var(--cor-cinza-suave);
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 14px;
-}
-
-.entrar__nota span {
-  color: var(--cor-texto-secundario);
-  line-height: 1.5;
-}
-
 .entrar__simulado {
   margin-top: 16px;
 }
@@ -105,4 +90,22 @@
   .entrar__titulo {
     margin-top: 20px;
   }
+}
+
+.entrar__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.entrar__trocar {
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--cor-destaque-texto);
+  cursor: pointer;
+  text-align: left;
 }

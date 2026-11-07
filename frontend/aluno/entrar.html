@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar · Perdidos &amp; Achados</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/pages/entrar.css">
+</head>
+<body>
+  <main class="entrar">
+    <section class="entrar__visual">
+      <a href="../index.html" class="entrar__marca" id="entrar-logo" aria-label="Perdidos e Achados, página inicial"></a>
+
+      <div>
+        <p class="sobretitulo entrar__sobretitulo">Perdidos &amp; Achados</p>
+        <h1 class="entrar__frase">Pequenos gestos.<br>Grandes reencontros.</h1>
+      </div>
+
+      <p class="entrar__rodape">Um campus com menos coisas perdidas.</p>
+    </section>
+
+    <section class="entrar__formulario">
+      <div class="entrar__caixa">
+    
+        <h2 class="entrar__titulo" id="titulo">Bem-vindo</h2>
+        
+        <form class="entrar__form" id="form-entrar" novalidate>
+          <div class="grupo">
+            <label for="email" class="rotulo">Email do IADE</label>
+            <input id="email" type="email" class="campo" autocomplete="username" placeholder="20202030@iade.pt">
+            <span class="erro" id="erro-email" hidden></span>
+          </div>
+          <div class="grupo">
+            <label for="password" class="rotulo">Palavra-passe</label>
+            <input id="password" type="password" class="campo" autocomplete="current-password">
+            <span class="erro" id="erro-password" hidden>Escreve a tua palavra-passe.</span>
+          </div>
+
+          <p class="erro" id="erro-entrar" role="alert" hidden></p>
+
+          <button type="submit" class="botao botao--destaque entrar__botao" id="botao-entrar">Entrar →</button>
+        </form>
+
+        <button type="button" class="entrar__trocar" id="trocar-perfil">És da equipa da receção? Entra aqui →</button>
+
+        <p class="ajuda entrar__simulado" id="aviso-simulado" hidden>Modo de demonstração</p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="../js/pages/entrar.js"></script>
+</body>
+</html>

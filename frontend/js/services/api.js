@@ -6,13 +6,17 @@ async function pedido(metodo, caminho, corpo) {
   const token = localStorage.getItem('token');
   const temFicheiros = corpo instanceof FormData;
 
+  const csrf = localStorage.getItem('csrf');
+
   const headers = {};
   if (token) headers.Authorization = `Bearer ${token}`;
+  if (csrf && metodo !== 'GET') headers['X-CSRF-Token'] = csrf;
   if (corpo && !temFicheiros) headers['Content-Type'] = 'application/json';
 
   const resposta = await fetch(`${BASE_URL}${caminho}`, {
     method: metodo,
     headers,
+    credentials: 'include',
     body: corpo ? (temFicheiros ? corpo : JSON.stringify(corpo)) : undefined,
   });
 
