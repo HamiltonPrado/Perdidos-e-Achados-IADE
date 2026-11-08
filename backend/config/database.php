@@ -5,10 +5,15 @@ declare(strict_types=1);
 // Em Docker as credenciais chegam por variáveis de ambiente (docker-compose.yml).
 // Fora do Docker (MAMP, php -S) usa o credenciais.php local, como até agora.
 //
-// DB_HOST pode ter várias bases de dados separadas por vírgulas (ex.: "db1,db2"), para
-// tolerância a falhas: liga-se à primeira que ACEITA ESCRITAS (a principal). Se nenhuma
-// aceitar (a principal caiu e a réplica ainda não foi promovida), usa a primeira que
-// responder, em modo só-leitura: as escritas falham com erro e o site responde 503.
+// DB_HOST pode ter várias bases de dados separadas por vírgulas (ex.: "galera1,galera2,galera3"),
+// para tolerância a falhas. Liga-se à primeira que:
+//  - responde (uma BD em baixo é saltada ao fim de 2 s);
+//  - num cluster Galera, está sincronizada (wsrep_ready = ON): um nó isolado da maioria
+//    aceita ligações mas recusa consultas, por isso é saltado;
+//  - aceita escritas (read_only = 0).
+// Como todos tentam pela mesma ordem, as escritas vão sempre para o mesmo nó enquanto ele
+// estiver bem, o que evita conflitos entre nós. Se nenhuma aceitar escritas, usa a primeira
+// que responder, em modo só-leitura: as escritas falham com erro e o site responde 503.
 $config = getenv('DB_HOST') !== false
     ? [
         'host' => getenv('DB_HOST'),
@@ -52,12 +57,20 @@ $ultimoErro = null;
 foreach ($hosts as $host) {
     try {
         $pdo = $ligar($host);
+
+        // Só existe em MariaDB Galera; num MySQL normal a consulta não devolve linhas.
+        $galera = $pdo->query("SHOW GLOBAL STATUS LIKE 'wsrep_ready'")->fetch();
+        if ($galera !== false && strtoupper((string) $galera['Value']) !== 'ON') {
+            continue;
+        }
+
+        $soLeituraNo = (int) $pdo->query('SELECT @@GLOBAL.read_only')->fetchColumn() !== 0;
     } catch (PDOException $erro) {
         $ultimoErro = $erro;
         continue;
     }
 
-    if ((int) $pdo->query('SELECT @@GLOBAL.read_only')->fetchColumn() === 0) {
+    if (!$soLeituraNo) {
         return $pdo;
     }
 
@@ -68,4 +81,4 @@ if ($soLeitura !== null) {
     return $soLeitura;
 }
 
-throw $ultimoErro;
+throw $ultimoErro ?? new PDOException('Nenhuma base de dados sincronizada disponível.');
