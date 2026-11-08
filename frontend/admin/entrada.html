@@ -1,129 +1,133 @@
 <!doctype html>
 <html lang="pt-PT">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirmar entrada · Receção · Perdidos &amp; Achados</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmar entrada · Receção · Perdidos &amp; Achados</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
 
-  <link rel="stylesheet" href="../assets/css/variables.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <link rel="stylesheet" href="../assets/css/components/admin-header.css">
-  <link rel="stylesheet" href="../assets/css/components/footer.css">
-  <link rel="stylesheet" href="../assets/css/pages/admin.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/components/admin-header.css">
+    <link rel="stylesheet" href="../assets/css/components/footer.css">
+    <link rel="stylesheet" href="../assets/css/pages/admin.css">
 </head>
+
 <body>
-  <header class="admin-header" id="admin-header"></header>
+    <header class="admin-header" id="admin-header"></header>
 
-  <main class="contentor admin">
-    <a href="objetos.html?separador=receber" class="voltar">← Voltar a Por receber</a>
+    <main class="contentor admin">
+        <a href="objetos.html?separador=receber" class="voltar">← Voltar a Por receber</a>
 
-    <section class="caixa receber" id="ecra-referencia" hidden>
-      <p class="sobretitulo">Receção de objeto</p>
-      <h1>Receber objeto</h1>
-      <p class="ajuda">Escreve a referência que o aluno indicar (aparece no ecrã dele depois de registar o objeto).</p>
-      <form class="levantamento__form" id="form-referencia" novalidate>
-        <label for="referencia-pesquisa" class="so-leitor">Referência</label>
-        <input id="referencia-pesquisa" class="campo" placeholder="Ex.: UE-0248" autocomplete="off">
-        <button type="submit" class="botao botao--preto">Procurar objeto</button>
-      </form>
-      <p class="erro" id="erro-referencia" role="alert" hidden></p>
-    </section>
-
-    <div class="vazio" id="nao-encontrado" hidden>
-      <p id="nao-encontrado-texto">Não encontrámos este objeto.</p>
-      <a href="objetos.html?separador=receber" class="botao botao--contorno">Ver objetos por receber</a>
-    </div>
-
-    <section id="ecra-formulario" hidden>
-      <div class="admin__topo">
-        <div>
-          <p class="sobretitulo">Receção de objeto</p>
-          <h1>Confirmar entrada</h1>
-          <p>Confirma o objeto entregue pelo aluno, define a pergunta secreta e indica onde fica guardado.</p>
-        </div>
-      </div>
-
-      <div class="admin-grelha">
-        <section class="caixa">
-          <div class="objeto-resumo" id="resumo"></div>
-          <dl class="dados">
-            <div><dt class="rotulo-pequeno">Entregue por</dt><dd id="entregue-por"></dd></div>
-            <div><dt class="rotulo-pequeno">Encontrado em</dt><dd id="encontrado-em"></dd></div>
-          </dl>
-          <div>
-            <span class="rotulo-pequeno">Descrição do aluno</span>
-            <p id="descricao" style="margin: 0"></p>
-          </div>
+        <section class="caixa receber" id="ecra-referencia" hidden>
+            <p class="sobretitulo">Receção de objeto</p>
+            <h1>Receber objeto</h1>
+            <p class="ajuda">Escreve a referência que o aluno indicar (aparece no ecrã dele depois de registar o objeto).</p>
+            <form class="levantamento__form" id="form-referencia" novalidate>
+                <label for="referencia-pesquisa" class="so-leitor">Referência</label>
+                <input id="referencia-pesquisa" class="campo" placeholder="Ex.: ENT-000050" autocomplete="off">
+                <button type="submit" class="botao botao--preto">Procurar objeto</button>
+            </form>
+            <p class="erro" id="erro-referencia" role="alert" hidden></p>
         </section>
 
-        <form class="caixa" id="form-entrada" novalidate>
-          <h2>Validação e armazenamento</h2>
-          <div class="grupo">
-            <label for="ponto" class="rotulo">Ponto de recolha</label>
-            <select id="ponto" class="campo"></select>
-          </div>
-          <div class="grupo">
-            <label for="stock" class="rotulo">Localização física no stock</label>
-            <select id="stock" class="campo"></select>
-            <span class="ajuda" id="ajuda-stock"></span>
-            <span class="erro" id="erro-stock" hidden>Escolhe a prateleira onde o objeto fica guardado.</span>
-          </div>
-          <div class="nota-cinza">
-            <span class="rotulo-pequeno">Validação do proprietário</span>
-            <p>Define uma pergunta sobre um detalhe que <b>não aparece na fotografia</b>. Só a receção vê a resposta.</p>
-          </div>
-          <div class="grupo">
-            <label for="pergunta" class="rotulo">Pergunta secreta</label>
-            <input id="pergunta" class="campo" maxlength="255" placeholder="Ex.: Que autocolantes tem a garrafa?">
-            <span class="erro" id="erro-pergunta" hidden>Escreve a pergunta secreta.</span>
-          </div>
-          <div class="grupo">
-            <label for="resposta" class="rotulo">Resposta esperada</label>
-            <input id="resposta" class="campo" maxlength="255" autocomplete="off" placeholder="Ex.: Estrelas e planetas">
-            <span class="erro" id="erro-resposta" hidden>Escreve a resposta esperada.</span>
-          </div>
-          <div class="grupo">
-            <label for="observacoes" class="rotulo">Observações internas <span class="rotulo__opcional">(opcional)</span></label>
-            <textarea id="observacoes" class="campo" rows="3" placeholder="Ex.: fecho funcional, sem conteúdo no interior."></textarea>
-          </div>
-          <div class="nota-cinza">
-            <span class="rotulo-pequeno">Referência</span>
-            <b id="referencia"></b>
-          </div>
-          <p class="erro" id="erro-geral" role="alert" hidden></p>
-          <div class="acoes-fim">
-            <a href="objetos.html?separador=receber" class="link-simples">Cancelar</a>
-            <button type="submit" class="botao botao--destaque" id="botao-confirmar">Confirmar entrada →</button>
-          </div>
-        </form>
-      </div>
-    </section>
+        <div class="vazio" id="nao-encontrado" hidden>
+            <p id="nao-encontrado-texto">Não encontrámos este objeto.</p>
+            <a href="objetos.html?separador=receber" class="botao botao--contorno">Ver objetos por receber</a>
+        </div>
 
-    <section class="admin-sucesso" id="ecra-sucesso" hidden>
-      <div class="sucesso__icone" aria-hidden="true">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"></path></svg>
-      </div>
-      <p class="sobretitulo">Entrada confirmada</p>
-      <h1>Objeto recebido na receção.</h1>
-      <p>O anúncio está agora disponível para pesquisa no site.</p>
-      <div class="objeto-resumo" id="resumo-final"></div>
-      <div class="confirmacoes">
-        <span>✓ Aluno notificado</span>
-        <span>✓ Disponível no site</span>
-      </div>
-      <div class="acoes-fim" style="justify-content: center">
-        <a href="objetos.html?separador=receber" class="botao botao--contorno">Receber outro objeto</a>
-        <a href="objetos.html?separador=rececao" class="botao botao--preto">Ver no inventário →</a>
-      </div>
-    </section>
-  </main>
+        <section id="ecra-formulario" hidden>
+            <div class="admin__topo">
+                <div>
+                    <p class="sobretitulo">Receção de objeto</p>
+                    <h1>Confirmar entrada</h1>
+                    <p>Confirma o objeto entregue pelo aluno, define a pergunta secreta e indica onde fica guardado.</p>
+                </div>
+            </div>
 
-  <footer class="footer" id="footer"></footer>
+            <div class="admin-grelha">
+                <section class="caixa">
+                    <div class="objeto-resumo" id="resumo"></div>
+                    <dl class="dados">
+                        <div><dt class="rotulo-pequeno">Entregue por</dt>
+                            <dd id="entregue-por"></dd>
+                        </div>
+                        <div><dt class="rotulo-pequeno">Encontrado em</dt>
+                            <dd id="encontrado-em"></dd>
+                        </div>
+                    </dl>
+                    <div>
+                        <span class="rotulo-pequeno">Descrição do aluno</span>
+                        <p id="descricao" style="margin: 0"></p>
+                    </div>
+                </section>
 
-  <script type="module" src="../js/pages/adminEntrada.js"></script>
+                <form class="caixa" id="form-entrada" novalidate>
+                    <h2>Validação e armazenamento</h2>
+                    <div class="grupo">
+                        <label for="ponto" class="rotulo">Ponto de recolha</label>
+                        <select id="ponto" class="campo"></select>
+                    </div>
+                    <div class="grupo">
+                        <label for="stock" class="rotulo">Localização física no stock</label>
+                        <select id="stock" class="campo"></select>
+                        <span class="ajuda" id="ajuda-stock"></span>
+                        <span class="erro" id="erro-stock" hidden>Escolhe a prateleira onde o objeto fica guardado.</span>
+                    </div>
+
+                    <div class="grupo">
+                        <label for="pergunta" class="rotulo">Pergunta secreta</label>
+                        <input id="pergunta" class="campo" maxlength="255" placeholder="Ex.: Que autocolantes tem a garrafa?">
+                        <span class="erro" id="erro-pergunta" hidden>Escreve a pergunta secreta.</span>
+                    </div>
+                    <div class="grupo">
+                        <label for="resposta" class="rotulo">Resposta esperada</label>
+                        <input id="resposta" class="campo" maxlength="255" autocomplete="off" placeholder="Ex.: Estrelas e planetas">
+                        <span class="erro" id="erro-resposta" hidden>Escreve a resposta esperada.</span>
+                    </div>
+                    <div class="grupo">
+                        <label for="observacoes" class="rotulo">Observações internas <span class="rotulo__opcional">(opcional)</span></label>
+                        <textarea id="observacoes" class="campo" rows="3" placeholder="Ex.: fecho funcional, sem conteúdo no interior."></textarea>
+                    </div>
+                    <div class="nota-cinza">
+                        <span class="rotulo-pequeno">Referência</span>
+                        <b id="referencia"></b>
+                    </div>
+                    <p class="erro" id="erro-geral" role="alert" hidden></p>
+                    <div class="acoes-fim">
+                        <a href="objetos.html?separador=receber" class="link-simples">Cancelar</a>
+                        <button type="submit" class="botao botao--destaque" id="botao-confirmar">Confirmar entrada →</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="admin-sucesso" id="ecra-sucesso" hidden>
+            <div class="sucesso__icone" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"></path></svg>
+            </div>
+            <p class="sobretitulo">Entrada confirmada</p>
+            <h1>Objeto recebido na receção.</h1>
+            <p>O anúncio está agora disponível para pesquisa no site.</p>
+            <div class="objeto-resumo" id="resumo-final"></div>
+            <div class="confirmacoes">
+                <span>✓ Aluno notificado</span>
+                <span>✓ Disponível no site</span>
+            </div>
+            <div class="acoes-fim" style="justify-content: center">
+                <a href="objetos.html?separador=receber" class="botao botao--contorno">Receber outro objeto</a>
+                <a href="objetos.html?separador=rececao" class="botao botao--preto">Ver no inventário →</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer" id="footer"></footer>
+
+    <script type="module" src="../js/pages/adminEntrada.js"></script>
 </body>
+
 </html>

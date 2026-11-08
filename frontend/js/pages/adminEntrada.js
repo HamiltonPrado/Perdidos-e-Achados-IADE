@@ -45,7 +45,8 @@ async function iniciar() {
   $('entregue-por').textContent = item.publicadoPor?.nome ?? '—';
   $('encontrado-em').innerHTML = `${esc(item.local)}<span>${esc(formatarData(item.dataEncontrado))}</span>`;
   $('descricao').textContent = item.descricao || 'Sem descrição.';
-  $('referencia').textContent = item.referencia || 'Gerada ao confirmar a entrada';
+  // O aluno traz a referência provisória ENT-…; ao confirmar passa a ACH-… com o mesmo número.
+  $('referencia').textContent = `${item.referencia} → ${item.referencia.replace(/^ENT-/, 'ACH-')} ao confirmar`;
 
   const pontos = await adminService.listarPontosRecolha();
   $('ponto').innerHTML = pontos.map((p) => `<option value="${p.id}">${esc(p.nome)}</option>`).join('');

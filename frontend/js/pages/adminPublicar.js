@@ -4,7 +4,7 @@ import { montarFooter } from '../components/footer.js';
 import { adminService } from '../services/adminService.js';
 import { categoriasService } from '../services/categoriasService.js';
 import { locaisService } from '../services/locaisService.js';
-import { esc, seletorDeFotos } from '../utilities/tools.js';
+import { esc, seletorDeFotos, dataParaApi } from '../utilities/tools.js';
 import { PRATELEIRAS } from '../utilities/stock.js';
 
 const $ = (id) => document.getElementById(id);
@@ -60,14 +60,14 @@ async function iniciar() {
         descricao: $('descricao').value.trim(),
         categoriaId: $('categoria').value,
         localId: $('local').value,
-        dataEncontrado: $('data').value ? new Date($('data').value).toISOString() : new Date().toISOString(),
+        dataEncontrado: dataParaApi($('data').value),
         pontoRecolhaId: $('ponto').value,
         localizacaoStock: $('stock').value,
         entreguePor: $('entregue').value.trim(),
         pergunta: $('pergunta').value.trim(),
         respostaEsperada: $('resposta').value.trim(),
         fotos: fotos.ficheiros,
-      }, categorias, locais);
+      });
       window.location.href = `objetos.html?separador=rececao&publicado=${encodeURIComponent(novo.referencia)}`;
     } catch (erro) {
       $('erro-geral').textContent = erro.message;
