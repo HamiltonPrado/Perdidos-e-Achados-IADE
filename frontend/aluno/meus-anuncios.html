@@ -1,50 +1,52 @@
 <!doctype html>
 <html lang="pt-PT">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Os meus anúncios · Perdidos &amp; Achados</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Os meus anúncios · Perdidos &amp; Achados</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
 
-  <link rel="stylesheet" href="../assets/css/variables.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <link rel="stylesheet" href="../assets/css/components/navbar.css">
-  <link rel="stylesheet" href="../assets/css/components/footer.css">
-  <link rel="stylesheet" href="../assets/css/pages/meus-anuncios.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/components/navbar.css">
+    <link rel="stylesheet" href="../assets/css/components/footer.css">
+    <link rel="stylesheet" href="../assets/css/pages/meus-anuncios.css">
 </head>
+
 <body>
-  <header class="navbar" id="navbar"></header>
+    <header class="navbar" id="navbar"></header>
 
-  <main class="contentor meus">
-    <p class="sobretitulo">Área pessoal</p>
-    <h1 class="meus__titulo">Os meus registos</h1>
+    <main class="contentor meus">
+        <p class="sobretitulo">Área pessoal</p>
+        <h1 class="meus__titulo">Os meus registos</h1>
 
-    <div class="separadores" role="tablist" aria-label="Estado dos objetos">
-      <button type="button" class="separador" role="tab" data-separador="por_entregar">Por entregar <span data-contagem="por_entregar">0</span></button>
-      <button type="button" class="separador" role="tab" data-separador="na_rececao">Na receção <span data-contagem="na_rececao">0</span></button>
-      <button type="button" class="separador separador--levantar" role="tab" data-separador="por_levantar">Por levantar <span data-contagem="por_levantar">0</span></button>
-      <button type="button" class="separador" role="tab" data-separador="devolvidos">Devolvidos <span data-contagem="devolvidos">0</span></button>
-    </div>
+        <div class="separadores" role="tablist" aria-label="Estado dos objetos">
+            <button type="button" class="separador" role="tab" data-separador="por_entregar">Por entregar <span data-contagem="por_entregar">0</span></button>
+            <button type="button" class="separador" role="tab" data-separador="na_rececao">Na receção <span data-contagem="na_rececao">0</span></button>
+            <button type="button" class="separador separador--levantar" role="tab" data-separador="por_levantar">Por levantar <span data-contagem="por_levantar">0</span></button>
+            <button type="button" class="separador" role="tab" data-separador="devolvidos">Devolvidos <span data-contagem="devolvidos">0</span></button>
+        </div>
 
-    <div class="aviso meus__aviso" id="aviso-entregar" hidden></div>
+        <div class="aviso meus__aviso" id="aviso-entregar" hidden></div>
 
-    <div class="meus__nota-levantar" id="aviso-levantar" hidden>
-      <span aria-hidden="true">
+        <div class="meus__nota-levantar" id="aviso-levantar" hidden>
+            <span aria-hidden="true">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><path d="m5 12 5 5 9-10"></path></svg>
       </span>
-      <p>Estes objetos já foram validados pela receção. Ficam aqui até os levantares e a receção os marcar como devolvidos.</p>
-    </div>
+        </div>
 
-    <div class="registos" id="registos" aria-live="polite">
-      <p class="ajuda">A carregar…</p>
-    </div>
-  </main>
+        <div class="registos" id="registos" aria-live="polite">
+            <p class="ajuda">A carregar…</p>
+        </div>
+    </main>
 
-  <footer class="footer" id="footer"></footer>
+    <footer class="footer" id="footer"></footer>
 
-  <script type="module" src="../js/pages/meusAnuncios.js"></script>
+    <script type="module" src="../js/pages/meusAnuncios.js"></script>
 </body>
+
 </html>
