@@ -29,3 +29,7 @@ Thumbs.db
 
 # Backups automáticos do Docker (docker/backup/backup.sh)
 /backups/
+
+# Ficheiros compilados do Python
+__pycache__/
+*.pyc

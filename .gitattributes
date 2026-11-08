@@ -1,0 +1,12 @@
+# Fins de linha Unix (LF) para tudo o que corre dentro dos contentores Linux.
+# Sem isto, o Git no Windows pode converter para CRLF e os scripts deixam de funcionar
+# (ex.: o Galera não arranca porque o bash não reconhece «arrancar.sh\r»).
+*.sh        text eol=lf
+*.py        text eol=lf
+*.cnf       text eol=lf
+*.conf      text eol=lf
+*.ini       text eol=lf
+*.sql       text eol=lf
+*.yml       text eol=lf
+Dockerfile  text eol=lf
+.env.example text eol=lf
