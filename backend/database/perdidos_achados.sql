@@ -239,14 +239,18 @@ INSERT INTO `matches` (`id`, `item_id`, `matched_item_id`, `score`, `score_texto
 
 CREATE TABLE `notifications` (
   `id` int UNSIGNED NOT NULL,
-  `match_id` int UNSIGNED NOT NULL,
+  `tipo` enum('correspondencia','pedido_aprovado','pedido_recusado','pedido_reaberto') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'correspondencia',
+  `match_id` int UNSIGNED DEFAULT NULL,
+  `reclamacao_id` int UNSIGNED DEFAULT NULL,
   `user_id` int UNSIGNED NOT NULL,
-  `item_id` int UNSIGNED NOT NULL,
+  `item_id` int UNSIGNED DEFAULT NULL,
   `ponto_recolha_id` int UNSIGNED NOT NULL,
   `lida` tinyint(1) NOT NULL DEFAULT '0',
   `lida_em` datetime DEFAULT NULL,
   `invalidada_em` datetime DEFAULT NULL,
-  `criado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `arquivada_em` datetime DEFAULT NULL,
+  `criado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `chk_notifications_tipo` CHECK (((`tipo` = _utf8mb4'correspondencia') and (`match_id` is not null) and (`item_id` is not null) and (`reclamacao_id` is null)) or ((`tipo` in (_utf8mb4'pedido_aprovado',_utf8mb4'pedido_recusado',_utf8mb4'pedido_reaberto')) and (`reclamacao_id` is not null) and (`match_id` is null) and (`item_id` is null)))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -480,7 +484,9 @@ ALTER TABLE `notifications`
   ADD KEY `fk_notifications_dono` (`item_id`,`user_id`),
   ADD KEY `fk_notifications_match` (`match_id`,`item_id`),
   ADD KEY `fk_notifications_ponto` (`ponto_recolha_id`),
-  ADD KEY `idx_notifications_user` (`user_id`,`invalidada_em`,`lida`,`criado_em`);
+  ADD KEY `fk_notifications_reclamacao` (`reclamacao_id`),
+  ADD KEY `idx_notifications_user` (`user_id`,`invalidada_em`,`lida`,`criado_em`),
+  ADD KEY `idx_notifications_ativas` (`user_id`,`arquivada_em`,`lida`,`criado_em`);
 
 --
 -- Índices para tabela `pedidos_levantamento`
@@ -656,6 +662,7 @@ ALTER TABLE `notifications`
   ADD CONSTRAINT `fk_notifications_dono` FOREIGN KEY (`item_id`,`user_id`) REFERENCES `items` (`id`, `user_id`),
   ADD CONSTRAINT `fk_notifications_match` FOREIGN KEY (`match_id`,`item_id`) REFERENCES `matches` (`id`, `item_id`),
   ADD CONSTRAINT `fk_notifications_ponto` FOREIGN KEY (`ponto_recolha_id`) REFERENCES `pontos_recolha` (`id`),
+  ADD CONSTRAINT `fk_notifications_reclamacao` FOREIGN KEY (`reclamacao_id`) REFERENCES `reclamacoes` (`id`),
   ADD CONSTRAINT `fk_notifications_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
