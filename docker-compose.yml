@@ -1,18 +1,21 @@
-# Perdidos & Achados em Docker, com tolerância a falhas (fase 1).
+# Perdidos & Achados em Docker, com tolerância a falhas.
 #
-#   browser → nginx (8080) → web (Apache + PHP) → db1 (MySQL principal) ──replicação──▶ db2 (réplica)
-#                                                                                        └▶ backup → ./backups
+#   browser → nginx (8080) → web (Apache + PHP) → galera1 ⇄ galera2 ⇄ galera3   (MariaDB Galera)
+#                                                     └─ backup → ./backups
 #   autoheal reinicia qualquer contentor que fique «unhealthy».
+#
+# Galera: os 3 nós têm sempre os mesmos dados (replicação síncrona). Se um cai, os outros dois
+# continuam sem parar nem perder nada; quando ele volta, recebe sozinho o que perdeu.
+# Quórum: um nó que PARA de forma ordenada sai do cluster e os outros continuam (até 1 nó).
+# Se 2 nós CAEM de repente (crash, rede), o que sobra fica sem maioria e recusa escritas até
+# outro voltar: assim nunca há dois «clusters» com dados diferentes.
+# Se os 3 caírem de repente e não se refizerem sozinhos: sh docker/galera/recuperar-cluster.sh
 #
 # Arrancar:   cp .env.example .env   (e mudar as palavras-passe)
 #             docker compose up -d --build
 # Abrir:      http://localhost:8080
 # Ver estado: docker compose ps
-#
-# Se o db1 cair:   sh docker/replicacao/promover-db2.sh   (o db2 passa a principal)
-# Voltar ao normal: sh docker/replicacao/repor-replica.sh
-#
-# Na fase 2 entram os workers de IA e o Galera (escritas em vários nós, failover automático).
+# Ver o cluster: docker compose exec galera1 bash -c 'mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SHOW STATUS LIKE \"wsrep_cluster_size\""'
 
 x-logs: &logs
   driver: json-file
@@ -20,108 +23,99 @@ x-logs: &logs
     max-size: "10m"
     max-file: "3"
 
-x-ligacao-bd: &ligacao-bd
-  # O PHP liga-se à primeira destas BDs que aceite escritas (backend/config/database.php).
-  DB_HOST: db1,db2
-  DB_PORT: "3306"
-  DB_NAME: ${DB_NAME:-perdidos_achados}
-  DB_USER: ${DB_USER:-perdidos}
-  DB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD no ficheiro .env}
-
-x-mysql: &mysql
-  image: mysql:8.0
+x-galera: &galera
+  image: mariadb:11.4
   restart: unless-stopped
-  environment:
-    MYSQL_DATABASE: ${DB_NAME:-perdidos_achados}
-    MYSQL_USER: ${DB_USER:-perdidos}
-    MYSQL_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD no ficheiro .env}
-    MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Define DB_ROOT_PASSWORD no ficheiro .env}
+  entrypoint: ["bash", "/galera/arrancar.sh"]
+  environment: &galera-env
+    MARIADB_DATABASE: ${DB_NAME:-perdidos_achados}
+    MARIADB_USER: ${DB_USER:-perdidos}
+    MARIADB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD no ficheiro .env}
+    MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Define DB_ROOT_PASSWORD no ficheiro .env}
+    GALERA_SST_PASSWORD: ${GALERA_SST_PASSWORD:?Define GALERA_SST_PASSWORD no ficheiro .env}
+    GALERA_NOS: galera1,galera2,galera3
+    GALERA_FUNDADOR: galera1
     TZ: Europe/Lisbon
   healthcheck:
-    test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 -u root --silent"]
+    test: ["CMD", "bash", "/galera/saude.sh"]
     interval: 10s
     timeout: 5s
-    retries: 5
-    start_period: 60s
-  labels:
-    autoheal: "true"
+    retries: 3
+    start_period: 120s
+  # Sem autoheal nos nós Galera: reiniciar um nó que perdeu a maioria não ajuda e apaga o
+  # estado (gvwstate.dat) que o Galera usa para se refazer sozinho depois de um crash total.
+  # Um crash do processo é tratado pelo restart acima.
   deploy:
     resources:
       limits:
-        memory: 1g
+        memory: 768m
   logging: *logs
 
 services:
-  # Base de dados principal: recebe todas as leituras e escritas.
-  db1:
-    <<: *mysql
-    hostname: db1
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --server-id=1
-      - --log-bin=mysql-bin
-      - --gtid-mode=ON
-      - --enforce-gtid-consistency=ON
+  # Nó fundador: na instalação nova cria o cluster, as contas e as tabelas (perdidos_achados.sql).
+  galera1:
+    <<: *galera
+    hostname: galera1
+    environment:
+      <<: *galera-env
+      GALERA_NO: galera1
     volumes:
-      # Os dados sobrevivem a apagar/recriar o contentor.
-      - dados_mysql:/var/lib/mysql
-      # Só no PRIMEIRO arranque (volume vazio): cria as tabelas, as contas e os dados de referência.
-      # O perdidos_achados.sql já inclui as migrações de backend/database/migracoes/.
+      - dados_galera1:/var/lib/mysql
+      - ./docker/galera:/galera:ro
+      - ./docker/galera/galera.cnf:/etc/mysql/conf.d/galera.cnf:ro
+      # Só no PRIMEIRO arranque (volume vazio): conta do SST + tabelas, contas e dados de referência.
+      - ./docker/galera/initdb/00-utilizador-sst.sh:/docker-entrypoint-initdb.d/00-utilizador-sst.sh:ro
       - ./backend/database/perdidos_achados.sql:/docker-entrypoint-initdb.d/01-perdidos_achados.sql:ro
     ports:
       # Para abrir a BD com o phpMyAdmin/DBeaver em localhost:3307 (a 3306 é do MAMP).
       - "3307:3306"
 
-  # Réplica: cópia em tempo real do db1, só de leitura. Não recebe o .sql: os dados vêm do db1
-  # (contentor «replicacao»). Se o db1 se perder, os dados estão aqui.
-  db2:
-    <<: *mysql
-    hostname: db2
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --server-id=2
-      - --log-bin=mysql-bin
-      - --gtid-mode=ON
-      - --enforce-gtid-consistency=ON
+  # Os outros nós entram no cluster e recebem do galera1 uma cópia completa (SST).
+  galera2:
+    <<: *galera
+    hostname: galera2
+    environment:
+      <<: *galera-env
+      GALERA_NO: galera2
     volumes:
-      - dados_mysql_replica:/var/lib/mysql
+      - dados_galera2:/var/lib/mysql
+      - ./docker/galera:/galera:ro
+      - ./docker/galera/galera.cnf:/etc/mysql/conf.d/galera.cnf:ro
     ports:
       - "3308:3306"
 
-  # Corre uma vez por arranque e termina: liga a replicação db1 → db2 (não faz nada se já estiver ligada).
-  replicacao:
-    image: mysql:8.0
-    restart: "no"
-    entrypoint: ["sh", "/scripts/configurar.sh"]
+  galera3:
+    <<: *galera
+    hostname: galera3
     environment:
-      DB_NAME: ${DB_NAME:-perdidos_achados}
-      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Define DB_ROOT_PASSWORD no ficheiro .env}
-      REPL_PASSWORD: ${REPL_PASSWORD:?Define REPL_PASSWORD no ficheiro .env}
+      <<: *galera-env
+      GALERA_NO: galera3
     volumes:
-      - ./docker/replicacao:/scripts:ro
-    depends_on:
-      db1:
-        condition: service_healthy
-      db2:
-        condition: service_healthy
-    logging: *logs
+      - dados_galera3:/var/lib/mysql
+      - ./docker/galera:/galera:ro
+      - ./docker/galera/galera.cnf:/etc/mysql/conf.d/galera.cnf:ro
+    ports:
+      - "3309:3306"
 
-  # A aplicação (uma réplica). As sessões e as fotos estão na base de dados, por isso para
-  # escalar basta acrescentar outro serviço igual e outra linha «server» no nginx.conf.
+  # A aplicação. As sessões e as fotos estão na base de dados, por isso para escalar basta
+  # acrescentar outro serviço igual e outra linha «server» no nginx.conf.
   web:
     build: ./docker/web
     image: perdidos-achados-web
     hostname: web
     restart: unless-stopped
-    environment: *ligacao-bd
+    environment:
+      # O PHP usa o primeiro nó sincronizado desta lista (backend/config/database.php).
+      DB_HOST: galera1,galera2,galera3
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-perdidos_achados}
+      DB_USER: ${DB_USER:-perdidos}
+      DB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD no ficheiro .env}
     volumes:
       - ./frontend:/var/www/frontend:ro
       - ./backend:/var/www/backend:ro
     depends_on:
-      db1:
-        condition: service_healthy
+      - galera1
     labels:
       autoheal: "true"
     deploy:
@@ -153,13 +147,14 @@ services:
           memory: 64m
     logging: *logs
 
-  # Os backups saem da réplica, para não pesarem na base de dados principal.
+  # Backups de hora a hora a partir de um nó que não é o que recebe as escritas (galera3,
+  # ou o seguinte disponível): todos têm os mesmos dados.
   backup:
-    image: mysql:8.0
+    image: mariadb:11.4
     restart: unless-stopped
     entrypoint: ["sh", "/scripts/backup.sh"]
     environment:
-      DB_HOST: db2
+      DB_HOST: galera3,galera2,galera1
       DB_NAME: ${DB_NAME:-perdidos_achados}
       DB_USER: ${DB_USER:-perdidos}
       DB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD no ficheiro .env}
@@ -170,8 +165,7 @@ services:
       - ./docker/backup:/scripts:ro
       - ./backups:/backups
     depends_on:
-      replicacao:
-        condition: service_completed_successfully
+      - galera1
     deploy:
       resources:
         limits:
@@ -179,14 +173,14 @@ services:
     logging: *logs
 
   # O Docker só reinicia sozinho um contentor que TERMINA. O autoheal trata dos que ficam
-  # de pé mas «unhealthy» (ex.: Apache ligado mas sem conseguir falar com a BD).
+  # de pé mas «unhealthy» (ex.: um nó Galera que perdeu a sincronização).
   autoheal:
     image: willfarrell/autoheal:1.2.0
     restart: unless-stopped
     environment:
       AUTOHEAL_CONTAINER_LABEL: autoheal
       AUTOHEAL_INTERVAL: 10
-      AUTOHEAL_START_PERIOD: 60
+      AUTOHEAL_START_PERIOD: 180
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:
@@ -196,5 +190,6 @@ services:
     logging: *logs
 
 volumes:
-  dados_mysql:
-  dados_mysql_replica:
+  dados_galera1:
+  dados_galera2:
+  dados_galera3:

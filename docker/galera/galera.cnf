@@ -1,0 +1,31 @@
+# Configuração comum aos 3 nós MariaDB Galera.
+# Galera = replicação SÍNCRONA entre todos os nós: uma escrita só é confirmada quando todos a
+# aceitaram. Se um nó cai, os outros já têm tudo e continuam; quando volta, recebe o que perdeu.
+[mysqld]
+character-set-server = utf8mb4
+collation-server     = utf8mb4_unicode_ci
+bind-address         = 0.0.0.0
+
+# Requisitos do Galera.
+binlog_format            = ROW
+default_storage_engine   = InnoDB
+innodb_autoinc_lock_mode = 2
+
+wsrep_on            = ON
+wsrep_provider      = /usr/lib/galera/libgalera_smm.so
+wsrep_cluster_name  = perdidos_achados
+# Cópia completa para um nó novo/atrasado sem parar o nó que a dá (doador).
+wsrep_sst_method    = mariabackup
+# pc.recovery: depois de uma falha de energia de TODOS os nós, o cluster refaz-se sozinho
+# quando eles voltarem. gcache: histórico para um nó que volte receber só o que perdeu (IST).
+wsrep_provider_options = "pc.recovery=TRUE;gcache.size=128M"
+
+# Ids seguidos (1, 2, 3…) em vez de saltos de 3 em 3: o PHP escreve sempre no mesmo nó
+# (o primeiro disponível de DB_HOST), por isso não há dois nós a gerar ids ao mesmo tempo.
+# Se isso acontecesse, o Galera recusava uma das escritas (erro 1213), sem corromper dados.
+wsrep_auto_increment_control = OFF
+auto_increment_increment     = 1
+auto_increment_offset        = 1
+
+# Memória moderada: são 3 nós no mesmo computador.
+innodb_buffer_pool_size = 128M
