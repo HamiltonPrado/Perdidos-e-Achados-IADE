@@ -22,5 +22,12 @@ printf 'Repor %s? Os dados atuais serão substituídos. [s/N] ' "${FICHEIRO}"
 read -r RESPOSTA
 [ "${RESPOSTA}" = "s" ] || { echo "Cancelado."; exit 0; }
 
-docker compose exec -T db1 sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -u root "$MYSQL_DATABASE"' < "${FICHEIRO}"
+# Repõe num nó sincronizado do cluster; o Galera replica a reposição para os outros.
+for NO in galera1 galera2 galera3; do
+    if docker compose exec -T "${NO}" bash /galera/saude.sh >/dev/null 2>&1; then
+        docker compose exec -T "${NO}" sh -c 'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" mariadb -u root "$MARIADB_DATABASE"' < "${FICHEIRO}"
+        echo "Reposto através do ${NO}."
+        break
+    fi
+done
 echo "Base de dados reposta a partir de ${FICHEIRO}."
