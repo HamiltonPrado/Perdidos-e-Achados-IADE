@@ -119,3 +119,9 @@
     flex: 1 1 140px;
   }
 }
+
+.lista__mais {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}

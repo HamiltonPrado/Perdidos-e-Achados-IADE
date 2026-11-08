@@ -22,11 +22,14 @@ async function iniciar() {
     return;
   }
 
+  // Por entregar: referência provisória ENT-…; depois da entrada na receção passa a ACH-….
+  const referencia = item.referencia;
+
   const textos = {
     por_receber: {
       sobretitulo: lerParametro('novo') ? 'Objeto registado' : 'Por entregar',
       titulo: 'Agora entrega-o na receção.',
-      texto: `Leva o objeto à receção (${RECECAO.local}) e indica a referência ${item.referencia}. O anúncio fica disponível depois da entrega.`,
+      texto: `Leva o objeto à receção (${RECECAO.local}) e indica a referência ${referencia}. O anúncio fica disponível depois da entrega.`,
     },
     por_reclamar: {
       sobretitulo: 'Na receção',
@@ -49,7 +52,7 @@ async function iniciar() {
   $('sobretitulo').textContent = t.sobretitulo;
   $('titulo').textContent = t.titulo;
   $('texto').textContent = t.texto;
-  $('referencia').textContent = item.referencia || `#${item.id}`;
+  $('referencia').textContent = referencia;
 
   $('resumo').innerHTML = `
     <div class="resumo-objeto__foto">${item.fotos[0] ? `<img src="${esc(item.fotos[0])}" alt="">` : fotoVazia()}</div>

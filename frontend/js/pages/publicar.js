@@ -4,8 +4,7 @@ import { montarFooter } from '../components/footer.js';
 import { itemsService } from '../services/itemsService.js';
 import { categoriasService } from '../services/categoriasService.js';
 import { locaisService } from '../services/locaisService.js';
-import { esc, seletorDeFotos } from '../utilities/tools.js';
-import { RECECAO } from '../utilities/rececao.js';
+import { esc, seletorDeFotos, dataParaApi } from '../utilities/tools.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -16,7 +15,6 @@ if (requerLogin()) {
 }
 
 async function iniciar() {
-  $('nota-proximo').textContent = `Leva o objeto à receção (${RECECAO.local}, ${RECECAO.horario}) e indica a referência que vais receber.`;
 
   const categorias = await categoriasService.getAll();
   const locais = await locaisService.getAll();
@@ -41,6 +39,7 @@ async function iniciar() {
     const erros = {
       titulo: !$('titulo').value.trim(),
       categoria: !$('categoria').value,
+      descricao: !$('descricao').value.trim(),
       local: !$('local').value,
     };
     Object.entries(erros).forEach(([campo, temErro]) => {
@@ -71,12 +70,9 @@ async function iniciar() {
           descricao: $('descricao').value.trim(),
           categoriaId: $('categoria').value,
           localId: $('local').value,
-          dataEncontrado: $('data').value ? new Date($('data').value).toISOString() : new Date().toISOString(),
+          dataEncontrado: dataParaApi($('data').value),
           fotos: fotos.ficheiros,
-        },
-        categorias,
-        locais
-      );
+        });
 
       window.location.href = `registo.html?id=${novo.id}&novo=1`;
     } catch (erro) {

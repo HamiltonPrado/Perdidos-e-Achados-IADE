@@ -45,6 +45,7 @@
         <div class="grupo">
           <label for="descricao" class="rotulo">Descrição detalhada</label>
           <textarea id="descricao" class="campo" rows="3" maxlength="500" placeholder="Ex.: capa transparente, pequeno risco junto à câmara…"></textarea>
+          <span class="erro" id="erro-descricao" hidden>Descreve o objeto (cor, marca, detalhes).</span>
         </div>
 
         <div class="duas-colunas">
@@ -59,12 +60,6 @@
             <label for="data" class="rotulo">Quando?</label>
             <input id="data" type="datetime-local" class="campo">
           </div>
-        </div>
-
-        <div class="grupo">
-          <label for="detalhe" class="rotulo">Detalhe que só o proprietário conhece</label>
-          <input id="detalhe" type="text" class="campo" placeholder="Ex.: imagem do ecrã bloqueado, autocolante ou marca…" autocomplete="off">
-          <span class="ajuda">Só a receção vê este detalhe. Ajuda a confirmar que o objeto é teu.</span>
         </div>
 
         <label for="fotos" class="upload upload--compacto">
@@ -91,6 +86,7 @@
         <p class="sobretitulo">Pedido de procura registado</p>
         <h1>Vamos estar atentos.</h1>
         <p>Quando a receção receber um objeto parecido, vais ser avisado.</p>
+        <p class="ajuda" id="referencia-procura"></p>
       </div>
 
       <div class="procurar__parecidos">

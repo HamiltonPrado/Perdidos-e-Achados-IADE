@@ -6,7 +6,7 @@ import { procurasService } from '../services/procurasService.js';
 import { itemsService } from '../services/itemsService.js';
 import { categoriasService } from '../services/categoriasService.js';
 import { locaisService } from '../services/locaisService.js';
-import { esc, seletorDeFotos } from '../utilities/tools.js';
+import { esc, seletorDeFotos, dataParaApi } from '../utilities/tools.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -33,6 +33,7 @@ async function iniciar() {
     const erros = {
       titulo: !$('titulo').value.trim(),
       categoria: !$('categoria').value,
+      descricao: !$('descricao').value.trim(),
       local: !$('local').value,
     };
     Object.entries(erros).forEach(([campo, temErro]) => {
@@ -55,13 +56,9 @@ async function iniciar() {
           descricao: $('descricao').value.trim(),
           categoriaId: $('categoria').value,
           localId: $('local').value,
-          dataPerdido: $('data').value ? new Date($('data').value).toISOString() : null,
-          detalhePrivado: $('detalhe').value.trim(),
+          dataPerdido: dataParaApi($('data').value),
           fotos: fotos.ficheiros,
-        },
-        categorias,
-        locais
-      );
+        });
       await mostrarParecidos(procura);
     } catch (erro) {
       $('erro-geral').textContent = erro.message;
@@ -79,6 +76,8 @@ async function mostrarParecidos(procura) {
   $('parecidos').hidden = parecidos.length === 0;
   $('parecidos-titulo').hidden = parecidos.length === 0;
   $('sem-parecidos').hidden = parecidos.length > 0;
+
+  $('referencia-procura').textContent = procura.referencia ? `Referência do teu registo: ${procura.referencia}` : '';
 
   $('ecra-formulario').hidden = true;
   $('ecra-enviado').hidden = false;

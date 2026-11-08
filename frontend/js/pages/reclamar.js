@@ -3,7 +3,7 @@ import { montarNavBar } from '../components/navbar.js';
 import { montarFooter } from '../components/footer.js';
 import { itemsService } from '../services/itemsService.js';
 import { reclamacoesService } from '../services/reclamacoesService.js';
-import { esc, fotoVazia, lerParametro, seletorDeFotos } from '../utilities/tools.js';
+import { esc, fotoVazia, lerParametro } from '../utilities/tools.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -27,6 +27,13 @@ async function iniciar() {
     return;
   }
 
+  // O backend recusa reclamações enquanto a equipa não definir a pergunta secreta.
+  if (!item.pergunta) {
+    $('indisponivel-texto').textContent = 'A receção ainda está a preparar este objeto. Tenta reclamá-lo mais tarde.';
+    $('indisponivel').hidden = false;
+    return;
+  }
+
   const minhas = await reclamacoesService.getMinhas();
   if (minhas.some((r) => r.itemId === item.id)) {
     mostrarEnviado();
@@ -40,13 +47,9 @@ async function iniciar() {
   $('resumo-foto').innerHTML = foto ? `<img src="${esc(foto)}" alt="">` : fotoVazia();
   $('resumo-titulo').textContent = item.titulo;
   $('resumo-local').textContent = `Encontrado em ${item.local}`;
-  $('pergunta').textContent = item.pergunta || 'Descreve um detalhe que só o dono saberia.';
+  $('pergunta').textContent = item.pergunta;
 
   $('ecra-formulario').hidden = false;
-
-  const fotosProva = seletorDeFotos($('fotos-prova'), $('miniaturas-prova'), 3, () => {
-    $('erro-fotos').hidden = false;
-  });
 
   $('form-reclamar').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -66,7 +69,6 @@ async function iniciar() {
       await reclamacoesService.create(item.id, {
         resposta,
         informacao: $('informacao').value.trim(),
-        fotos: fotosProva.ficheiros,
       });
       mostrarEnviado();
     } catch (erro) {

@@ -34,7 +34,8 @@ if (requerLogin()) {
 }
 
 async function iniciar() {
-  const itens = await itemsService.getMine();
+  // Arquivados pela equipa não pertencem a nenhum separador.
+  const itens = (await itemsService.getMine()).filter((i) => i.estado in GRUPO);
 
   const contagem = { por_entregar: 0, na_rececao: 0, devolvidos: 0 };
   itens.forEach((i) => contagem[GRUPO[i.estado] ?? 'na_rececao']++);

@@ -72,6 +72,35 @@ export function lerImagem(ficheiro, tamanhoMax = 900) {
   });
 }
 
+// Converte uma foto escolhida num JPEG de no máximo `lado` px, pronto a enviar à API
+// (o backend só aceita JPEG/PNG até 2 MB). Fotos grandes do telemóvel ficam ~200–500 KB.
+// O backend guarda só o dia (AAAA-MM-DD). Recebe o valor de um <input type="datetime-local">
+// ("AAAA-MM-DDTHH:MM"); sem valor, usa o dia de hoje na hora local.
+export function dataParaApi(valor = '') {
+  if (valor) return valor.slice(0, 10);
+  const hoje = new Date();
+  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+}
+
+export function prepararFoto(ficheiro, numero = 1, lado = 1600) {
+  return new Promise((resolve, reject) => {
+    const falhou = () => reject(new Error(`Não foi possível ler a foto ${numero}. Usa uma imagem JPEG ou PNG.`));
+    const endereco = URL.createObjectURL(ficheiro);
+    const img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(endereco); falhou(); };
+    img.onload = () => {
+      URL.revokeObjectURL(endereco);
+      const escala = Math.min(1, lado / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * escala);
+      canvas.height = Math.round(img.height * escala);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => (blob ? resolve(blob) : falhou()), 'image/jpeg', 0.85);
+    };
+    img.src = endereco;
+  });
+}
+
 export function seletorDeFotos(input, zona, maximo, aoPassar = () => {}) {
   const estado = { ficheiros: [], previews: [] };
 

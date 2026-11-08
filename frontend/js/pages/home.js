@@ -6,6 +6,7 @@ import { itemsService } from '../services/itemsService.js';
 import { categoriasService } from '../services/categoriasService.js';
 import { locaisService } from '../services/locaisService.js';
 import { esc } from '../utilities/tools.js';
+import { requerLogin } from '../utilities/auth.js';
 
 const formPesquisa = document.getElementById('form-pesquisa');
 const campoPesquisa = document.getElementById('pesquisa');
@@ -15,67 +16,113 @@ const contagem = document.getElementById('contagem');
 const listaVazia = document.getElementById('lista-vazia');
 const grelha = document.getElementById('grelha');
 
+const botaoMais = document.getElementById('carregar-mais');
+
 const filtros = { q: '', categoria: '', local: '', ordem: 'recentes' };
 
+// Paginação: o backend devolve 20 objetos de cada vez e o total com os filtros atuais.
+const lista = { pagina: 0, total: 0, mostrados: 0 };
+// Cada novo pedido invalida os anteriores (ex.: mudar o filtro enquanto «Carregar mais» ainda carrega).
+let pedidoAtual = 0;
+
+function atualizarContagem() {
+  const { total, mostrados } = lista;
+  const texto = `${total} ${total === 1 ? 'objeto' : 'objetos'} por reclamar`;
+  contagem.textContent = mostrados < total ? `${texto} · a mostrar ${mostrados}` : texto;
+  botaoMais.hidden = mostrados >= total;
+}
+
 async function carregarLista() {
+  const este = ++pedidoAtual;
   contagem.textContent = 'A carregar…';
   listaVazia.hidden = true;
+  botaoMais.hidden = true;
 
   try {
-    const items = await itemsService.getAll(filtros);
+    const { itens, pagina, total } = await itemsService.getPagina(filtros, 1);
+    if (este !== pedidoAtual) return;
 
-    contagem.textContent = `${items.length} ${items.length === 1 ? 'objeto' : 'objetos'} por reclamar`;
-    listaVazia.hidden = items.length > 0;
-    grelha.innerHTML = items.map(cartaoItem).join('');
+    Object.assign(lista, { pagina, total, mostrados: itens.length });
+    listaVazia.hidden = itens.length > 0;
+    grelha.innerHTML = itens.map(cartaoItem).join('');
+    atualizarContagem();
   } catch (erro) {
+    if (este !== pedidoAtual) return;
     contagem.textContent = erro.message;
     grelha.innerHTML = '';
   }
 }
 
-montarNavBar('inicio');
-montarFooter();
+async function carregarMais() {
+  const este = ++pedidoAtual;
+  botaoMais.disabled = true;
+  botaoMais.textContent = 'A carregar…';
 
-const categorias = await categoriasService.getAll();
-const escolherCategoria = montarFiltroCategorias(
-  document.getElementById('filtro-categorias'),
-  categorias,
-  (id) => {
-    filtros.categoria = id;
-    carregarLista();
+  try {
+    const { itens, pagina, total } = await itemsService.getPagina(filtros, lista.pagina + 1);
+    if (este !== pedidoAtual) return;
+
+    grelha.insertAdjacentHTML('beforeend', itens.map(cartaoItem).join(''));
+    // Se não vier nada (ex.: objetos reclamados entretanto), deixa de pedir mais páginas.
+    Object.assign(lista, { pagina, total: itens.length ? total : lista.mostrados, mostrados: lista.mostrados + itens.length });
+    atualizarContagem();
+  } catch (erro) {
+    if (este !== pedidoAtual) return;
+    contagem.textContent = erro.message;
+  } finally {
+    botaoMais.disabled = false;
+    botaoMais.textContent = 'Carregar mais';
   }
-);
+}
 
-const locais = await locaisService.getAll();
-selectLocal.insertAdjacentHTML(
-  'beforeend',
-  locais.map((l) => `<option value="${esc(l.id)}">${esc(l.nome)}</option>`).join('')
-);
+// A lista e o detalhe dos objetos só estão disponíveis com sessão iniciada.
+if (requerLogin()) {
+  montarNavBar('inicio');
+  montarFooter();
 
-formPesquisa.addEventListener('submit', (e) => {
-  e.preventDefault();
-  filtros.q = campoPesquisa.value;
+  const categorias = await categoriasService.getAll();
+  const escolherCategoria = montarFiltroCategorias(
+    document.getElementById('filtro-categorias'),
+    categorias,
+    (id) => {
+      filtros.categoria = id;
+      carregarLista();
+    }
+  );
+
+  const locais = await locaisService.getAll();
+  selectLocal.insertAdjacentHTML(
+    'beforeend',
+    locais.map((l) => `<option value="${esc(l.id)}">${esc(l.nome)}</option>`).join('')
+  );
+
+  botaoMais.addEventListener('click', carregarMais);
+
+  formPesquisa.addEventListener('submit', (e) => {
+    e.preventDefault();
+    filtros.q = campoPesquisa.value;
+    carregarLista();
+  });
+
+  selectLocal.addEventListener('change', () => {
+    filtros.local = selectLocal.value;
+    carregarLista();
+  });
+
+  selectOrdem.addEventListener('change', () => {
+    filtros.ordem = selectOrdem.value;
+    carregarLista();
+  });
+
+  document.getElementById('limpar-filtros').addEventListener('click', () => {
+    filtros.q = '';
+    filtros.categoria = '';
+    filtros.local = '';
+    campoPesquisa.value = '';
+    selectLocal.value = '';
+    escolherCategoria('');
+    carregarLista();
+  });
+
   carregarLista();
-});
-
-selectLocal.addEventListener('change', () => {
-  filtros.local = selectLocal.value;
-  carregarLista();
-});
-
-selectOrdem.addEventListener('change', () => {
-  filtros.ordem = selectOrdem.value;
-  carregarLista();
-});
-
-document.getElementById('limpar-filtros').addEventListener('click', () => {
-  filtros.q = '';
-  filtros.categoria = '';
-  filtros.local = '';
-  campoPesquisa.value = '';
-  selectLocal.value = '';
-  escolherCategoria('');
-  carregarLista();
-});
-
-carregarLista();
+}

@@ -1,39 +1,40 @@
-import { api, USAR_MOCKS, esperar } from './api.js';
+import { api } from './api.js';
 import { Procura } from '../models/Procura.js';
-import { db, guardar, novoId } from '../mocks/db.js';
-import { getUser } from '../utilities/auth.js';
-import { lerImagem } from '../utilities/tools.js';
+import { prepararFoto } from '../utilities/tools.js';
 
 export const procurasService = {
-  // POST /procuras
-  async create(dados, categorias, locais) {
-    if (USAR_MOCKS) {
-      await esperar();
-      db.procuras ??= [];
-      const nova = {
-        id: novoId(db.procuras),
-        titulo: dados.titulo,
-        descricao: dados.descricao,
-        categoriaId: dados.categoriaId,
-        categoria: categorias.find((c) => c.id === dados.categoriaId)?.nome ?? '',
-        localId: dados.localId,
-        local: locais.find((l) => l.id === dados.localId)?.nome ?? '',
-        dataPerdido: dados.dataPerdido,
-        detalhePrivado: dados.detalhePrivado,
-        fotos: await Promise.all(dados.fotos.map((f) => lerImagem(f, 600))),
-        estado: 'ativa',
-        criadoEm: new Date().toISOString(),
-        criadoPor: getUser()?.id ?? null,
-      };
-      db.procuras.push(nova);
-      guardar();
-      return new Procura(nova);
+  // POST /api/items/lost (JSON)  →  { item: { id, referencia: 'PER-000037', … } }
+  // depois, para cada foto: POST /api/items/:id/photos (multipart, campo "foto").
+  // Um perdido é visível a todos os alunos com sessão; a IA compara-o com os achados.
+  async create(dados) {
+    // Prepara as fotos antes de registar, para não ficar uma procura criada sem fotos
+    // por causa de um ficheiro que o browser não consegue ler.
+    const fotos = [];
+    for (const [n, ficheiro] of dados.fotos.entries()) {
+      fotos.push(await prepararFoto(ficheiro, n + 1));
     }
 
-    const formData = new FormData();
-    ['titulo', 'descricao', 'categoriaId', 'localId', 'dataPerdido', 'detalhePrivado']
-      .forEach((campo) => formData.append(campo, dados[campo] ?? ''));
-    dados.fotos.forEach((f) => formData.append('fotos', f));
-    return new Procura(await api.post('/procuras', formData));
+    const { item } = await api.post('/items/lost', {
+      titulo: dados.titulo,
+      descricao: dados.descricao,
+      category_id: Number(dados.categoriaId),
+      location_id: Number(dados.localId),
+      data_ocorrencia: dados.dataPerdido,
+    });
+
+    for (const [n, foto] of fotos.entries()) {
+      const formData = new FormData();
+      formData.append('foto', foto, `foto-${n + 1}.jpg`);
+      try {
+        await api.post(`/items/${item.id}/photos`, formData);
+      } catch (erro) {
+        throw new Error(`A procura foi registada (${item.referencia}), mas a foto ${n + 1} não foi enviada: ${erro.message}`);
+      }
+    }
+
+    return Object.assign(
+      new Procura({ id: item.id, titulo: dados.titulo, categoriaId: dados.categoriaId, localId: dados.localId }),
+      { referencia: item.referencia }
+    );
   },
 };
