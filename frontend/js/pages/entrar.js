@@ -1,14 +1,12 @@
 import { url } from '../utilities/caminhos.js';
-import { USAR_MOCKS } from '../services/api.js';
 import { authService } from '../services/authService.js';
-import { isLoggedIn, isAdmin, logout, EMAIL_ALUNO, EMAIL_IADE } from '../utilities/auth.js';
+import { isLoggedIn, isAdmin, logout, EMAIL_IADE } from '../utilities/auth.js';
 import { lerParametro } from '../utilities/tools.js';
 import { logoHtml } from '../components/logo.js';
 
 const $ = (id) => document.getElementById(id);
 
 $('entrar-logo').innerHTML = logoHtml();
-$('aviso-simulado').hidden = !USAR_MOCKS;
 
 let perfil = lerParametro('perfil') === 'admin' || lerParametro('voltar')?.startsWith('admin/') ? 'admin' : 'aluno';
 
@@ -27,11 +25,7 @@ if (isLoggedIn()) {
 function mostrarPerfil() {
   const admin = perfil === 'admin';
   $('titulo').textContent = admin ? 'Área da receção' : 'Bem-vindo';
-  $('texto').textContent = admin
-    ? 'Entra com o email do IADE da equipa da receção.'
-    : 'Entra com o teu email do IADE para publicar e reclamar objetos.';
   $('email').placeholder = admin ? 'nome@iade.pt' : '20202030@iade.pt';
-  $('ajuda-email').textContent = admin ? 'O email do IADE da equipa.' : 'O teu número de estudante seguido de @iade.pt.';
   $('trocar-perfil').textContent = admin ? '← Sou aluno' : 'És da equipa da receção? Entra aqui →';
   $('erro-email').hidden = true;
   $('erro-entrar').hidden = true;
@@ -47,11 +41,11 @@ $('form-entrar').addEventListener('submit', async (e) => {
   const email = $('email').value.trim();
   const password = $('password').value;
 
-  const regra = perfil === 'admin' ? EMAIL_IADE : EMAIL_ALUNO;
+  // Aluno ou receção: qualquer email @iade.pt. É o backend (campo role) que decide o perfil.
   const erroEmail = !email
     ? 'Escreve o teu email do IADE.'
-    : !regra.test(email)
-      ? (perfil === 'admin' ? 'Usa um email @iade.pt.' : 'Usa o teu número de estudante seguido de @iade.pt (ex.: 20202030@iade.pt).')
+    : !EMAIL_IADE.test(email)
+      ? 'Usa o teu email do IADE (termina em @iade.pt).'
       : '';
   $('erro-email').textContent = erroEmail;
   $('erro-email').hidden = !erroEmail;
@@ -62,7 +56,7 @@ $('form-entrar').addEventListener('submit', async (e) => {
   $('botao-entrar').disabled = true;
   $('erro-entrar').hidden = true;
   try {
-    const user = await authService.entrar(email, password, perfil);
+    const user = await authService.entrar(email, password);
     if (perfil === 'admin' && user.role !== 'admin') {
       logout();
       throw new Error('Esta conta não tem acesso à área da receção.');

@@ -1,15 +1,15 @@
+// Só o perfil (userService) ainda funciona sem backend: não há rota para editar a conta.
 export const USAR_MOCKS = true;
 
-export const BASE_URL = 'http://localhost:3000/api';
+// Mesma origem que o frontend (o backend usa cookie de sessão e não tem CORS).
+export const BASE_URL = '/api';
 
 async function pedido(metodo, caminho, corpo) {
-  const token = localStorage.getItem('token');
   const temFicheiros = corpo instanceof FormData;
 
   const csrf = localStorage.getItem('csrf');
 
   const headers = {};
-  if (token) headers.Authorization = `Bearer ${token}`;
   if (csrf && metodo !== 'GET') headers['X-CSRF-Token'] = csrf;
   if (corpo && !temFicheiros) headers['Content-Type'] = 'application/json';
 
@@ -21,7 +21,11 @@ async function pedido(metodo, caminho, corpo) {
   });
 
   const dados = await resposta.json().catch(() => ({}));
-  if (!resposta.ok) throw new Error(dados.erro ?? 'Ocorreu um erro. Tenta outra vez.');
+  if (!resposta.ok) {
+    const erro = new Error(dados.erro ?? 'Ocorreu um erro. Tenta outra vez.');
+    erro.status = resposta.status; // permite distinguir 401, 404, 422…
+    throw erro;
+  }
   return dados;
 }
 
@@ -32,5 +36,3 @@ export const api = {
   patch: (caminho, corpo) => pedido('PATCH', caminho, corpo),
   delete: (caminho) => pedido('DELETE', caminho),
 };
-
-export const esperar = (ms = 250) => new Promise((r) => setTimeout(r, ms));

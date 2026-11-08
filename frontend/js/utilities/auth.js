@@ -1,12 +1,7 @@
 import { url, caminhoAtual } from './caminhos.js';
 import { User } from '../models/User.js';
 
-export const USER_EXEMPLO = { id: 7, nome: 'Ana Silva', email: '20242038@iade.pt', foto: null, role: 'user' };
-export const ADMIN_EXEMPLO = { id: 1, nome: 'Equipa da receção', email: 'rececao@iade.pt', foto: null, role: 'admin' };
-
-// Aluno: número de estudante (8 dígitos) + @iade.pt, ex.: 20202030@iade.pt
-export const EMAIL_ALUNO = /^\d{8}@iade\.pt$/i;
-// Equipa da receção: qualquer email @iade.pt
+// Qualquer email @iade.pt (alunos e equipa da receção).
 export const EMAIL_IADE = /^[^\s@]+@iade\.pt$/i;
 
 export function getUser() {
@@ -19,12 +14,13 @@ export function getUser() {
 }
 
 export function isLoggedIn() {
-  return !!localStorage.getItem('token');
+  return !!getUser();
 }
 
-export function login(user, token) {
+// Depois do POST /api/login: guarda quem entrou e o token CSRF da sessão.
+export function login(user, csrf) {
   localStorage.setItem('user', JSON.stringify(user));
-  localStorage.setItem('token', token);
+  localStorage.setItem('csrf', csrf);
 }
 
 export function atualizarUser(user) {
