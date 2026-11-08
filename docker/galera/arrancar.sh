@@ -43,7 +43,13 @@ ARGS=(
 )
 
 if cluster_ativo; then
-    :
+    # Depois de um crash (SIGKILL) o tc.log pode ficar inconsistente e o MariaDB recusa arrancar
+    # («Can't init tc log»), ficando em ciclo de reinícios. Um nó que entra num cluster ativo
+    # recebe os dados dos outros (IST/SST), por isso pode descartá-lo com segurança.
+    if [ -f "${DADOS}/tc.log" ]; then
+        log "a entrar num cluster ativo: descarto o tc.log local (os dados vêm do cluster)."
+        rm -f "${DADOS}/tc.log"
+    fi
 elif [ ! -d "${DADOS}/mysql" ]; then
     if [ "${NO}" = "${FUNDADOR}" ]; then
         log "instalação nova e nenhum cluster ativo: a FUNDAR o cluster."
