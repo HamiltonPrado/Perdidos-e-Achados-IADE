@@ -9,6 +9,13 @@ if ($metodo === 'GET' && $caminho === '/api/categories') {
     $controller->listarCategorias();
 }
 
+// Encaminha a listagem dos locais do campus para o controller.
+if ($metodo === 'GET' && $caminho === '/api/locations') {
+    $controller = new ReferenciaController(obterLigacao());
+
+    $controller->listarLocais();
+}
+
 // Encaminha a listagem dos pontos de recolha para o controller.
 if ($metodo === 'GET' && $caminho === '/api/collection-points') {
     $controller = new ReferenciaController(obterLigacao());

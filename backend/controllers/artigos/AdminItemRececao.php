@@ -11,7 +11,9 @@ trait AdminItemRececao
         $utilizador = exigirAdministrador($this->pdo);
         exigirCsrf();
 
-        $dados = ItemValidator::lerDadosArtigo(true, true);
+        // O terceiro argumento aceita a prateleira (localizacao_stock) e as observações internas,
+        // porque o objeto fica logo guardado na receção.
+        $dados = ItemValidator::lerDadosArtigo(true, true, true);
 
         try {
             $this->pdo->beginTransaction();

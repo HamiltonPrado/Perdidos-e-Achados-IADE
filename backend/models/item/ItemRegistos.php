@@ -59,6 +59,8 @@ trait ItemRegistos
             data_ocorrencia,
             pergunta_secreta,
             resposta_esperada,
+            localizacao_stock,
+            observacoes_internas,
             estado_recepcao,
             recebido_por,
             recebido_em
@@ -74,6 +76,8 @@ trait ItemRegistos
             :data_ocorrencia,
             :pergunta_secreta,
             :resposta_esperada,
+            :localizacao_stock,
+            :observacoes_internas,
             'na_recepcao',
             :recebido_por,
             CURRENT_TIMESTAMP
@@ -92,6 +96,8 @@ trait ItemRegistos
             'data_ocorrencia' => $dados['data_ocorrencia'],
             'pergunta_secreta' => $dados['pergunta_secreta'],
             'resposta_esperada' => $dados['resposta_esperada'],
+            'localizacao_stock' => $dados['localizacao_stock'] ?? null,
+            'observacoes_internas' => $dados['observacoes_internas'] ?? null,
             'recebido_por' => $userId,
         ]);
 

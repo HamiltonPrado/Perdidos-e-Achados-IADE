@@ -1,6 +1,6 @@
 # Contrato da API
 
-Este documento descreve as **38 rotas implementadas** em `backend/routes/grupos`. Os caminhos já incluem `/api`. A origem depende da configuração do Apache; por exemplo, `http://localhost:8888`. A porta do frontend não define a porta do backend.
+Este documento descreve as **39 rotas implementadas** em `backend/routes/grupos`. Os caminhos já incluem `/api`. A origem depende da configuração do Apache; por exemplo, `http://localhost:8888`. A porta do frontend não define a porta do backend.
 
 **Só a equipa com o papel `admin` confirma a receção, define a pergunta e a resposta esperada, decide reclamações e confirma entregas.** Quem encontra o objeto apenas o regista e entrega à equipa.
 
@@ -75,6 +75,7 @@ O backend atual não configura CORS. Uma interface noutra origem precisa de inte
 | POST | `/api/logout` | Sessão | Termina a sessão |
 | GET | `/api/admin/teste` | Admin | Verifica acesso da equipa |
 | GET | `/api/categories` | Público | Lista `categorias` |
+| GET | `/api/locations` | Público | Lista `locais` |
 | GET | `/api/collection-points` | Público | Lista `pontos_recolha` |
 
 ### Artigos e fotografias
@@ -145,6 +146,12 @@ A mesma referência aparece nos perdidos das listas `/api/items/mine`, `/api/ite
 
 A referência é o ID com o prefixo `PER-` e pelo menos seis algarismos. IDs maiores não são cortados: `1000000` fica `PER-1000000`. Não é necessário acrescentar uma coluna à BD e o cliente não pode escolher o valor.
 
+### Referência provisória de um achado por entregar
+
+Quando o aluno regista um achado (`POST /api/items/found`), a resposta inclui `item.referencia`, por exemplo `ENT-000050` (de «entrega») para o ID `50`. É a referência que o aluno indica na receção. Aparece também em `/api/items/mine`, `/api/items/{id}`, `/api/admin/items` e `/api/admin/items/{id}` enquanto o achado estiver `por_entregar`.
+
+Usa o mesmo número que a referência de inventário: ao confirmar a entrada, `ENT-000050` passa a `ACH-000050`. Tal como as outras, é calculada a partir do ID e não precisa de coluna na BD.
+
 ### Referência de inventário de um achado
 
 Quando a equipa confirma a entrada por `POST /api/admin/items/{id}/receive`, a resposta inclui `item.referencia`, por exemplo `ACH-000242` para o achado de ID `242`. O registo direto por `POST /api/admin/items/found` também a devolve, porque o objeto já fica recebido na receção.
@@ -171,7 +178,7 @@ Quando a equipa confirma a entrada por `POST /api/admin/items/{id}/receive`, a r
 
 A referência é calculada com o prefixo `ACH-` (de «achado») e pelo menos seis algarismos. IDs maiores não são cortados: `1000000` fica `ACH-1000000`. É o ID do artigo, não um contador separado de receções, pelo que pode haver intervalos na numeração.
 
-Um achado `por_entregar` não tem este campo. Depois de ficar `na_recepcao`, a referência aparece no catálogo de achados, nos artigos próprios, no inventário da equipa e nos detalhes autorizados. Mantém-se após edição, arquivo ou devolução. Os achados antigos já marcados `na_recepcao` também a recebem, mesmo quando o registo antigo não tem a data ou o responsável pela receção preenchidos.
+Um achado `por_entregar` não tem referência de inventário: recebe a referência provisória `ENT-` (ver acima). Depois de ficar `na_recepcao`, a referência `ACH-` aparece no catálogo de achados, nos artigos próprios, no inventário da equipa e nos detalhes autorizados. Mantém-se após edição, arquivo ou devolução. Os achados antigos já marcados `na_recepcao` também a recebem, mesmo quando o registo antigo não tem a data ou o responsável pela receção preenchidos.
 
 ### Apresentar o ecrã «Objeto recebido na receção»
 

@@ -25,7 +25,12 @@ trait ItemConsultas
             i.estado_recepcao,
             i.ia_estado,
             i.criado_em,
-            i.atualizado_em
+            i.atualizado_em,
+            (
+                SELECT MIN(f.id)
+                FROM item_photos AS f
+                WHERE f.item_id = i.id
+            ) AS foto_id
          FROM items AS i
          INNER JOIN categories AS c ON c.id = i.category_id
          INNER JOIN locations AS l ON l.id = i.location_id
@@ -64,7 +69,12 @@ trait ItemConsultas
                 i.recebido_por,
                 i.recebido_em,
                 i.ia_estado,
-                i.criado_em
+                i.criado_em,
+                (
+                    SELECT MIN(f.id)
+                    FROM item_photos AS f
+                    WHERE f.item_id = i.id
+                ) AS foto_id
             FROM items AS i
             INNER JOIN users AS u ON u.id = i.user_id
             INNER JOIN categories AS c ON c.id = i.category_id
@@ -179,10 +189,17 @@ trait ItemConsultas
     }
 
     // Lista apenas achados ativos já entregues à receção, para quem tem sessão iniciada.
+    // Filtros opcionais: categoria (ID), local (ID), q (texto no título ou descrição)
+    // e ordem ('recentes' ou 'antigos', pela data em que o objeto foi encontrado).
     public function listarAchadosDisponiveis(
         int $limite = 20,
-        int $offset = 0
+        int $offset = 0,
+        array $filtros = []
     ): array {
+        [$condicoes, $valores] = $this->condicoesAchados($filtros);
+
+        $direcao = ($filtros['ordem'] ?? 'recentes') === 'antigos' ? 'ASC' : 'DESC';
+
         $sql = "
             SELECT
                 i.id,
@@ -198,7 +215,12 @@ trait ItemConsultas
                 i.data_ocorrencia,
                 i.estado,
                 i.estado_recepcao,
-                i.criado_em
+                i.criado_em,
+                (
+                    SELECT MIN(f.id)
+                    FROM item_photos AS f
+                    WHERE f.item_id = i.id
+                ) AS foto_id
             FROM items AS i
             INNER JOIN categories AS c
                 ON c.id = i.category_id
@@ -209,27 +231,77 @@ trait ItemConsultas
             WHERE i.tipo = 'found'
               AND i.estado = 'ativo'
               AND i.estado_recepcao = 'na_recepcao'
-            ORDER BY i.criado_em DESC, i.id DESC
+              {$condicoes}
+            ORDER BY i.data_ocorrencia {$direcao}, i.id {$direcao}
             LIMIT :limite OFFSET :offset
         ";
 
         $consulta = $this->pdo->prepare($sql);
+        $this->ligarValores($consulta, $valores);
 
-        $consulta->bindValue(
-            ':limite',
-            $limite,
-            PDO::PARAM_INT
-        );
-
-        $consulta->bindValue(
-            ':offset',
-            $offset,
-            PDO::PARAM_INT
-        );
+        $consulta->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $consulta->bindValue(':offset', $offset, PDO::PARAM_INT);
 
         $consulta->execute();
 
         return array_map([$this, 'adicionarReferencia'], $consulta->fetchAll());
+    }
+
+    // Conta os achados disponíveis com os mesmos filtros da lista (para a paginação).
+    public function contarAchadosDisponiveis(array $filtros = []): int
+    {
+        [$condicoes, $valores] = $this->condicoesAchados($filtros);
+
+        $consulta = $this->pdo->prepare("
+            SELECT COUNT(*)
+            FROM items AS i
+            WHERE i.tipo = 'found'
+              AND i.estado = 'ativo'
+              AND i.estado_recepcao = 'na_recepcao'
+              {$condicoes}
+        ");
+        $this->ligarValores($consulta, $valores);
+        $consulta->execute();
+
+        return (int) $consulta->fetchColumn();
+    }
+
+    // Filtros opcionais da lista de achados → [condições SQL, valores para os marcadores].
+    private function condicoesAchados(array $filtros): array
+    {
+        $condicoes = '';
+        $valores = [];
+
+        if (isset($filtros['categoria'])) {
+            $condicoes .= ' AND i.category_id = :categoria';
+            $valores[':categoria'] = $filtros['categoria'];
+        }
+
+        if (isset($filtros['local'])) {
+            $condicoes .= ' AND i.location_id = :local';
+            $valores[':local'] = $filtros['local'];
+        }
+
+        if (isset($filtros['q'])) {
+            // O PDO sem emulação não aceita o mesmo marcador duas vezes.
+            $condicoes .= ' AND (i.titulo LIKE :q_titulo OR i.descricao LIKE :q_descricao)';
+            $padrao = '%' . addcslashes($filtros['q'], '%_\\') . '%';
+            $valores[':q_titulo'] = $padrao;
+            $valores[':q_descricao'] = $padrao;
+        }
+
+        return [$condicoes, $valores];
+    }
+
+    private function ligarValores(PDOStatement $consulta, array $valores): void
+    {
+        foreach ($valores as $marcador => $valor) {
+            $consulta->bindValue(
+                $marcador,
+                $valor,
+                is_int($valor) ? PDO::PARAM_INT : PDO::PARAM_STR
+            );
+        }
     }
 
     // Lê os dados internos de que a equipa precisa para gerir o artigo.

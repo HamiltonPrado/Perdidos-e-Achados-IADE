@@ -284,12 +284,15 @@ class ItemController
             return;
         }
 
+        $filtros = $this->lerFiltrosAchados();
+
         $limite = 20;
         $offset = ($pagina - 1) * $limite;
 
         $artigos = $this->artigos->listarAchadosDisponiveis(
             $limite,
-            $offset
+            $offset,
+            $filtros
         );
 
         responderJson([
@@ -298,8 +301,70 @@ class ItemController
             'paginacao' => [
                 'pagina' => $pagina,
                 'por_pagina' => $limite,
+                'total' => $this->artigos->contarAchadosDisponiveis($filtros),
             ],
         ]);
+    }
+
+    // Lê os filtros opcionais da lista de achados: ?q=&categoria=&local=&ordem=
+    // Parâmetros vazios são ignorados; valores inválidos devolvem 422.
+    private function lerFiltrosAchados(): array
+    {
+        $filtros = [];
+
+        foreach (['categoria', 'local'] as $campo) {
+            $valor = $_GET[$campo] ?? '';
+
+            if ($valor === '') {
+                continue;
+            }
+
+            $id = filter_var(
+                $valor,
+                FILTER_VALIDATE_INT,
+                ['options' => ['min_range' => 1]]
+            );
+
+            if ($id === false) {
+                responderJson([
+                    'erro' => 'Filtro de ' . $campo . ' inválido.'
+                ], 422);
+            }
+
+            $filtros[$campo] = $id;
+        }
+
+        $q = $_GET['q'] ?? '';
+
+        if (!is_string($q)) {
+            responderJson([
+                'erro' => 'Pesquisa inválida.'
+            ], 422);
+        }
+
+        $q = trim($q);
+
+        if ($q !== '') {
+            if (mb_strlen($q) > 100) {
+                responderJson([
+                    'erro' => 'A pesquisa pode ter no máximo 100 caracteres.'
+                ], 422);
+            }
+
+            $filtros['q'] = $q;
+        }
+
+        $ordem = $_GET['ordem'] ?? 'recentes';
+
+        if (!in_array($ordem, ['recentes', 'antigos'], true)) {
+            responderJson([
+                'erro' => 'Ordem inválida.'
+            ], 422);
+        }
+
+        $filtros['ordem'] = $ordem;
+
+        return $filtros;
     }
 
     // Regista um achado que o aluno ainda vai entregar à equipa.
@@ -335,6 +400,7 @@ class ItemController
                 . 'para confirmar a entrada na receção.',
             'item' => [
                 'id' => $id,
+                'referencia' => Item::formatarReferenciaEntrega($id),
                 'tipo' => 'found',
                 'estado' => 'ativo',
                 'estado_recepcao' => 'por_entregar',

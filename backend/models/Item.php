@@ -43,8 +43,21 @@ class Item
         return 'ACH-' . str_pad((string) $id, 6, '0', STR_PAD_LEFT);
     }
 
+    // Referência provisória do achado que o aluno registou mas ainda não entregou.
+    // Por exemplo, o ID 50 fica ENT-000050 (de «entrega»): é a que o aluno indica na receção.
+    // Ao confirmar a entrada passa a ACH-000050 — o número não muda.
+    public static function formatarReferenciaEntrega(int $id): string
+    {
+        if ($id <= 0) {
+            throw new InvalidArgumentException('O ID do achado deve ser positivo.');
+        }
+
+        return 'ENT-' . str_pad((string) $id, 6, '0', STR_PAD_LEFT);
+    }
+
     // Calcula a referência pelo ID, incluindo nos registos antigos.
-    // Um achado por entregar ainda não tem referência de inventário.
+    // Um achado por entregar recebe a referência provisória ENT-; a de inventário (ACH-)
+    // só aparece depois de a equipa confirmar a entrada.
     private function adicionarReferencia(array $artigo): array
     {
         if ($artigo['tipo'] === 'lost') {
@@ -54,6 +67,11 @@ class Item
             && $artigo['estado_recepcao'] === 'na_recepcao'
         ) {
             $artigo['referencia'] = self::formatarReferenciaAchado((int) $artigo['id']);
+        } elseif (
+            $artigo['tipo'] === 'found'
+            && $artigo['estado_recepcao'] === 'por_entregar'
+        ) {
+            $artigo['referencia'] = self::formatarReferenciaEntrega((int) $artigo['id']);
         }
 
         return $artigo;
