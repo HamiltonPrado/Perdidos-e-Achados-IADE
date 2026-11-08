@@ -19,3 +19,10 @@ if ($metodo === 'GET' && $caminho === '/api/health/database') {
         'mensagem' => 'Ligação à base de dados estabelecida.'
     ]);
 }
+
+// Estado de cada nó da base de dados (cluster Galera em Docker). Só para a equipa.
+if ($metodo === 'GET' && $caminho === '/api/health/cluster') {
+    $controller = new EstadoBdController(obterLigacao());
+
+    $controller->cluster();
+}

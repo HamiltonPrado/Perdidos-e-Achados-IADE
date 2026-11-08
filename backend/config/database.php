@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-// Em Docker as credenciais chegam por variáveis de ambiente (docker-compose.yml).
-// Fora do Docker (MAMP, php -S) usa o credenciais.php local, como até agora.
+// Credenciais: variáveis de ambiente em Docker, credenciais.php no MAMP (configuracao_bd.php).
 //
 // DB_HOST pode ter várias bases de dados separadas por vírgulas (ex.: "galera1,galera2,galera3"),
 // para tolerância a falhas. Liga-se à primeira que:
@@ -14,17 +13,8 @@ declare(strict_types=1);
 // Como todos tentam pela mesma ordem, as escritas vão sempre para o mesmo nó enquanto ele
 // estiver bem, o que evita conflitos entre nós. Se nenhuma aceitar escritas, usa a primeira
 // que responder, em modo só-leitura: as escritas falham com erro e o site responde 503.
-$config = getenv('DB_HOST') !== false
-    ? [
-        'host' => getenv('DB_HOST'),
-        'port' => (int) (getenv('DB_PORT') ?: 3306),
-        'database' => getenv('DB_NAME') ?: 'perdidos_achados',
-        'username' => getenv('DB_USER') ?: '',
-        'password' => getenv('DB_PASSWORD') ?: '',
-    ]
-    : require __DIR__ . '/credenciais.php';
-
-$hosts = array_values(array_filter(array_map('trim', explode(',', (string) $config['host']))));
+$config = require __DIR__ . '/configuracao_bd.php';
+$hosts = $config['hosts'];
 
 $opcoes = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,

@@ -12,6 +12,7 @@ require_once __DIR__ . '/../controllers/DevolucaoController.php';
 require_once __DIR__ . '/../controllers/NotificationController.php';
 require_once __DIR__ . '/../controllers/PedidoLevantamentoController.php';
 require_once __DIR__ . '/../controllers/ReclamacaoController.php';
+require_once __DIR__ . '/../controllers/EstadoBdController.php';
 
 // Carrega os grupos de rotas: cada grupo trata uma área, como artigos ou reclamações.
 require __DIR__ . '/grupos/saude.php';
