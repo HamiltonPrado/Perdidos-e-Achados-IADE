@@ -7,11 +7,32 @@
 :root{--paper:#f5f6f2;--card:#fff;--ink:#183a33;--muted:#667871;--line:#dfe6df;--green:#20755b;--lime:#d7f49b;--red:#b63838;--amber:#9b650b;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px}button,input,select,textarea{font:inherit}button{cursor:pointer;transition:.16s}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #91c9b5;outline-offset:2px}button{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:10px 15px;font-weight:650}button:hover:not(:disabled){border-color:var(--green);background:#f2f8ef}.primary{background:var(--ink);color:#fff;border-color:var(--ink)}.primary:hover:not(:disabled){background:var(--green);color:#fff}.danger{color:var(--red)}.quiet{padding:6px 10px;background:transparent}.app{display:grid;grid-template-columns:224px 1fr;min-height:100vh}.side{background:#173e34;color:#d5e4db;padding:30px 20px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}.brand{font-size:27px;font-weight:850;letter-spacing:-1px;color:#fff}.brand span{color:var(--lime)}.brand-sub{font-size:11px;letter-spacing:2px;margin:7px 0 35px;color:#b0c7b9}.nav{display:grid;gap:8px}.nav button{text-align:left;color:#c9ded0;background:transparent;border:0;padding:13px 14px;font-weight:550}.nav button.active{background:#315747;color:#efffd8}.nav button span{opacity:.65;display:inline-block;width:28px;font:13px var(--mono)}.side-note{margin-top:auto;font-size:12px;line-height:1.8;color:#b2c9bc;border-top:1px solid #3d6052;padding-top:20px}.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#a5b6af;margin-right:8px}.live-dot.on{background:#c2f38f}.main{min-width:0}.top{padding:17px 34px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:20px;background:#ffffffb0}.top small{color:var(--muted)}.session{display:flex;align-items:center;gap:10px}.pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;padding:5px 10px;font-size:11px;gap:5px;white-space:nowrap}.pill.green{color:#216145;background:#ecf7e3;border-color:#d7e9c8}.pill.red{color:var(--red);background:#fff0ee;border-color:#f2ceca}.pill.amber{color:var(--amber);background:#fff7df;border-color:#efe0b8}main{max-width:1480px;margin:auto;padding:32px 34px 46px}.eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--green)}h1{font-size:33px;line-height:1.2;letter-spacing:-1px;margin:10px 0}h2{font-size:18px;margin:0 0 13px;letter-spacing:-.35px}h3{font-size:15px;margin:0 0 9px}p{line-height:1.7;margin:9px 0;color:var(--muted)}.hero{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:25px}.hero p{max-width:690px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:23px}.grid{display:grid;gap:18px}.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:repeat(3,1fr)}.four{grid-template-columns:repeat(4,1fr)}.stat{padding:18px 20px}.stat strong{font-size:28px;letter-spacing:-1px;display:block;margin-top:8px}.stat span{font-size:12px;color:var(--muted)}.stat:last-child{background:#e9f0e5}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.between{justify-content:space-between}.space{margin-top:20px}.small{font-size:12px}.hint{font-size:12px;color:var(--muted);line-height:1.65}.mono,code{font-family:var(--mono)}code{font-size:12px;overflow-wrap:anywhere}.label,label{font-size:11px;font-weight:650;color:var(--muted);display:block;margin-bottom:7px}input,select,textarea{border:1px solid #d7e1d8;background:#fcfdfa;border-radius:8px;color:var(--ink);padding:10px 11px;width:100%;min-width:0}input[type=checkbox]{width:auto;accent-color:var(--green)}textarea{font-family:var(--mono);font-size:12px;line-height:1.65;resize:vertical;tab-size:2}input[type=password]{font-family:var(--mono)}.fields{display:grid;gap:12px;grid-template-columns:1fr 1fr}.fields .full{grid-column:1/-1}.alert{border:1px solid #e7d8b8;background:#fffaec;padding:14px 17px;border-radius:10px;color:#805b13;font-size:13px;line-height:1.7;margin-bottom:20px}.alert.error{background:#fff1ee;border-color:#efc6bf;color:#8f3830}.alert.success{background:#edf7e7;border-color:#d3e6c9;color:#2c673f}.hidden,[hidden]{display:none!important}.suite{position:relative;display:flex;flex-direction:column;gap:10px;min-height:216px}.suite .number{color:var(--green);font:12px var(--mono)}.suite p{font-size:12px;flex:1}.suite button{align-self:flex-start}.suite-main{background:#eaf2e4;border-color:#d1dec7}.suite .tag{font-size:10px;color:var(--muted)}.section-title{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:27px 0 14px}.section-title h2{margin:0}.progress-track{height:5px;background:#e5ece2;border-radius:9px;overflow:hidden}.progress-fill{height:100%;background:var(--green);width:0;transition:width .3s}.run-title{font-weight:700}.run-detail{font:11px var(--mono);color:var(--muted);margin-top:5px}.checks{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}.check{background:#fff;padding:12px 16px;display:flex;align-items:flex-start;gap:12px}.check .badge{font-size:11px;font-weight:800;width:48px;flex-shrink:0}.check.pass .badge{color:var(--green)}.check.fail .badge{color:var(--red)}.check.skip .badge{color:var(--amber)}.check .detail{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5;overflow-wrap:anywhere}.empty{padding:34px;text-align:center;border:1px dashed #cbd8cc;border-radius:12px;color:var(--muted);line-height:1.7}.view{display:none}.view.active{display:block}.toolbar{display:flex;gap:10px;margin-bottom:17px;flex-wrap:wrap}.toolbar input{flex:1;min-width:190px}.toolbar select{max-width:190px}.endpoint-layout{display:grid;grid-template-columns:minmax(290px,.85fr) minmax(380px,1.15fr);gap:18px}.endpoint-list{max-height:720px;overflow:auto;padding-right:5px}.endpoint{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 13px;margin-bottom:8px;cursor:pointer}.endpoint:hover,.endpoint.selected{border-color:var(--green)}.endpoint.selected{box-shadow:inset 3px 0 var(--green)}.endpoint .desc{font-size:12px;margin-bottom:8px;color:var(--muted)}.endpoint code{font-size:10px;word-break:break-all}.method{font:700 10px var(--mono);display:inline-block;min-width:49px;padding:4px 6px;border-radius:5px;background:#edf4eb;color:#28664b}.method.POST{background:#fff0d4;color:#916009}.method.PATCH,.method.PUT{background:#eaf0ff;color:#4d64a6}.method.DELETE{background:#ffeae6;color:#b34736}.endpoint .meta{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:10px;color:#7c8e82}.editor{align-self:start}.editor-path{display:flex;align-items:center;gap:9px}.editor-path input{font-family:var(--mono);font-size:12px}.response{background:#142b26;color:#c5e5c6;border-radius:10px;padding:17px;font:12px/1.7 var(--mono);white-space:pre-wrap;overflow:auto;max-height:420px;margin:0}.response code{font:inherit}.response-meta{font-size:11px;color:var(--muted);margin:12px 0}.logitem{padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer}.logitem:last-child{border-bottom:0}.logitem .topline{display:flex;justify-content:space-between;gap:8px;font-size:12px}.logitem .bottomline{color:var(--muted);font:11px var(--mono);margin-top:7px;overflow-wrap:anywhere}.logs{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}.vars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.vars input{font:12px var(--mono)}details{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}summary{cursor:pointer;font-weight:650;font-size:12px}details p{font-size:12px}ol,ul{padding-left:21px;color:var(--muted);line-height:1.9}.help-grid{display:grid;gap:18px;grid-template-columns:1fr 1fr}.help-grid li{font-size:13px}a{color:var(--green)}.footer{font-size:11px;color:#7d8e82;margin-top:30px}.route-group{font:700 10px var(--mono);letter-spacing:1px;color:var(--muted);padding:15px 2px 8px}#toast{position:fixed;bottom:25px;right:25px;max-width:430px;background:#173e34;color:#fff;padding:14px 19px;border-radius:10px;box-shadow:0 8px 40px #173e3430;z-index:10;white-space:pre-wrap}.error-text{color:var(--red)}.image-preview{max-width:100%;max-height:220px;border:1px solid var(--line);border-radius:9px;background:repeating-conic-gradient(#eee 0% 25%,white 0% 50%) 50%/20px 20px}.route-note{font-size:12px;line-height:1.7;background:#f5f7f2;border-radius:8px;padding:11px;margin:12px 0;color:var(--muted)}.busy-label{color:var(--green);font-size:11px}button.running{background:#e7efdf}.chevron{font-size:18px;color:var(--green)}.legend{display:flex;gap:16px;font-size:11px;color:var(--muted);margin-bottom:16px}
 @media(max-width:1120px){.app{grid-template-columns:184px 1fr}.side{padding:24px 15px}main{padding:26px 23px}.top{padding:16px 23px}.three{grid-template-columns:1fr 1fr}.endpoint-layout{grid-template-columns:1fr}.endpoint-list{max-height:340px}.vars{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:720px){.app{display:block}.side{position:static;height:auto;padding:18px}.brand-sub{margin:4px 0 17px}.nav{display:flex;overflow:auto;gap:5px}.nav button{white-space:nowrap;padding:9px}.nav button span,.side-note{display:none}.top{padding:12px 18px}.top>small{display:none}main{padding:22px 16px}h1{font-size:27px}.hero{align-items:flex-start;flex-direction:column}.two,.three,.help-grid{grid-template-columns:1fr}.four{grid-template-columns:1fr 1fr}.fields{grid-template-columns:1fr}.vars{grid-template-columns:1fr 1fr}.card{padding:18px}.hero .pill{display:none}.endpoint-layout{grid-template-columns:minmax(0,1fr)}}
+.mapa-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:18px;align-items:start}
+.mapa svg{width:100%;height:auto;display:block}
+.mapa .aresta{stroke:#cfd9d1;stroke-width:2;fill:none}.mapa .aresta.tracejada{stroke-dasharray:4 5}
+.mapa .aresta.ativa{stroke:var(--green);stroke-width:3.5;stroke-dasharray:8 7;animation:fluxo .9s linear infinite}
+.mapa .aresta.rep{stroke:#8fb7a6;stroke-width:2.5}.mapa .aresta.rep.ativa{stroke:#2d8a6b;stroke-width:2.5;stroke-dasharray:3 6}
+.mapa .caixa rect{stroke-width:1.5;rx:10}.mapa .caixa.ok rect{fill:#ecf7e3;stroke:#9fcf86}.mapa .caixa.aviso rect{fill:#fff7df;stroke:#e5c46e}.mapa .caixa.parado rect{fill:#fff0ee;stroke:#e29a93}.mapa .caixa.neutro rect{fill:#f3f5f1;stroke:#cdd6ce}
+.mapa .caixa.uso rect{stroke:var(--green);stroke-width:3}
+.mapa text{font-family:inherit;fill:var(--ink)}.mapa .nome{font-size:17px;font-weight:700}.mapa .sub{font-size:12.5px;fill:var(--muted)}
+@keyframes fluxo{to{stroke-dashoffset:-15}}
+@media(prefers-reduced-motion:reduce){.mapa .aresta.ativa{animation:none}}
+.acoes{display:grid;gap:8px}.acao{border:1px solid var(--line);border-radius:10px;padding:9px 11px}.acao .row{gap:6px}.acao strong{font-size:13px}.acao button{padding:5px 9px;font-size:11px}
+.eventos{margin-top:14px;max-height:220px;overflow:auto;font-size:12px;line-height:1.6;border-top:1px solid var(--line);padding-top:10px}.eventos div{display:flex;gap:8px}.eventos time{color:var(--muted);font-family:var(--mono);flex:none}
+@media(max-width:1180px){.mapa-layout{grid-template-columns:1fr}.acoes{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}}
+.nodes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.node h3{margin:0;font-size:17px}.node dl{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;margin:16px 0 0;font-size:13px}.node dt{color:var(--muted)}.node dd{margin:0;font-family:var(--mono);text-align:right}
+.node.down{border-color:#f2ceca;background:#fffafa}.node.warn{border-color:#efe0b8;background:#fffdf6}
+.tag-uso{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--lime);color:var(--ink);border-radius:99px;padding:3px 9px}
+.check-inline{display:inline-flex;align-items:center;gap:7px;margin:0;font-size:12px}.check-inline input{width:auto;min-width:0;flex:none}
+.strip{display:flex;flex-wrap:wrap;gap:3px;margin-top:16px;min-height:22px}.tick{width:9px;height:22px;border-radius:3px;background:var(--line)}.tick.ok{background:var(--green)}.tick.fail{background:var(--red)}
+.cmds{display:grid;gap:9px;margin-top:14px}.cmd{display:flex;gap:12px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:10px 12px}.cmd small{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}.cmd code{font-size:12px}.cmd button{flex:none}
+@media(max-width:900px){.nodes{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="app">
-<aside class="side"><div class="brand">iade<span> / lab</span></div><div class="brand-sub">PERDIDOS & ACHADOS</div><nav class="nav" aria-label="Navegação"><button data-view="overview" class="active"><span>01</span> Visão geral</button><button data-view="tests"><span>02</span> Testes automáticos</button><button data-view="endpoints"><span>03</span> Endpoints</button><button data-view="history"><span>04</span> Histórico</button><button data-view="help"><span>05</span> Como usar</button></nav><div class="side-note"><span id="connectionDot" class="live-dot"></span><span id="sideConnection">Por verificar</span><br>PHP · MySQL · Python IA<br>Testes sobre a tua API real.</div></aside>
+<aside class="side"><div class="brand">iade<span> / lab</span></div><div class="brand-sub">PERDIDOS & ACHADOS</div><nav class="nav" aria-label="Navegação"><button data-view="overview" class="active"><span>01</span> Visão geral</button><button data-view="tests"><span>02</span> Testes automáticos</button><button data-view="endpoints"><span>03</span> Endpoints</button><button data-view="history"><span>04</span> Histórico</button><button data-view="help"><span>05</span> Como usar</button><button data-view="docker"><span>06</span> Docker</button></nav><div class="side-note"><span id="connectionDot" class="live-dot"></span><span id="sideConnection">Por verificar</span><br>PHP · MySQL · Python IA<br>Testes sobre a tua API real.</div></aside>
 <div class="main"><header class="top"><small>Ferramentas de desenvolvimento / API</small><div class="session"><span class="pill" id="sessionPill">Sem sessão verificada</span><button class="quiet" id="logoutBtn">Sair</button></div></header>
 <main>
 <div id="environmentWarning" class="alert hidden"></div>
@@ -33,6 +54,13 @@
 <div class="endpoint-layout"><div class="endpoint-list" id="endpointList"></div><div class="card editor"><div class="row between"><h2 id="editorTitle">Seleciona um endpoint</h2><span class="pill" id="editorRole">—</span></div><div class="editor-path"><span class="method" id="editorMethod">GET</span><input id="editorPath" aria-label="Caminho do pedido" spellcheck="false"></div><div id="editorNote" class="route-note"></div><label for="editorBody">JSON do pedido</label><textarea id="editorBody" rows="10" spellcheck="false"></textarea><div id="fileWrap" class="hidden space"><label for="uploadFile">Fotografia · campo foto · JPEG ou PNG até 2 MB</label><input type="file" id="uploadFile" accept="image/jpeg,image/png"><p class="hint">Sem ficheiro selecionado, o painel envia um PNG de teste de 1 píxel.</p></div><div class="row space"><label style="margin:0"><input id="sendCsrf" type="checkbox" checked> Enviar CSRF</label><span class="hint">O token é obtido no login.</span></div><div class="row space"><button id="sendBtn" class="primary">Enviar pedido</button><select id="manualRole" style="width:auto" aria-label="Conta do pedido"><option value="current">Sessão atual</option><option value="student">Entrar como aluno</option><option value="admin">Entrar como equipa</option></select></div><div id="responseMeta" class="response-meta">Nenhum pedido enviado.</div><pre id="responseBox" class="response">A resposta real da API aparecerá aqui.</pre><img id="responseImage" class="image-preview hidden" alt="Fotografia devolvida pela API"></div></div></section>
 <section class="view" id="view-history"><div class="hero"><div><div class="eyebrow">Rasto desta sessão</div><h1>O que foi pedido à API.</h1><p>Clica num pedido para inspecionar a resposta. Os segredos são ocultados no histórico e no relatório exportado.</p></div><div class="row"><button id="exportHistory">Exportar relatório</button><button id="clearHistory">Limpar histórico local</button></div></div><div id="history" class="empty">Ainda não há pedidos.</div></section>
 <section class="view" id="view-help"><div class="hero"><div><div class="eyebrow">Instala uma vez</div><h1>Depois, é abrir e testar.</h1></div></div><div class="help-grid"><div class="card"><h2>Como abrir no MAMP</h2><ol><li>Copia este ficheiro para <code>backend/public/testar-api.html</code>.</li><li>Inicia o Apache e o MySQL no MAMP.</li><li>Abre <code>http://127.0.0.1/testar-api.html</code>, usando a porta e o endereço habituais da tua API.</li><li>Preenche as duas contas e clica em <strong>Executar bateria principal</strong>.</li></ol><p class="hint">Se a tua API usa localhost ou a porta 8888, usa esse mesmo domínio e porta no painel. Abrir o HTML por duplo clique não partilha a origem da API.</p></div><div class="card"><h2>Como ler os resultados</h2><ul><li><strong>PASSOU:</strong> o código HTTP e as condições indicadas foram verificados.</li><li><strong>FALHOU:</strong> houve uma resposta inesperada ou os dados não correspondem ao esperado.</li><li><strong>POR TESTAR:</strong> uma dependência falhou, a execução parou ou falta uma funcionalidade necessária.</li></ul><p class="hint">Uma resposta 200, por si só, não valida o fluxo inteiro. O relatório guarda as verificações e os pedidos separados.</p></div><div class="card"><h2>Sessão e permissões</h2><p>Usa contas fictícias. O login devolve o token CSRF; os cookies são enviados pelo navegador. As ações da equipa e do aluno são executadas sequencialmente, com um novo login quando necessário.</p><p>A API <code>/api/me</code> não devolve o CSRF no código partilhado. Ao recarregar o painel, volta a entrar para executar escritas.</p><p class="hint">Um segundo aluno não está configurado. A separação entre dois alunos, concorrência, expiração e falhas reais de infraestrutura não são comprovadas pela bateria principal.</p></div><div class="card"><h2>IA e dados de teste</h2><p>O percurso de reclamação e entrega funciona sem esperar pela IA. Para testar correspondências e notificações, inicia o worker e executa o cenário específico.</p><p>O painel usa a API pública e não consegue consultar a fila nem iniciar Python. Os objetos de teste permanecem na base de dados; os IDs ficam disponíveis no relatório.</p><p class="hint">O reenvio de uma pergunta alterada requer primeiro a alteração pela equipa. Uma reclamação recusada só permite nova resposta depois de a equipa a reabrir.</p></div></div><div class="card space"><h2>Se não ligar</h2><p><strong>Erro de rede / Load failed:</strong> verifica se abriste este HTML no mesmo domínio e porta do backend. Confirma o MAMP e o endereço da API. O painel recusa origens diferentes porque o backend partilhado não tem CORS configurado.</p><p><strong>404:</strong> a rota pode ainda não estar no teu <code>api.php</code>. <strong>500:</strong> consulta o log de PHP para verificar o erro. <strong>503:</strong> verifica a ligação à base de dados. <strong>403 numa escrita:</strong> entra novamente para renovar o CSRF.</p></div></section>
+<section class="view" id="view-docker"><div class="hero"><div><div class="eyebrow">Tolerância a falhas</div><h1>Desliga um nó.<br>Vê o site aguentar.</h1><p>Estado do cluster MariaDB Galera em tempo real e um teste de continuidade. Para, provoca um crash ou volta a ligar cada contentor no mapa e vê o resto do sistema reagir.</p></div></div>
+<div class="alert">Abre este painel pelo Docker: <code>http://localhost:8080/api/testar-api.html</code>. Usa a conta da equipa preenchida na Visão geral (o estado do cluster só é mostrado à equipa). No MAMP aparece a base de dados única.</div>
+<div class="card"><div class="row between"><h2>01 / Mapa ao vivo</h2><div class="row"><label class="check-inline"><input type="checkbox" id="mapaAoVivo"> Ao vivo (2 s)</label><span class="pill" id="mapaPill">Parado</span></div></div><p class="hint">Cada caixa é um contentor. Verde: a funcionar · amarelo: a arrancar ou sem maioria · vermelho: parado. A linha animada é o caminho que os pedidos estão a seguir; as linhas entre os nós Galera são a replicação. Com 3 nós, o cluster aguenta 1 em baixo; com 2 em baixo fica sem maioria e o site para (de propósito).</p><div id="mapaAviso" class="alert hidden" style="margin:16px 0 0"></div><div class="mapa-layout space"><div class="mapa" id="mapa"></div><div><div class="acoes" id="mapaAcoes"></div><div class="eventos" id="mapaEventos"><span class="hint">Os acontecimentos aparecem aqui.</span></div></div></div></div>
+<div class="card space"><div class="row between"><h2>02 / Nós da base de dados</h2><div class="row"><label class="check-inline"><input type="checkbox" id="clusterAuto"> Atualizar a cada 2 s</label><button class="quiet" id="clusterRefresh">Atualizar agora</button></div></div><div id="clusterResumo" class="row space" style="gap:8px"></div><div id="clusterNos" class="nodes space"><p class="hint">Carrega em «Atualizar agora» para ler o estado de cada nó.</p></div></div>
+<div class="grid two space"><div class="card"><div class="row between"><h2>03 / Teste de continuidade</h2><span class="pill" id="contPill">Parado</span></div><p class="hint">Faz um pedido autenticado por segundo (<code>GET /api/me</code>, que lê e grava a sessão na base de dados). Inicia, desliga um nó no terminal e vê se aparece algum vermelho.</p><div class="row space"><button id="contStart">Iniciar teste</button><button class="quiet" id="contStop" disabled>Parar</button></div><div class="grid three space" style="gap:10px"><div class="card stat"><span>Pedidos</span><strong id="contTotal">0</strong></div><div class="card stat"><span>Falhas</span><strong id="contFalhas">0</strong></div><div class="card stat"><span>Maior paragem</span><strong id="contParagem">0 s</strong></div></div><div id="contStrip" class="strip" aria-label="Resultado de cada pedido, do mais antigo para o mais recente"></div><p class="hint" id="contUltimo"></p></div>
+<div class="card"><h2>04 / Simular falhas (no terminal)</h2><p class="hint">Corre na pasta do projeto. Com 3 nós, o cluster aguenta 1 em baixo sem parar; um nó que volta recebe sozinho o que perdeu.</p><div class="cmds" id="dockerCmds"></div></div></div>
+</section>
 </main></div></div><div id="toast" class="hidden" role="status"></div>
 <script>
 'use strict';
@@ -49,6 +77,7 @@ const receiveBody=()=>({...verificationBody(),ponto_recolha_id:Number(vars.point
 const endpoints=[
 E('health','Estado','Saúde do PHP','GET','/api/health','public'),
 E('database','Estado','Ligação à base de dados','GET','/api/health/database','public'),
+E('cluster','Estado','Estado dos nós da base de dados (Docker)','GET','/api/health/cluster','admin','','Estado de cada nó do cluster Galera: sincronização, nó em uso e se os dados são iguais em todos.'),
 E('login','Autenticação','Iniciar sessão','POST','/api/login','public',()=>({email:$('studentEmail').value,password:$('studentPassword').value}),'Usa os botões de login para alternar automaticamente. Este pedido usa o JSON que editares.'),
 E('me','Autenticação','Consultar a conta atual','GET','/api/me','student'),
 E('logout','Autenticação','Terminar sessão','POST','/api/logout','student'),
@@ -205,6 +234,162 @@ function busy(value){state.busy=value;document.querySelectorAll('[data-suite],#r
 async function runSuites(ids){if(state.busy)return;showView('tests');state.stopping=false;busy(true);let done=0;try{targetUrl('/api/health');for(const id of ids){if(state.stopping)break;state.activeSuite=id;const s=suites.find(x=>x.id===id);const ctx={run:today().replaceAll('-','')+'-'+crypto.getRandomValues(new Uint32Array(1))[0].toString(36),created:[],failed:false};$('runTitle').textContent=s.name;$('progressFill').style.width=Math.round(done/ids.length*100)+'%';try{await suiteFns[id](ctx);}catch(e){if(state.stopping)throw e;addCheck('skip','Restantes verificações de «'+s.name+'»','Interrompidas porque uma condição necessária falhou.');}finally{if(ctx.created.length)addCheck('info','Registos de teste · '+ctx.run,ctx.created.map(x=>x.tipo+' #'+x.id).join(' · ')+'. Mantidos na base de dados.');}done++;$('progressFill').style.width=Math.round(done/ids.length*100)+'%';}$('runTitle').textContent=state.stopping?'Execução interrompida':'Execução terminada';$('runDetail').textContent='Consulta os resultados e exporta o relatório. Os registos já criados mantêm-se.';}catch(e){if(!state.stopping){addCheck('fail','Iniciar execução',e.message);toast(e.message);}else addCheck('skip','Execução interrompida','O pedido em curso pode ter sido processado. Consulta o histórico antes de repetir.');$('runTitle').textContent=state.stopping?'Execução interrompida':'Não foi possível executar';}finally{state.activeSuite='';state.stopping=false;busy(false);updateCounts();}}
 async function single(action){if(state.busy)return;state.stopping=false;busy(true);try{await action();}catch(e){if(e.record)showResponse(e.record);toast(e.record?.data?.erro||e.message);}finally{state.stopping=false;busy(false);}}
 function exportReport(){const report={titulo:'IADE · Relatório de testes da API',versao_painel:'rececao-admin-2026-11-01',data:new Date().toISOString(),backend:$('baseUrl').value,limites:['Não é um teste de concorrência nem de failover.','Não valida isolamento entre dois alunos.','A bateria principal não cobre reenvio após alteração da pergunta nem reabertura de recusadas.','O cenário da IA não consulta a fila nem identifica o candidato da notificação.'],verificacoes:state.checks,pedidos:state.requests.map(r=>({id:r.id,hora:r.time,metodo:r.method,caminho:r.displayPath,perfil:r.role,cenario:r.suite,status:r.status,duracao_ms:r.ms,resposta:safe(r.data)})),variaveis:safe(vars)};const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='IADE_relatorio_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+const comandosDocker=[
+ ['Ver o estado dos contentores','docker compose ps'],
+ ['Parar um nó de forma ordenada','docker compose stop galera1'],
+ ['Voltar a ligar esse nó','docker compose start galera1'],
+ ['Crash de um nó (sem aviso)','docker kill --signal=SIGKILL $(docker compose ps -q galera2)'],
+ ['Voltar a ligar o nó do crash','docker compose start galera2'],
+ ['Parar o web (o site cai: só há um web)','docker compose stop web'],
+ ['Recuperar depois de um crash dos 3 nós','sh docker/galera/recuperar-cluster.sh'],
+];
+const docker={auto:null,aLer:false,correr:false,ticks:[]};
+const esperarMs=ms=>new Promise(r=>setTimeout(r,ms));
+async function lerCluster(){
+ if(docker.aLer)return;docker.aLer=true;
+ try{
+  await ensure('admin');
+  const res=await fetch(targetUrl('/api/health/cluster'),{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
+  const data=await res.json().catch(()=>({erro:'Resposta inválida do servidor (HTTP '+res.status+').'}));
+  if(res.status===401){state.user=null;state.csrf='';updateSession();}
+  renderCluster(res.ok?data:null,res.ok?'':(data.erro||'HTTP '+res.status));
+ }catch(e){renderCluster(null,e.message==='Failed to fetch'||e.message==='Load failed'?'Sem resposta do servidor (nginx ou web em baixo?).':(e.record?.data?.erro||e.message));}
+ finally{docker.aLer=false;}
+}
+function renderCluster(d,erro){
+ docker.cluster=d;
+ const resumo=$('clusterResumo');
+ if(!d){resumo.innerHTML=`<span class="pill red">${escapeHtml(erro)}</span>`;$('clusterNos').innerHTML=`<p class="hint">Sem dados dos nós neste momento: a API não conseguiu ler a base de dados. O estado de cada contentor continua visível no mapa acima.</p>`;return;}
+ const r=d.resumo,pill=(cls,txt)=>`<span class="pill ${cls}">${escapeHtml(txt)}</span>`;
+ resumo.innerHTML=[
+  pill(r.acessiveis===r.total?'green':'red',`${r.acessiveis}/${r.total} nós a responder`),
+  d.tipo==='galera'?pill(r.sincronizados===r.total?'green':'amber',`${r.sincronizados}/${r.total} sincronizados`):'',
+  r.acessiveis>1?pill(r.dados_iguais?'green':'red',r.dados_iguais?'Dados iguais em todos':'DADOS DIFERENTES'):'',
+  pill('',`web: ${d.web}`),pill('',`BD em uso: ${d.bd_em_uso}`),
+  `<span class="hint">às ${escapeHtml(new Date(d.verificado_em).toLocaleTimeString('pt-PT'))}</span>`].join('');
+ $('clusterNos').innerHTML=d.nos.map(n=>{
+  const g=n.galera;let cls='',estado;
+  if(!n.acessivel){cls='down';estado=pill('red','Sem resposta');}
+  else if(g&&!(g.cluster_status==='Primary'&&g.local_state==='Synced')){cls='warn';estado=pill('amber',`${g.local_state||'?'} · ${g.cluster_status||'?'}`);}
+  else estado=pill('green',g?'Synced · Primary':n.so_leitura?'Só leitura':'A funcionar');
+  const linhas=[['Servidor',n.servidor||'—'],g&&['Nós no cluster',g.cluster_size],g&&['Última transação',g.last_committed],n.dados&&['Artigos',n.dados.artigos],n.dados&&['Users',n.dados.users],n.dados&&['Reclamações',n.dados.reclamacoes],['Latência',n.latencia_ms+' ms']].filter(Boolean);
+  return `<article class="card node ${cls}"><div class="row between"><h3>${escapeHtml(n.host)}</h3>${n.em_uso?'<span class="tag-uso">em uso</span>':''}</div><div style="margin-top:9px">${estado}</div><dl>${linhas.map(([k,v])=>`<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join('')}</dl>${n.erro?`<p class="hint">${escapeHtml(n.erro)}</p>`:''}</article>`;
+ }).join('');
+}
+const POSICOES={browser:[380,34],nginx:[380,112],controlo:[620,112],web:[380,196],autoheal:[140,196],backup:[620,196],galera1:[150,320],galera2:[380,394],galera3:[610,320]};
+const SUBTITULOS={browser:'127.0.0.1:8080',nginx:'entrada',controlo:'este painel',web:'Apache + PHP',autoheal:'vigia',backup:'cópias de hora a hora'};
+const ARESTAS=[['browser','nginx','fluxo'],['nginx','web','fluxo'],['nginx','controlo','apoio'],['autoheal','web','apoio'],['web','galera1','bd'],['web','galera2','bd'],['web','galera3','bd'],['galera1','galera2','rep'],['galera2','galera3','rep'],['galera1','galera3','rep'],['backup','galera3','apoio']];
+// O contentor «controlo» vive em /controlo/ (fora de /api/), no mesmo endereço do painel.
+const urlControlo=caminho=>new URL(caminho,$('baseUrl').value.trim().replace(/\/+$/,'').replace(/\/api$/,'')+'/').href;
+async function lerControlo(){
+ try{const res=await fetch(urlControlo('/controlo/estado'),{cache:'no-store',headers:{Accept:'application/json'}});if(!res.ok)throw new Error('HTTP '+res.status);docker.controlo=await res.json();}
+ catch(e){docker.controlo=null;}
+}
+function estadoDe(nome){
+ if(nome==='browser')return{cls:'ok',sub:SUBTITULOS.browser};
+ const c=docker.controlo?.servicos?.find(x=>x.servico===nome);
+ if(!c)return{cls:'neutro',sub:docker.controlo?'não existe':'sem informação'};
+ if(c.estado!=='running')return{cls:'parado',sub:c.estado==='restarting'?'a reiniciar':'parado',c};
+ if(nome.startsWith('galera')){
+  const n=docker.cluster?.nos?.find(x=>x.host===nome),g=n?.galera;
+  if(n&&!n.acessivel)return{cls:c.saude==='healthy'?'aviso':'aviso',sub:'a arrancar / sem resposta',c};
+  if(g&&!(g.local_state==='Synced'&&g.cluster_status==='Primary'))return{cls:'aviso',sub:g.cluster_status==='Primary'&&/Donor/.test(g.local_state||'')?'a enviar dados a outro nó':`${g.local_state||'?'} · ${g.cluster_status||'?'}`,c};
+  if(g)return{cls:'ok',sub:`Synced · ${g.cluster_size} nós${n.em_uso?' · em uso':''}`,c,uso:n.em_uso};
+ }
+ if(c.saude==='starting')return{cls:'aviso',sub:'a arrancar',c};
+ if(c.saude==='unhealthy')return{cls:'aviso',sub:nome.startsWith('galera')?'sem maioria / a sincronizar':nome==='web'?'sem base de dados':'unhealthy',c};
+ return{cls:'ok',sub:SUBTITULOS[nome]||'a funcionar',c};
+}
+function desenharMapa(){
+ const est=Object.fromEntries(Object.keys(POSICOES).map(n=>[n,estadoDe(n)]));
+ const vivo=n=>est[n].cls==='ok';
+ const linhas=ARESTAS.map(([a,b,tipo])=>{
+  const [x1,y1]=POSICOES[a],[x2,y2]=POSICOES[b];let cls='aresta';
+  if(tipo==='fluxo'&&vivo(a)&&vivo(b))cls+=' ativa';
+  if(tipo==='bd'){if(docker.cluster?.bd_em_uso===b&&vivo('web'))cls+=' ativa';else if(!vivo(b))cls+=' tracejada';}
+  if(tipo==='rep'){cls+=' rep';if(vivo(a)&&vivo(b))cls+=' ativa';else cls+=' tracejada';}
+  if(tipo==='apoio')cls+=' tracejada';
+  return `<line class="${cls}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+ }).join('');
+ const caixas=Object.entries(POSICOES).map(([n,[x,y]])=>{const e=est[n];return `<g class="caixa ${e.cls}${e.uso?' uso':''}"><rect x="${x-88}" y="${y-28}" width="176" height="56"/><text class="nome" x="${x}" y="${y-4}" text-anchor="middle">${n}</text><text class="sub" x="${x}" y="${y+16}" text-anchor="middle">${escapeHtml(e.sub)}</text></g>`;}).join('');
+ $('mapa').innerHTML=`<svg viewBox="0 0 760 440" role="img" aria-label="Mapa dos contentores Docker e das ligações entre eles">${linhas}${caixas}</svg>`;
+ const permitidos=docker.controlo?.permitidos||[];
+ $('mapaAcoes').innerHTML=permitidos.length?permitidos.map(n=>{const e=est[n],corre=e.c?.estado==='running';const pill=e.cls==='ok'?'green':e.cls==='parado'?'red':'amber';
+  return `<div class="acao"><div class="row between"><strong>${escapeHtml(n)}</strong><span class="pill ${pill}">${escapeHtml(e.sub)}</span></div><div class="row" style="margin-top:7px"><button class="quiet" data-acao="parar" data-servico="${n}" ${corre?'':'disabled'}>Parar</button><button class="quiet" data-acao="crash" data-servico="${n}" ${corre?'':'disabled'}>Crash</button><button class="quiet" data-acao="arrancar" data-servico="${n}" ${corre?'disabled':''}>Arrancar</button></div></div>`;}).join('')
+  :'<p class="hint">Sem ligação ao contentor «controlo». Abre o painel em http://localhost:8080/api/testar-api.html com o Docker a correr.</p>';
+ avisoMaioria(est);
+ registarEventos(est);
+}
+function avisoMaioria(est){
+ const aviso=$('mapaAviso');
+ if(!docker.controlo){aviso.classList.add('hidden');return;}
+ // Contam para a maioria os nós no grupo Primary, mesmo ocupados a enviar dados a outro (Donor).
+ const nos=['galera1','galera2','galera3'],naMaioria=n=>est[n].cls==='ok'||docker.cluster?.nos?.find(x=>x.host===n)?.galera?.cluster_status==='Primary',bons=nos.filter(naMaioria),ligados=nos.filter(n=>est[n].c?.estado==='running'),parados=nos.filter(n=>est[n].c&&est[n].c.estado!=='running');
+ if(bons.length>=2){aviso.classList.add('hidden');return;}
+ aviso.innerHTML=`<strong>Sem maioria: só ${bons.length} de 3 nós Galera ${bons.length===1?'está':'estão'} a funcionar.</strong> O cluster recusa escritas e o site responde 503 — de propósito: um nó sozinho não sabe se os outros morreram ou se só deixou de os ver, e parar evita dados diferentes entre nós.<br>`+
+  (parados.length&&docker.controlo?.arbitro?.ativo?`<b>O árbitro do Docker está a confirmar:</b> se ${parados.map(escapeHtml).join(' e ')} continuarem parados, reativa o cluster no nó que sobrou dentro de ~15 s. Também podes arrancar um deles. `:parados.length?`Para recuperar, <b>arranca o último nó que caiu</b> (${parados.map(escapeHtml).join(' ou ')}). `:`Os nós estão ligados mas ainda sem maioria: espera uns segundos. `)+
+  `Se ficarem amarelos mais de um minuto com os 3 ligados, corre <code>sh docker/galera/recuperar-cluster.sh</code> no terminal.`;
+ aviso.classList.remove('hidden');
+}
+function registarEventos(est){
+ const agora={bd:docker.cluster?.bd_em_uso||null,tamanho:docker.cluster?.nos?.find(n=>n.galera)?.galera?.cluster_size??null,...Object.fromEntries(Object.entries(est).map(([n,e])=>[n,e.sub]))};
+ const antes=docker.ultimoEstado;docker.ultimoEstado=agora;if(!antes){docker.ultimaDecisao=docker.controlo?.arbitro?.ultima_decisao?.hora??null;return;}
+ const novos=[];
+ for(const n of Object.keys(POSICOES))if(antes[n]!==agora[n]&&n!=='browser')novos.push(`${n}: ${antes[n]} → ${agora[n]}`);
+ if(agora.bd&&antes.bd!==agora.bd)novos.push(`O PHP passou a usar o ${agora.bd}${antes.bd?' (antes: '+antes.bd+')':''}`);
+ if(antes.tamanho!==agora.tamanho&&agora.tamanho!==null)novos.push(`O cluster Galera tem agora ${agora.tamanho} nó(s)`);
+ const decisao=docker.controlo?.arbitro?.ultima_decisao;
+ if(decisao&&decisao.hora!==docker.ultimaDecisao){if(docker.ultimaDecisao!==undefined)novos.unshift('Árbitro: '+decisao.mensagem);docker.ultimaDecisao=decisao.hora;}
+ if(!novos.length)return;
+ docker.eventos=[...novos.map(t=>({t:new Date(),texto:t})),...(docker.eventos||[])].slice(0,40);
+ $('mapaEventos').innerHTML=docker.eventos.map(e=>`<div><time>${e.t.toLocaleTimeString('pt-PT')}</time><span>${escapeHtml(e.texto)}</span></div>`).join('');
+}
+async function cicloMapa(){
+ if(docker.aCiclar)return;docker.aCiclar=true;
+ try{await Promise.allSettled([lerControlo(),lerCluster()]);desenharMapa();$('mapaPill').textContent='Ao vivo · '+new Date().toLocaleTimeString('pt-PT');$('mapaPill').className='pill green';}
+ finally{docker.aCiclar=false;}
+}
+function definirAoVivo(ligado){
+ clearInterval(docker.auto);docker.auto=ligado?setInterval(cicloMapa,2000):null;
+ $('mapaAoVivo').checked=ligado;$('clusterAuto').checked=ligado;
+ if(ligado)cicloMapa();else{$('mapaPill').textContent='Parado';$('mapaPill').className='pill';}
+}
+async function executarAcao(servico,acao){
+ if(acao==='parar'&&servico==='web'||acao==='crash'&&servico==='web')toast('Com o web em baixo o site cai (só há um web). O mapa continua a funcionar.');
+ if((acao==='parar'||acao==='crash')&&servico.startsWith('galera')){
+  const emBaixo=['galera1','galera2','galera3'].filter(n=>n!==servico&&estadoDe(n).cls!=='ok'&&docker.cluster?.nos?.find(x=>x.host===n)?.galera?.cluster_status!=='Primary');
+  if(emBaixo.length&&!confirm(`O ${emBaixo.join(' e o ')} já está em baixo. Desligar também o ${servico} deixa o cluster sem maioria: o site para (503) até um deles voltar. Continuar?`)){cicloMapa();return;}
+ }
+ try{
+  const res=await fetch(urlControlo('/controlo/acao'),{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','X-Controlo':'1'},body:JSON.stringify({servico,acao})});
+  const d=await res.json().catch(()=>({erro:'HTTP '+res.status}));
+  if(!res.ok)throw new Error(d.erro||'HTTP '+res.status);
+  docker.eventos=[{t:new Date(),texto:`Pedido ao Docker: ${acao} ${servico} (${d.mensagem})`},...(docker.eventos||[])];
+  toast(`${acao[0].toUpperCase()+acao.slice(1)} ${servico}: ${d.mensagem}`);
+ }catch(e){toast(e.message==='Failed to fetch'?'Sem ligação ao contentor «controlo».':e.message);}
+ cicloMapa();
+}
+async function iniciarContinuidade(){
+ if(docker.correr)return;
+ try{await ensure('admin');}catch(e){toast(e.record?.data?.erro||e.message);return;}
+ docker.correr=true;docker.ticks=[];$('contStart').disabled=true;$('contStop').disabled=false;renderContinuidade();
+ while(docker.correr){
+  const t0=Date.now();let ok=false,status=0;
+  try{const res=await fetch(targetUrl('/api/me'),{credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(5000)});status=res.status;ok=res.ok;}catch{}
+  docker.ticks.push({ok,status,t:t0,ms:Date.now()-t0});renderContinuidade();
+  await esperarMs(Math.max(0,1000-(Date.now()-t0)));
+ }
+}
+function pararContinuidade(){docker.correr=false;$('contStart').disabled=false;$('contStop').disabled=true;renderContinuidade();}
+function renderContinuidade(){
+ const t=docker.ticks,falhas=t.filter(x=>!x.ok).length;let maior=0,inicio=null;
+ for(const x of t){if(!x.ok){inicio??=x.t;maior=Math.max(maior,Math.round((x.t+x.ms-inicio)/1000));}else inicio=null;}
+ $('contTotal').textContent=t.length;$('contFalhas').textContent=falhas;$('contParagem').textContent=maior+' s';
+ const ultimo=t.at(-1),p=$('contPill');
+ p.textContent=!docker.correr?'Parado':ultimo&&!ultimo.ok?'A falhar':'A correr';p.className='pill'+(!docker.correr?'':ultimo&&!ultimo.ok?' red':' green');
+ $('contStrip').innerHTML=t.slice(-150).map(x=>`<span class="tick ${x.ok?'ok':'fail'}" title="${new Date(x.t).toLocaleTimeString('pt-PT')} · HTTP ${x.status||'sem resposta'} · ${x.ms} ms"></span>`).join('');
+ $('contUltimo').textContent=ultimo?`Último pedido: ${new Date(ultimo.t).toLocaleTimeString('pt-PT')} · HTTP ${ultimo.status||'sem resposta'} · ${ultimo.ms} ms`:'';
+}
 function init(){
  $('baseUrl').value=location.protocol==='file:'?'http://127.0.0.1':location.origin;
  if(location.protocol==='file:'){$('environmentWarning').textContent='Para testar a API, copia este HTML para backend/public/testar-api.html e abre-o pelo MAMP. Por duplo clique podes explorar o painel, mas os pedidos ficam bloqueados.';$('environmentWarning').classList.remove('hidden');}
@@ -226,6 +411,14 @@ function init(){
  $('sendBtn').onclick=()=>single(async()=>{if(!state.selected)throw new Error('Seleciona um endpoint.');const role=$('manualRole').value;if(role!=='current')await ensure(role);const method=state.selected.method,path=resolvePath($('editorPath').value.trim());let body;if(state.selected.body==='file'){body=new FormData();body.append('foto',$('uploadFile').files[0]||png(),$('uploadFile').files[0]?.name||'teste-lab.png');}else if($('editorBody').value.trim()&&method!=='GET'){try{body=JSON.parse($('editorBody').value);}catch{throw new Error('O JSON do pedido é inválido. Corrige-o antes de enviar.');}}const r=await request(method,path,body,{csrf:$('sendCsrf').checked,image:state.selected.id==='photo'});showResponse(r);});
  $('exportBtn').onclick=exportReport;$('exportHistory').onclick=exportReport;
  $('clearHistory').onclick=()=>{state.requests=[];state.checks=[];state.covered.clear();$('checks').className='empty';$('checks').textContent='Os resultados aparecem aqui, à medida que a API responde.';renderHistory();updateCounts();renderRoutes();toast('Histórico do painel limpo. A base de dados não foi alterada.');};
+ $('dockerCmds').innerHTML=comandosDocker.map(([txt,cmd],i)=>`<div class="cmd"><div><small>${escapeHtml(txt)}</small><code>${escapeHtml(cmd)}</code></div><button class="quiet" data-copiar="${i}">Copiar</button></div>`).join('');
+ $('dockerCmds').addEventListener('click',e=>{const b=e.target.closest('[data-copiar]');if(!b)return;navigator.clipboard.writeText(comandosDocker[Number(b.dataset.copiar)][1]).then(()=>toast('Comando copiado. Cola-o no terminal, na pasta do projeto.'),()=>toast('Não foi possível copiar: seleciona o comando à mão.'));});
+ $('clusterRefresh').onclick=()=>lerCluster();
+ $('clusterAuto').onchange=e=>definirAoVivo(e.target.checked);
+ $('mapaAoVivo').onchange=e=>definirAoVivo(e.target.checked);
+ $('mapaAcoes').addEventListener('click',e=>{const b=e.target.closest('[data-acao]');if(!b||b.disabled)return;b.disabled=true;executarAcao(b.dataset.servico,b.dataset.acao);});
+ document.querySelector('.nav [data-view="docker"]').addEventListener('click',()=>{if(!docker.auto)definirAoVivo(true);});
+ $('contStart').onclick=iniciarContinuidade;$('contStop').onclick=pararContinuidade;
  selectEndpoint('health');updateCounts();
 }
 window.IADEPanel={endpoints,suites,state,vars,suiteFns,request,api,runSuites,login,ensure,targetUrl,resolvePath,safe,checkNoSecrets,selectEndpoint,init};
