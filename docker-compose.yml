@@ -128,7 +128,9 @@ services:
     image: nginx:1.28-alpine
     restart: unless-stopped
     ports:
-      - "8080:80"
+      # Só neste computador (127.0.0.1): o painel de testes pode parar contentores, por isso
+      # o site não fica acessível a outras máquinas da rede.
+      - "127.0.0.1:8080:80"
     volumes:
       # A pasta inteira (e não só o ficheiro): editar o nginx.conf não quebra a montagem.
       - ./docker/nginx:/etc/nginx/conf.d:ro
@@ -170,6 +172,33 @@ services:
       resources:
         limits:
           memory: 128m
+    logging: *logs
+
+  # Para o laboratório da API (testar-api.html → vista Docker): mostra o estado dos contentores
+  # e permite parar / arrancar / provocar um crash nos nós Galera, no web e no backup.
+  # Só desenvolvimento: tem acesso ao Docker, mas só aceita essas ações nesses serviços.
+  controlo:
+    image: python:3.12-alpine
+    restart: unless-stopped
+    command: ["python", "-u", "/app/servidor.py"]
+    environment:
+      CONTROLO_SERVICOS: galera1,galera2,galera3,web,backup
+      # Árbitro: se os nós ligados ficarem sem maioria e o Docker confirmar que os outros estão
+      # parados, reativa o cluster no que sobrou ao fim deste tempo (segundos).
+      ARBITRO_NOS: galera1,galera2,galera3
+      ARBITRO_ESPERA: 15
+    volumes:
+      - ./docker/controlo:/app:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/estado', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 64m
     logging: *logs
 
   # O Docker só reinicia sozinho um contentor que TERMINA. O autoheal trata dos que ficam
