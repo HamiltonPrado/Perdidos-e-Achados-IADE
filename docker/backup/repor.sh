@@ -24,7 +24,7 @@ read -r RESPOSTA
 
 # Repõe num nó sincronizado do cluster; o Galera replica a reposição para os outros.
 for NO in galera1 galera2 galera3; do
-    if docker compose exec -T "${NO}" bash /galera/saude.sh >/dev/null 2>&1; then
+    if docker compose exec -T "${NO}" bash -c "tr -d '\\r' < /galera/saude.sh | bash" >/dev/null 2>&1; then
         docker compose exec -T "${NO}" sh -c 'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" mariadb -u root "$MARIADB_DATABASE"' < "${FICHEIRO}"
         echo "Reposto através do ${NO}."
         break

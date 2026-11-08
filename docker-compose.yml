@@ -26,7 +26,9 @@ x-logs: &logs
 x-galera: &galera
   image: mariadb:11.4
   restart: unless-stopped
-  entrypoint: ["bash", "/galera/arrancar.sh"]
+  # Os scripts correm a partir de uma cópia sem «\r»: no Windows o Git pode convertê-los para
+  # CRLF e o bash recusava-os (o nó ficava em «Restarting»).
+  entrypoint: ["bash", "-c", "tr -d '\\r' < /galera/arrancar.sh > /tmp/arrancar.sh && exec bash /tmp/arrancar.sh"]
   environment: &galera-env
     MARIADB_DATABASE: ${DB_NAME:-perdidos_achados}
     MARIADB_USER: ${DB_USER:-perdidos}
@@ -37,7 +39,7 @@ x-galera: &galera
     GALERA_FUNDADOR: galera1
     TZ: Europe/Lisbon
   healthcheck:
-    test: ["CMD", "bash", "/galera/saude.sh"]
+    test: ["CMD", "bash", "-c", "tr -d '\\r' < /galera/saude.sh | bash"]
     interval: 10s
     timeout: 5s
     retries: 3
@@ -62,9 +64,8 @@ services:
     volumes:
       - dados_galera1:/var/lib/mysql
       - ./docker/galera:/galera:ro
-      - ./docker/galera/galera.cnf:/etc/mysql/conf.d/galera.cnf:ro
-      # Só no PRIMEIRO arranque (volume vazio): conta do SST + tabelas, contas e dados de referência.
-      - ./docker/galera/initdb/00-utilizador-sst.sh:/docker-entrypoint-initdb.d/00-utilizador-sst.sh:ro
+      # Só no PRIMEIRO arranque (volume vazio): tabelas, contas e dados de referência.
+      # (A conta do SST, docker/galera/initdb/, é copiada pelo arrancar.sh.)
       - ./backend/database/perdidos_achados.sql:/docker-entrypoint-initdb.d/01-perdidos_achados.sql:ro
     ports:
       # Para abrir a BD com o phpMyAdmin/DBeaver em localhost:3307 (a 3306 é do MAMP).
@@ -80,7 +81,6 @@ services:
     volumes:
       - dados_galera2:/var/lib/mysql
       - ./docker/galera:/galera:ro
-      - ./docker/galera/galera.cnf:/etc/mysql/conf.d/galera.cnf:ro
     ports:
       - "3308:3306"
 
@@ -93,7 +93,6 @@ services:
     volumes:
       - dados_galera3:/var/lib/mysql
       - ./docker/galera:/galera:ro
-      - ./docker/galera/galera.cnf:/etc/mysql/conf.d/galera.cnf:ro
     ports:
       - "3309:3306"
 
@@ -154,7 +153,7 @@ services:
   backup:
     image: mariadb:11.4
     restart: unless-stopped
-    entrypoint: ["sh", "/scripts/backup.sh"]
+    entrypoint: ["sh", "-c", "tr -d '\\r' < /scripts/backup.sh > /tmp/backup.sh && exec sh /tmp/backup.sh"]
     environment:
       DB_HOST: galera3,galera2,galera1
       DB_NAME: ${DB_NAME:-perdidos_achados}

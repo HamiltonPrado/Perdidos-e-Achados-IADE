@@ -20,6 +20,21 @@ DADOS=/var/lib/mysql
 
 log() { echo "[galera:${NO}] $*"; }
 
+# Windows: os ficheiros montados chegam com permissões 777 (o MariaDB IGNORA configurações que
+# todos podem alterar) e às vezes com fins de linha CRLF. Por isso a configuração e os scripts
+# de criação são copiados para dentro do contentor, sem «\r» e com permissões normais.
+tr -d '\r' < /galera/galera.cnf > /etc/mysql/conf.d/galera.cnf
+chmod 644 /etc/mysql/conf.d/galera.cnf
+if [ "${NO}" = "${FUNDADOR}" ]; then
+    for SCRIPT in /galera/initdb/*.sh; do
+        DESTINO="/docker-entrypoint-initdb.d/$(basename "${SCRIPT}")"
+        tr -d '\r' < "${SCRIPT}" > "${DESTINO}"
+        # Executável: o MariaDB corre-o à parte. Sem isto, «carregava-o» no próprio shell e o
+        # set -eu do script fazia rebentar o arranque.
+        chmod 755 "${DESTINO}"
+    done
+fi
+
 # Há algum outro nó num cluster a funcionar?
 cluster_ativo() {
     local par estado
