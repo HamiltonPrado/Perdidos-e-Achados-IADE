@@ -3,31 +3,31 @@ import { getUser, isLoggedIn, isAdmin } from '../utilities/auth.js';
 import { esc, iniciais } from '../utilities/tools.js';
 import { logoHtml } from './logo.js';
 import { itemsService } from '../services/itemsService.js';
-import { botaoNotificacoesHtml, montarNotificacoes } from './notificacoes.js';
+// O sino de notificações (components/notificacoes.js) fica para a 3.ª entrega: não é montado na navbar.
 
 const LINKS = [
-  ['inicio', url('index.html'), 'Explorar'],
-  ['procurar', url('aluno/procurar.html'), 'Encontrar'],
-  ['publicar', url('aluno/publicar.html'), 'Publicar'],
-  ['meus-anuncios', url('aluno/meus-anuncios.html'), 'Meus anúncios'],
+    ['inicio', url('index.html'), 'Explorar'],
+    ['procurar', url('aluno/procurar.html'), 'Encontrar'],
+    ['publicar', url('aluno/publicar.html'), 'Publicar'],
+    ['meus-anuncios', url('aluno/meus-anuncios.html'), 'Meus anúncios'],
 ];
 
 const ICONE_MENU = 'M4 7h16M4 12h16M4 17h16';
 const ICONE_FECHAR = 'M6 6l12 12M18 6L6 18';
 
 export function montarNavBar(pagina) {
-  const user = getUser();
+    const user = getUser();
 
-  const links = LINKS.map(([nome, ficheiro, texto]) => {
-    const ativo = nome === pagina;
-    const bolinha = nome === 'meus-anuncios' ? '<span class="navbar__bolinha" id="navbar-bolinha" hidden></span>' : '';
-    return `<a href="${ficheiro}" class="navbar__link${ativo ? ' ativo' : ''}"${ativo ? ' aria-current="page"' : ''}>${texto}${bolinha}</a>`;
-  }).join('');
+    const links = LINKS.map(([nome, ficheiro, texto]) => {
+        const ativo = nome === pagina;
+        const bolinha = nome === 'meus-anuncios' ? '<span class="navbar__bolinha" id="navbar-bolinha" hidden></span>' : '';
+        return `<a href="${ficheiro}" class="navbar__link${ativo ? ' ativo' : ''}"${ativo ? ' aria-current="page"' : ''}>${texto}${bolinha}</a>`;
+    }).join('');
 
-  const avatar = user?.foto ? `<img src="${esc(user.foto)}" alt="">` : esc(iniciais(user?.nome));
+    const avatar = user && user.foto ? `<img src="${esc(user.foto)}" alt="">` : esc(iniciais(user && user.nome));
 
-  const zonaSessao = isLoggedIn()
-    ? `${isAdmin() ? `<a href="${url('admin/index.html')}" class="navbar__link">Área da receção</a>` : ''}
+    const zonaSessao = isLoggedIn() ?
+        `${isAdmin() ? `<a href="${url('admin/index.html')}" class="navbar__link">Área da receção</a>` : ''}
        <a href="${url('aluno/perfil.html')}" class="navbar__link navbar__perfil${pagina === 'perfil' ? ' ativo' : ''}">Perfil</a>
        <a href="${url('aluno/perfil.html')}" class="navbar__avatar" aria-label="O meu perfil">${avatar}</a>`
     : `<a href="${url('aluno/entrar.html')}?voltar=${encodeURIComponent(caminhoAtual())}" class="navbar__entrar">Entrar</a>`;
@@ -35,8 +35,6 @@ export function montarNavBar(pagina) {
   document.getElementById('navbar').innerHTML = `
     <div class="contentor navbar__barra">
       <a href="${url('index.html')}" class="navbar__marca" aria-label="Perdidos e Achados, página inicial">${logoHtml()}</a>
-
-      ${isLoggedIn() ? botaoNotificacoesHtml() : ''}
 
       <button type="button" class="navbar__menu-botao" id="navbar-menu-botao"
               aria-label="Abrir menu" aria-expanded="false" aria-controls="navbar-menu">
@@ -59,10 +57,7 @@ export function montarNavBar(pagina) {
     document.getElementById('navbar-menu-icone').setAttribute('d', aberto ? ICONE_FECHAR : ICONE_MENU);
   });
 
-  if (isLoggedIn()) {
-    mostrarPorEntregar();
-    montarNotificacoes();
-  }
+  if (isLoggedIn()) mostrarPorEntregar();
 }
 
 async function mostrarPorEntregar() {
