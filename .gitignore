@@ -26,3 +26,6 @@ Thumbs.db
 /ia/__pycache__/
 /ia/config.local.json
 /ia/.venv-ai/
+
+# Backups automáticos do Docker (docker/backup/backup.sh)
+/backups/

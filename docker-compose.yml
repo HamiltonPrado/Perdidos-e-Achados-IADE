@@ -1,0 +1,200 @@
+# Perdidos & Achados em Docker, com tolerância a falhas (fase 1).
+#
+#   browser → nginx (8080) → web (Apache + PHP) → db1 (MySQL principal) ──replicação──▶ db2 (réplica)
+#                                                                                        └▶ backup → ./backups
+#   autoheal reinicia qualquer contentor que fique «unhealthy».
+#
+# Arrancar:   cp .env.example .env   (e mudar as palavras-passe)
+#             docker compose up -d --build
+# Abrir:      http://localhost:8080
+# Ver estado: docker compose ps
+#
+# Se o db1 cair:   sh docker/replicacao/promover-db2.sh   (o db2 passa a principal)
+# Voltar ao normal: sh docker/replicacao/repor-replica.sh
+#
+# Na fase 2 entram os workers de IA e o Galera (escritas em vários nós, failover automático).
+
+x-logs: &logs
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-ligacao-bd: &ligacao-bd
+  # O PHP liga-se à primeira destas BDs que aceite escritas (backend/config/database.php).
+  DB_HOST: db1,db2
+  DB_PORT: "3306"
+  DB_NAME: ${DB_NAME:-perdidos_achados}
+  DB_USER: ${DB_USER:-perdidos}
+  DB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD no ficheiro .env}
+
+x-mysql: &mysql
+  image: mysql:8.0
+  restart: unless-stopped
+  environment:
+    MYSQL_DATABASE: ${DB_NAME:-perdidos_achados}
+    MYSQL_USER: ${DB_USER:-perdidos}
+    MYSQL_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD no ficheiro .env}
+    MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Define DB_ROOT_PASSWORD no ficheiro .env}
+    TZ: Europe/Lisbon
+  healthcheck:
+    test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 -u root --silent"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+    start_period: 60s
+  labels:
+    autoheal: "true"
+  deploy:
+    resources:
+      limits:
+        memory: 1g
+  logging: *logs
+
+services:
+  # Base de dados principal: recebe todas as leituras e escritas.
+  db1:
+    <<: *mysql
+    hostname: db1
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --server-id=1
+      - --log-bin=mysql-bin
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+    volumes:
+      # Os dados sobrevivem a apagar/recriar o contentor.
+      - dados_mysql:/var/lib/mysql
+      # Só no PRIMEIRO arranque (volume vazio): cria as tabelas, as contas e os dados de referência.
+      # O perdidos_achados.sql já inclui as migrações de backend/database/migracoes/.
+      - ./backend/database/perdidos_achados.sql:/docker-entrypoint-initdb.d/01-perdidos_achados.sql:ro
+    ports:
+      # Para abrir a BD com o phpMyAdmin/DBeaver em localhost:3307 (a 3306 é do MAMP).
+      - "3307:3306"
+
+  # Réplica: cópia em tempo real do db1, só de leitura. Não recebe o .sql: os dados vêm do db1
+  # (contentor «replicacao»). Se o db1 se perder, os dados estão aqui.
+  db2:
+    <<: *mysql
+    hostname: db2
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --server-id=2
+      - --log-bin=mysql-bin
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+    volumes:
+      - dados_mysql_replica:/var/lib/mysql
+    ports:
+      - "3308:3306"
+
+  # Corre uma vez por arranque e termina: liga a replicação db1 → db2 (não faz nada se já estiver ligada).
+  replicacao:
+    image: mysql:8.0
+    restart: "no"
+    entrypoint: ["sh", "/scripts/configurar.sh"]
+    environment:
+      DB_NAME: ${DB_NAME:-perdidos_achados}
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Define DB_ROOT_PASSWORD no ficheiro .env}
+      REPL_PASSWORD: ${REPL_PASSWORD:?Define REPL_PASSWORD no ficheiro .env}
+    volumes:
+      - ./docker/replicacao:/scripts:ro
+    depends_on:
+      db1:
+        condition: service_healthy
+      db2:
+        condition: service_healthy
+    logging: *logs
+
+  # A aplicação (uma réplica). As sessões e as fotos estão na base de dados, por isso para
+  # escalar basta acrescentar outro serviço igual e outra linha «server» no nginx.conf.
+  web:
+    build: ./docker/web
+    image: perdidos-achados-web
+    hostname: web
+    restart: unless-stopped
+    environment: *ligacao-bd
+    volumes:
+      - ./frontend:/var/www/frontend:ro
+      - ./backend:/var/www/backend:ro
+    depends_on:
+      db1:
+        condition: service_healthy
+    labels:
+      autoheal: "true"
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    logging: *logs
+
+  nginx:
+    image: nginx:1.28-alpine
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      # A pasta inteira (e não só o ficheiro): editar o nginx.conf não quebra a montagem.
+      - ./docker/nginx:/etc/nginx/conf.d:ro
+    depends_on:
+      - web
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/nginx-health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    labels:
+      autoheal: "true"
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    logging: *logs
+
+  # Os backups saem da réplica, para não pesarem na base de dados principal.
+  backup:
+    image: mysql:8.0
+    restart: unless-stopped
+    entrypoint: ["sh", "/scripts/backup.sh"]
+    environment:
+      DB_HOST: db2
+      DB_NAME: ${DB_NAME:-perdidos_achados}
+      DB_USER: ${DB_USER:-perdidos}
+      DB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD no ficheiro .env}
+      BACKUP_INTERVALO: ${BACKUP_INTERVALO:-3600}
+      BACKUP_MANTER: ${BACKUP_MANTER:-24}
+      TZ: Europe/Lisbon
+    volumes:
+      - ./docker/backup:/scripts:ro
+      - ./backups:/backups
+    depends_on:
+      replicacao:
+        condition: service_completed_successfully
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    logging: *logs
+
+  # O Docker só reinicia sozinho um contentor que TERMINA. O autoheal trata dos que ficam
+  # de pé mas «unhealthy» (ex.: Apache ligado mas sem conseguir falar com a BD).
+  autoheal:
+    image: willfarrell/autoheal:1.2.0
+    restart: unless-stopped
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: autoheal
+      AUTOHEAL_INTERVAL: 10
+      AUTOHEAL_START_PERIOD: 60
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      resources:
+        limits:
+          memory: 32m
+    logging: *logs
+
+volumes:
+  dados_mysql:
+  dados_mysql_replica:

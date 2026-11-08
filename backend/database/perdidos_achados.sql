@@ -64,13 +64,6 @@ CREATE TABLE `devolucoes` (
   `devolvido_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Extraindo dados da tabela `devolucoes`
---
-
-INSERT INTO `devolucoes` (`id`, `match_id`, `item_perdido_id`, `item_achado_id`, `recebido_por`, `confirmado_por`, `ponto_recolha_id`, `devolvido_em`) VALUES
-(1, 2, 2, 3, 2, 1, 1, '2026-10-29 17:36:09');
-
 -- --------------------------------------------------------
 
 --
@@ -90,21 +83,6 @@ CREATE TABLE `ia_jobs` (
   `criado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Extraindo dados da tabela `ia_jobs`
---
-
-INSERT INTO `ia_jobs` (`id`, `item_id`, `versao_item`, `estado`, `tentativas`, `disponivel_em`, `reservado_ate`, `token_reserva`, `ultimo_erro`, `criado_em`, `atualizado_em`) VALUES
-(1, 1, 1, 'concluido', 1, '2026-10-27 16:32:50', NULL, NULL, NULL, '2026-10-27 16:32:50', '2026-10-29 16:28:38'),
-(2, 2, 1, 'concluido', 1, '2026-10-28 20:52:29', NULL, NULL, NULL, '2026-10-28 20:52:29', '2026-10-29 16:28:38'),
-(3, 3, 1, 'concluido', 1, '2026-10-29 16:34:58', NULL, NULL, NULL, '2026-10-29 16:34:58', '2026-10-29 16:35:01'),
-(4, 4, 1, 'concluido', 1, '2026-10-30 00:57:07', NULL, NULL, NULL, '2026-10-30 00:57:07', '2026-10-30 00:57:10'),
-(5, 5, 2, 'concluido', 1, '2026-10-30 01:20:12', NULL, NULL, NULL, '2026-10-30 01:20:12', '2026-10-30 01:20:14'),
-(6, 7, 1, 'pendente', 0, '2026-10-30 17:51:38', NULL, NULL, NULL, '2026-10-30 17:51:38', '2026-10-30 17:51:38'),
-(7, 8, 1, 'pendente', 0, '2026-10-30 17:51:43', NULL, NULL, NULL, '2026-10-30 17:51:43', '2026-10-30 17:51:43'),
-(8, 9, 1, 'pendente', 0, '2026-10-30 17:51:45', NULL, NULL, NULL, '2026-10-30 17:51:45', '2026-10-30 17:51:45'),
-(9, 10, 2, 'pendente', 0, '2026-10-30 17:58:32', NULL, NULL, NULL, '2026-10-30 17:53:05', '2026-10-30 17:58:32');
 
 -- --------------------------------------------------------
 
@@ -140,22 +118,6 @@ CREATE TABLE `items` (
   `pergunta_secreta` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `resposta_esperada` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Extraindo dados da tabela `items`
---
-
-INSERT INTO `items` (`id`, `user_id`, `tipo`, `titulo`, `descricao`, `category_id`, `location_id`, `ponto_recolha_id`, `data_ocorrencia`, `estado`, `ia_estado`, `ia_erro`, `embedding_texto`, `embedding_modelo`, `versao`, `chave_pedido`, `pedido_hash`, `criado_em`, `atualizado_em`, `estado_recepcao`, `localizacao_stock`, `observacoes_internas`, `recebido_por`, `recebido_em`, `pergunta_secreta`, `resposta_esperada`) VALUES
-(1, 2, 'lost', 'Carteira preta — teste Postman', 'Perdi uma carteira preta com um pequeno fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-27', 'ativo', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-27 16:32:50', '2026-10-29 16:28:38', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(2, 2, 'lost', 'Carteira preta — teste Postman', 'Perdi uma carteira preta com um pequeno fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-28', 'devolvido', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-28 20:52:29', '2026-10-29 17:36:09', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(3, 1, 'found', 'Carteira preta com fecho vermelho', 'Carteira preta com um pequeno fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-29', 'devolvido', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-29 16:34:58', '2026-10-29 17:36:09', 'na_recepcao', NULL, NULL, NULL, NULL, NULL, NULL),
-(4, 2, 'lost', 'Carteira preta perdida', 'Perdi uma carteira preta com fecho vermelho na biblioteca.', 3, 2, NULL, '2026-10-30', 'ativo', 'analisado', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 00:57:07', '2026-10-30 00:57:10', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(5, 2, 'found', 'Carteira encontrada', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'analisado', NULL, NULL, NULL, 2, NULL, NULL, '2026-10-30 00:57:29', '2026-10-30 01:20:14', 'na_recepcao', 'Prateleira A2', 'Carteira recebida e conferida pela equipa.', 1, '2026-10-30 01:20:12', NULL, NULL),
-(6, 2, 'found', 'Estojo encontrado — teste de fotografia', 'Estojo azul com fecho preto encontrado na biblioteca.', 3, 2, NULL, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 01:49:37', '2026-10-30 01:49:37', 'por_entregar', NULL, NULL, NULL, NULL, NULL, NULL),
-(7, 1, 'found', '[LAB] Carteira preta', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 17:51:38', '2026-10-30 17:51:38', 'na_recepcao', NULL, NULL, 1, '2026-10-30 17:51:38', NULL, NULL),
-(8, 1, 'found', '[LAB] Carteira preta', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 17:51:43', '2026-10-30 17:51:43', 'na_recepcao', NULL, NULL, 1, '2026-10-30 17:51:43', NULL, NULL),
-(9, 1, 'found', '[LAB] Carteira preta', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 1, NULL, NULL, '2026-10-30 17:51:45', '2026-10-30 17:51:45', 'na_recepcao', NULL, NULL, 1, '2026-10-30 17:51:45', NULL, NULL),
-(10, 1, 'found', '[LAB] Carteira preta', 'Carteira preta com fecho vermelho encontrada na biblioteca.', 3, 2, 1, '2026-10-30', 'ativo', 'pendente', NULL, NULL, NULL, 2, NULL, NULL, '2026-10-30 17:53:05', '2026-10-30 17:58:32', 'na_recepcao', NULL, NULL, 1, '2026-10-30 17:53:05', 'Qual é a cor do fecho?', 'Vermelho');
 
 -- --------------------------------------------------------
 
@@ -221,16 +183,6 @@ CREATE TABLE `matches` (
   `atualizado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Extraindo dados da tabela `matches`
---
-
-INSERT INTO `matches` (`id`, `item_id`, `matched_item_id`, `score`, `score_texto`, `score_imagem`, `modelo_ia`, `versao_perdido`, `versao_achado`, `estado`, `criado_em`, `atualizado_em`) VALUES
-(1, 1, 3, 0.8229, 0.8229, NULL, 'texto-v1:minilm-multilingual-l12-v2@e8f8c211226b894fcb81acc59f3b34ba3efd5f42', 1, 1, 'sugerido', '2026-10-29 16:35:01', '2026-10-29 16:35:01'),
-(2, 2, 3, 0.8229, 0.8229, NULL, 'texto-v1:minilm-multilingual-l12-v2@e8f8c211226b894fcb81acc59f3b34ba3efd5f42', 1, 1, 'concluido', '2026-10-29 16:35:01', '2026-10-29 17:36:09'),
-(3, 1, 5, 0.8081, 0.8081, NULL, 'texto-v1:minilm-multilingual-l12-v2@e8f8c211226b894fcb81acc59f3b34ba3efd5f42', 1, 2, 'sugerido', '2026-10-30 01:20:14', '2026-10-30 01:20:14'),
-(4, 4, 5, 0.7639, 0.7639, NULL, 'texto-v1:minilm-multilingual-l12-v2@e8f8c211226b894fcb81acc59f3b34ba3efd5f42', 1, 2, 'sugerido', '2026-10-30 01:20:14', '2026-10-30 01:20:14');
-
 -- --------------------------------------------------------
 
 --
@@ -253,16 +205,6 @@ CREATE TABLE `notifications` (
   CONSTRAINT `chk_notifications_tipo` CHECK (((`tipo` = _utf8mb4'correspondencia') and (`match_id` is not null) and (`item_id` is not null) and (`reclamacao_id` is null)) or ((`tipo` in (_utf8mb4'pedido_aprovado',_utf8mb4'pedido_recusado',_utf8mb4'pedido_reaberto')) and (`reclamacao_id` is not null) and (`match_id` is null) and (`item_id` is null)))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Extraindo dados da tabela `notifications`
---
-
-INSERT INTO `notifications` (`id`, `match_id`, `user_id`, `item_id`, `ponto_recolha_id`, `lida`, `lida_em`, `invalidada_em`, `criado_em`) VALUES
-(1, 1, 2, 1, 1, 0, NULL, NULL, '2026-10-29 16:35:01'),
-(2, 2, 2, 2, 1, 0, NULL, NULL, '2026-10-29 16:35:01'),
-(3, 3, 2, 1, 1, 0, NULL, NULL, '2026-10-30 01:20:14'),
-(4, 4, 2, 4, 1, 0, NULL, NULL, '2026-10-30 01:20:14');
-
 -- --------------------------------------------------------
 
 --
@@ -282,14 +224,7 @@ CREATE TABLE `pedidos_levantamento` (
   `criado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `reclamacao_id` int UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Extraindo dados da tabela `pedidos_levantamento`
---
-
-INSERT INTO `pedidos_levantamento` (`id`, `user_id`, `item_achado_id`, `item_perdido_id`, `match_id`, `codigo`, `estado`, `expira_em`, `utilizado_em`, `criado_em`, `atualizado_em`, `reclamacao_id`) VALUES
-(1, 2, 3, 2, 2, '3G236BVX', 'utilizado', '2026-10-30 16:48:47', '2026-10-29 17:36:09', '2026-10-29 16:48:47', '2026-10-29 17:36:09', NULL);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -336,14 +271,6 @@ CREATE TABLE `reclamacoes` (
   `reaberta_em` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Extraindo dados da tabela `reclamacoes`
---
-
-INSERT INTO `reclamacoes` (`id`, `user_id`, `item_achado_id`, `item_perdido_id`, `match_id`, `versao_item`, `pergunta_secreta`, `resposta`, `informacao_adicional`, `estado`, `decidido_por`, `motivo_decisao`, `decidido_em`, `criado_em`, `atualizado_em`, `reaberta_por`, `reaberta_em`) VALUES
-(1, 2, 10, NULL, NULL, 2, 'Qual é a cor do fecho?', 'IADE', 'A palavra está escrita no interior.', 'pendente', NULL, NULL, NULL, '2026-10-30 17:54:35', '2026-10-30 18:15:57', 1, '2026-10-30 18:14:16'),
-(2, 1, 10, NULL, NULL, 2, 'Qual é a cor do fecho?', 'IADE', 'A palavra está escrita no interior.', 'pendente', NULL, NULL, NULL, '2026-10-30 18:15:15', '2026-10-30 18:15:15', NULL, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -357,23 +284,6 @@ CREATE TABLE `sessions` (
   `expira_em` datetime NOT NULL,
   `atualizado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Extraindo dados da tabela `sessions`
---
-
-INSERT INTO `sessions` (`id`, `user_id`, `dados`, `expira_em`, `atualizado_em`) VALUES
-('1votfhrha61egcj7lgfub6r877', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2237396264396139396536306131633533306434313466376236633532323961363862303132383762666562346332646261303538666134343865613330313465223b, '2026-10-29 18:29:45', '2026-10-29 17:29:45'),
-('2uvammnn4hbm14ug29bus76fck', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2233636132363165343032663433616332636633323336633937303266306437303439353664656236323064373134663836663937386630346330633333373830223b, '2026-10-29 18:30:05', '2026-10-29 17:30:05'),
-('3ntr8b87k5nh3hjkt30buqq0dt', 1, 0x757365725f69647c693a313b637372665f746f6b656e7c733a36343a2263633937326136633338666563356334396462306562346162393730316433386137373630623462323465333432336164343138393363383434666664626438223b, '2026-10-29 18:41:49', '2026-10-29 17:41:49'),
-('4mba4c4v5hip6huvbso24r40o7', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2238653632663330313238356165326565343532636531626661326538633234613762373565316662653536346364326538636135363730646462623239376438223b, '2026-10-27 23:51:10', '2026-10-27 22:51:10'),
-('a25co9f0dotb0vs6pmc57flf47', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2262336435326438313765353238623065336639356264363232343537616336346539653864656261313335656337306532653530646138633630363161323833223b, '2026-10-30 02:49:37', '2026-10-30 01:49:37'),
-('aki7np1c940fljh69clhqej8e5', 3, 0x757365725f69647c693a333b637372665f746f6b656e7c733a36343a2237313762646266666437626164316566313137313839323064353430373531343866316362326336316261613831336437313461323432616132316134386463223b, '2026-10-28 22:21:37', '2026-10-28 21:21:37'),
-('ce44oqceht12f61beno68np9uh', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2264636161653130333934356261333530386135323839346538366562353039323464326537383134323034666232626138633339323435633130643066633930223b, '2026-10-27 22:58:41', '2026-10-27 21:58:41'),
-('cofk7pdh6bb3la2dojr3m7dj5r', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2265643630316534633566396466646162336334393761346235326638613333363862396266306563666135666462653561623234316566643739636361396533223b, '2026-10-27 22:58:46', '2026-10-27 21:58:46'),
-('gu2iduk3tltc4oictnvrrn2t2e', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2239366264323534636139666433646261663533643031303965313835373734626638376231633130396636623434653930383235313062653466343635633135223b, '2026-10-27 22:45:31', '2026-10-27 21:45:31'),
-('i6t2jh8if8c206qe9up1lf6pcf', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2239343465646636303132323061383664343438653364613233643337346266333634393066653933373939663664633163363763666663643332363233663039223b, '2026-10-29 17:48:47', '2026-10-29 16:48:47'),
-('r4ltp2l7eg6deajp0b95umg6vn', 2, 0x757365725f69647c693a323b637372665f746f6b656e7c733a36343a2236653334363531363638636662396233393139366161613031643736623664663966323938313766646334336364373333663131613530356266323732633066223b, '2026-10-30 20:02:03', '2026-10-30 19:02:03');
 
 -- --------------------------------------------------------
 
@@ -397,8 +307,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `nome`, `email`, `password_hash`, `role`, `ativo`, `criado_em`) VALUES
 (1, 'Administradora', 'admin@iade.pt', '$2y$10$4T9zhSz/fPY0sKqXoXIZZOll4fNsOIeu8KYCk3VpjeENH7HjGvtFm', 'admin', 1, '2026-10-27 10:38:09'),
-(2, 'Aluno 1', 'aluno1@iade.pt', '$2y$10$qAVSU7U5oGvlHny15.h6MOVL19FgrrHjv7wcO.Kbbw.3ySm3x6jhK', 'user', 1, '2026-10-27 10:38:09'),
-(3, 'Aluno 2', 'aluno2@iade.pt', '$2y$10$qAVSU7U5oGvlHny15.h6MOVL19FgrrHjv7wcO.Kbbw.3ySm3x6jhK', 'user', 1, '2026-10-27 10:38:09');
+(2, 'Aluno 1', '20202600@iade.pt', '$2y$10$qAVSU7U5oGvlHny15.h6MOVL19FgrrHjv7wcO.Kbbw.3ySm3x6jhK', 'user', 1, '2026-10-27 10:38:09'),
+(3, 'Aluno 2', '2020@iade.pt', '$2y$10$qAVSU7U5oGvlHny15.h6MOVL19FgrrHjv7wcO.Kbbw.3ySm3x6jhK', 'user', 1, '2026-10-27 10:38:09');
 
 --
 -- Índices para tabelas despejadas
@@ -549,19 +459,19 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT de tabela `devolucoes`
 --
 ALTER TABLE `devolucoes`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `ia_jobs`
 --
 ALTER TABLE `ia_jobs`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `item_photos`
@@ -579,19 +489,19 @@ ALTER TABLE `locations`
 -- AUTO_INCREMENT de tabela `matches`
 --
 ALTER TABLE `matches`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos_levantamento`
 --
 ALTER TABLE `pedidos_levantamento`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `pontos_recolha`
@@ -603,7 +513,7 @@ ALTER TABLE `pontos_recolha`
 -- AUTO_INCREMENT de tabela `reclamacoes`
 --
 ALTER TABLE `reclamacoes`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `users`

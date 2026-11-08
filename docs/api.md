@@ -12,7 +12,7 @@ Login, com `Content-Type: application/json`:
 
 ```json
 {
-  "email": "aluno1@iade.pt",
+  "email": "20202600@iade.pt",
   "password": "aluno123"
 }
 ```
@@ -26,7 +26,7 @@ Resposta HTTP 200, com valores ilustrativos:
   "utilizador": {
     "id": 2,
     "nome": "Aluno 1",
-    "email": "aluno1@iade.pt",
+    "email": "20202600@iade.pt",
     "role": "user"
   },
   "csrf_token": "TOKEN_DEVOLVIDO_PELO_LOGIN"
