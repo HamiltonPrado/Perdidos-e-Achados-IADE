@@ -3,6 +3,7 @@ import { getUser, isLoggedIn, isAdmin } from '../utilities/auth.js';
 import { esc, iniciais } from '../utilities/tools.js';
 import { logoHtml } from './logo.js';
 import { itemsService } from '../services/itemsService.js';
+import { botaoNotificacoesHtml, montarNotificacoes } from './notificacoes.js';
 
 const LINKS = [
   ['inicio', url('index.html'), 'Explorar'],
@@ -35,6 +36,8 @@ export function montarNavBar(pagina) {
     <div class="contentor navbar__barra">
       <a href="${url('index.html')}" class="navbar__marca" aria-label="Perdidos e Achados, página inicial">${logoHtml()}</a>
 
+      ${isLoggedIn() ? botaoNotificacoesHtml() : ''}
+
       <button type="button" class="navbar__menu-botao" id="navbar-menu-botao"
               aria-label="Abrir menu" aria-expanded="false" aria-controls="navbar-menu">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -56,7 +59,10 @@ export function montarNavBar(pagina) {
     document.getElementById('navbar-menu-icone').setAttribute('d', aberto ? ICONE_FECHAR : ICONE_MENU);
   });
 
-  if (isLoggedIn()) mostrarPorEntregar();
+  if (isLoggedIn()) {
+    mostrarPorEntregar();
+    montarNotificacoes();
+  }
 }
 
 async function mostrarPorEntregar() {

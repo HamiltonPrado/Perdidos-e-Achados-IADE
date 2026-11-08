@@ -1,0 +1,217 @@
+.levantamento {
+  padding-top: 56px;
+  padding-bottom: 80px;
+}
+
+.levantamento > .vazio {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* Ecrã 22 */
+.levantamento__aviso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-bottom: 48px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.levantamento__icone {
+  background: var(--cor-ok);
+  margin-bottom: 16px;
+}
+
+.levantamento__sobretitulo {
+  color: var(--cor-ok);
+  margin: 0;
+}
+
+.levantamento__titulo {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 10px 0 12px;
+}
+
+.levantamento__texto {
+  margin: 0;
+  max-width: 48ch;
+  color: var(--cor-texto-secundario);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* Ecrã 24 */
+.levantamento__cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.levantamento__cabecalho h2 {
+  font-size: clamp(26px, 4vw, 34px);
+  margin: 0 0 6px;
+}
+
+.levantamento__cabecalho .ajuda {
+  margin: 0;
+}
+
+.levantamento__estado {
+  color: var(--cor-ok);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.levantamento__grelha {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 20px;
+}
+
+.levantamento__cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+}
+
+.levantamento__cartao > h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.levantamento__objeto {
+  background: none;
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.levantamento__codigo,
+.levantamento__pessoa,
+.levantamento__nota {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.levantamento__codigo small,
+.levantamento__pessoa small,
+.levantamento__nota small,
+.levantamento__horario dt {
+  color: var(--cor-texto-secundario);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.levantamento__codigo {
+  padding: 20px;
+  background: var(--cor-preto);
+  color: #fff;
+}
+
+.levantamento__codigo small,
+.levantamento__codigo span {
+  color: #aaa;
+}
+
+.levantamento__codigo span {
+  font-size: 13px;
+}
+
+.levantamento__codigo b {
+  font-family: var(--fonte-titulos);
+  font-size: clamp(28px, 5vw, 36px);
+  letter-spacing: 0.08em;
+}
+
+.levantamento__pessoa {
+  padding: 14px 16px;
+  background: var(--cor-cinza-suave);
+}
+
+.levantamento__pessoa span {
+  color: var(--cor-texto-secundario);
+  font-size: 14px;
+}
+
+.levantamento__local {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--cor-borda);
+}
+
+.levantamento__local > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.levantamento__pino {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--cor-marca);
+  color: #fff;
+}
+
+.levantamento__horario {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0;
+}
+
+.levantamento__horario > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  background: var(--cor-cinza-suave);
+}
+
+.levantamento__horario dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.levantamento__nota {
+  padding-top: 14px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.levantamento__nota p {
+  margin: 0;
+}
+
+@media (max-width: 820px) {
+  .levantamento__grelha {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .levantamento__horario {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .levantamento__cartao {
+    padding: 18px;
+  }
+}

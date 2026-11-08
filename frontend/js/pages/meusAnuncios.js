@@ -2,6 +2,8 @@ import { requerLogin } from '../utilities/auth.js';
 import { montarNavBar } from '../components/navbar.js';
 import { montarFooter } from '../components/footer.js';
 import { itemsService } from '../services/itemsService.js';
+import { reclamacoesService } from '../services/reclamacoesService.js';
+import { paraData } from '../services/notificacoesService.js';
 import { esc, formatarData, fotoVazia, lerParametro } from '../utilities/tools.js';
 import { RECECAO } from '../utilities/rececao.js';
 
@@ -24,6 +26,7 @@ const ETIQUETA = {
 const VAZIO = {
   por_entregar: 'Não tens objetos por entregar.',
   na_rececao: 'Nenhum objeto teu está na receção.',
+  por_levantar: 'Não tens objetos por levantar. Quando a receção validar um pedido teu, o objeto aparece aqui.',
   devolvidos: 'Ainda nenhum objeto teu foi devolvido.',
 };
 
@@ -34,19 +37,36 @@ if (requerLogin()) {
 }
 
 async function iniciar() {
-  // Arquivados pela equipa não pertencem a nenhum separador.
-  const itens = (await itemsService.getMine()).filter((i) => i.estado in GRUPO);
+  const [meus, reclamacoes] = await Promise.all([
+    itemsService.getMine(),
+    // Se as reclamações falharem, o resto da página continua a funcionar.
+    reclamacoesService.getMinhas().catch(() => []),
+  ]);
 
-  const contagem = { por_entregar: 0, na_rececao: 0, devolvidos: 0 };
+  // Arquivados pela equipa não pertencem a nenhum separador.
+  const itens = meus.filter((i) => i.estado in GRUPO);
+
+  // Por levantar: reclamações aprovadas cujo objeto ainda não foi entregue.
+  const porLevantar = reclamacoes.filter((r) => r.estado === 'aprovada' && r.estadoArtigo === 'ativo');
+
+  const contagem = { por_entregar: 0, na_rececao: 0, por_levantar: porLevantar.length, devolvidos: 0 };
   itens.forEach((i) => contagem[GRUPO[i.estado] ?? 'na_rececao']++);
   document.querySelectorAll('[data-contagem]').forEach((el) => {
     el.textContent = contagem[el.dataset.contagem];
   });
 
-  let atual = lerParametro('separador') || (contagem.por_entregar > 0 ? 'por_entregar' : 'na_rececao');
+  const porOmissao = contagem.por_levantar > 0 ? 'por_levantar'
+    : contagem.por_entregar > 0 ? 'por_entregar' : 'na_rececao';
+  let atual = lerParametro('separador') || porOmissao;
   if (!(atual in contagem)) atual = 'por_entregar';
 
-  function mostrar(separador) {
+  // Foto e referência dos objetos por levantar (não vêm na reclamação); carregadas uma vez.
+  const objetos = new Map();
+  const aCarregar = Promise.all(porLevantar.map((r) =>
+    itemsService.getById(r.itemId).then((item) => objetos.set(r.itemId, item)).catch(() => {}),
+  ));
+
+  async function mostrar(separador) {
     atual = separador;
     document.querySelectorAll('[data-separador]').forEach((b) => {
       const ativo = b.dataset.separador === separador;
@@ -58,6 +78,21 @@ async function iniciar() {
     aviso.hidden = !(separador === 'por_entregar' && contagem.por_entregar > 0);
     aviso.innerHTML = `<span class="aviso__rotulo">Entrega pendente</span>
       Leva os objetos à receção (${esc(RECECAO.local)}, ${esc(RECECAO.horario)}) e indica a referência de cada um.`;
+
+    document.getElementById('aviso-levantar').hidden = !(separador === 'por_levantar' && contagem.por_levantar > 0);
+
+    if (separador === 'por_levantar') {
+      if (!porLevantar.length) {
+        lista.innerHTML = `<div class="vazio"><p>${VAZIO.por_levantar}</p><a href="../index.html" class="botao botao--contorno">Explorar objetos</a></div>`;
+        return;
+      }
+      lista.innerHTML = porLevantar.map((r) => linhaLevantarHtml(r, objetos.get(r.itemId))).join('');
+      await aCarregar;
+      if (atual === 'por_levantar') {
+        lista.innerHTML = porLevantar.map((r) => linhaLevantarHtml(r, objetos.get(r.itemId))).join('');
+      }
+      return;
+    }
 
     const doGrupo = itens.filter((i) => (GRUPO[i.estado] ?? 'na_rececao') === separador);
     lista.innerHTML = doGrupo.length
@@ -91,5 +126,26 @@ function linhaHtml(item) {
         <p class="ajuda">${esc(item.referencia)} · ${esc(item.local)} · ${esc(formatarData(item.dataEncontrado))}</p>
       </div>
       <div class="registo-linha__acao">${acao}</div>
+    </article>`;
+}
+
+// Ecrã 10 do Figma: objeto validado pela receção, à espera de ser levantado.
+function linhaLevantarHtml(reclamacao, item) {
+  const foto = item?.fotos[0] ? `<img src="${esc(item.fotos[0])}" alt="">` : fotoVazia();
+  const detalhes = [item?.referencia, reclamacao.pontoRecolha || RECECAO.local].filter(Boolean).join(' · ');
+  const validado = paraData(reclamacao.decididoEm);
+
+  return `
+    <article class="registo-linha registo-linha--levantar">
+      <div class="registo-linha__foto">${foto}</div>
+      <div class="registo-linha__texto">
+        <span class="etiqueta etiqueta--ok registo-linha__pronto">Pronto para levantamento</span>
+        <h2 class="registo-linha__titulo">${esc(reclamacao.titulo)}</h2>
+        <p class="ajuda">${esc(detalhes)}</p>
+        ${validado ? `<small class="registo-linha__prazo">Validado ${esc(formatarData(validado).replace(/^(Hoje|Ontem)/, (d) => d.toLowerCase()))} · levanta em dias úteis, ${esc(RECECAO.horario)}</small>` : ''}
+      </div>
+      <div class="registo-linha__acao">
+        <a href="levantamento.html?reclamacao=${encodeURIComponent(reclamacao.id)}" class="botao botao--preto botao--pequeno">Ver levantamento</a>
+      </div>
     </article>`;
 }

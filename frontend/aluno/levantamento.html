@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Levantamento autorizado · Perdidos &amp; Achados</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components/navbar.css">
+  <link rel="stylesheet" href="../assets/css/components/footer.css">
+  <link rel="stylesheet" href="../assets/css/pages/levantamento.css">
+</head>
+<body>
+  <header class="navbar" id="navbar"></header>
+
+  <main class="contentor levantamento">
+
+    <p class="ajuda" id="a-carregar">A carregar…</p>
+
+    <div class="vazio" id="indisponivel" hidden>
+      <p id="indisponivel-titulo"><b>Não encontrámos este pedido.</b></p>
+      <p class="ajuda" id="indisponivel-texto"></p>
+      <a href="../index.html" class="botao botao--contorno">Voltar a explorar</a>
+    </div>
+
+    <div id="conteudo" hidden>
+      <!-- Ecrã 22: aviso de que a receção validou o pedido -->
+      <section class="levantamento__aviso">
+        <div class="sucesso__icone levantamento__icone" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"></path></svg>
+        </div>
+        <p class="sobretitulo levantamento__sobretitulo">Pedido validado pela receção</p>
+        <h1 class="levantamento__titulo">O objeto é teu.</h1>
+        <p class="levantamento__texto" id="texto"></p>
+      </section>
+
+      <!-- Ecrã 24: detalhes do levantamento -->
+      <div class="levantamento__cabecalho">
+        <div>
+          <p class="sobretitulo">Levantamento autorizado</p>
+          <h2>Detalhes do levantamento</h2>
+          <p class="ajuda">Apresenta esta informação na receção para receberes o teu objeto.</p>
+        </div>
+        <span class="etiqueta etiqueta--ok levantamento__estado">Pronto para levantamento</span>
+      </div>
+
+      <div class="levantamento__grelha">
+        <section class="levantamento__cartao">
+          <div class="resumo-objeto levantamento__objeto" id="resumo"></div>
+
+          <div class="levantamento__codigo">
+            <small>Código de levantamento</small>
+            <b id="codigo">—</b>
+            <span id="codigo-ajuda">Mostra este código na receção</span>
+          </div>
+          <p class="erro" id="erro-codigo" role="alert" hidden></p>
+
+          <div class="levantamento__pessoa">
+            <small>Pessoa autorizada</small>
+            <b id="pessoa-nome"></b>
+            <span id="pessoa-email"></span>
+          </div>
+        </section>
+
+        <section class="levantamento__cartao">
+          <h2>Onde e quando</h2>
+
+          <div class="levantamento__local">
+            <span class="levantamento__pino" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path><circle cx="12" cy="9" r="2.5"></circle></svg>
+            </span>
+            <div><b id="local"></b><span class="ajuda">Dirige-te ao balcão</span></div>
+          </div>
+
+          <dl class="levantamento__horario">
+            <div><dt>Horário</dt><dd id="horario"></dd><span class="ajuda">Dias úteis</span></div>
+            <div><dt>Código válido até</dt><dd id="validade">—</dd><span class="ajuda" id="validade-restante"></span></div>
+          </dl>
+
+          <div class="aviso">
+            <span class="aviso__rotulo">Leva contigo</span>
+            <p>Cartão de estudante válido. O objeto é entregue apenas à pessoa identificada neste pedido.</p>
+          </div>
+
+          <div class="levantamento__nota" id="nota" hidden>
+            <small>Nota da receção</small>
+            <p id="nota-texto"></p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script type="module" src="../js/pages/levantamento.js"></script>
+</body>
+</html>

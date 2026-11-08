@@ -72,3 +72,60 @@
     width: 100%;
   }
 }
+
+/* Separador «Por levantar» (ecrã 10 do Figma) */
+.separador--levantar.ativo {
+  border-bottom-color: var(--cor-ok);
+}
+
+.separador--levantar.ativo span {
+  background: var(--cor-ok);
+}
+
+.meus__nota-levantar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--cor-ok-fundo);
+  color: #285c3c;
+}
+
+.meus__nota-levantar > span {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--cor-ok);
+  color: #fff;
+}
+
+.meus__nota-levantar p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.registo-linha--levantar {
+  margin-bottom: 10px;
+  padding: 12px 16px 12px 12px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-left: 3px solid var(--cor-ok);
+}
+
+.registo-linha__pronto {
+  color: var(--cor-ok);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.registo-linha__prazo {
+  color: var(--cor-destaque-texto);
+  font-size: 13px;
+  font-weight: 600;
+}

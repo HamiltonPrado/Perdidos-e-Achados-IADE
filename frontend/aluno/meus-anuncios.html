@@ -25,10 +25,18 @@
     <div class="separadores" role="tablist" aria-label="Estado dos objetos">
       <button type="button" class="separador" role="tab" data-separador="por_entregar">Por entregar <span data-contagem="por_entregar">0</span></button>
       <button type="button" class="separador" role="tab" data-separador="na_rececao">Na receção <span data-contagem="na_rececao">0</span></button>
+      <button type="button" class="separador separador--levantar" role="tab" data-separador="por_levantar">Por levantar <span data-contagem="por_levantar">0</span></button>
       <button type="button" class="separador" role="tab" data-separador="devolvidos">Devolvidos <span data-contagem="devolvidos">0</span></button>
     </div>
 
     <div class="aviso meus__aviso" id="aviso-entregar" hidden></div>
+
+    <div class="meus__nota-levantar" id="aviso-levantar" hidden>
+      <span aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><path d="m5 12 5 5 9-10"></path></svg>
+      </span>
+      <p>Estes objetos já foram validados pela receção. Ficam aqui até os levantares e a receção os marcar como devolvidos.</p>
+    </div>
 
     <div class="registos" id="registos" aria-live="polite">
       <p class="ajuda">A carregar…</p>
