@@ -1,0 +1,8 @@
+# Em desenvolvimento os ficheiros mudam muitas vezes: o browser deve confirmar sempre com o
+# servidor se há versão nova de HTML, JS e CSS, em vez de usar uma cópia antiga da cache.
+# Quando nada mudou, o Apache responde 304 (sem reenviar o ficheiro), por isso continua rápido.
+<IfModule mod_headers.c>
+    <FilesMatch "\.(html|js|css)$">
+        Header set Cache-Control "no-cache"
+    </FilesMatch>
+</IfModule>
