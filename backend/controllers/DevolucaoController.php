@@ -11,6 +11,7 @@ require_once __DIR__ . '/../middleware/administrador.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../helpers/resposta.php';
 require_once __DIR__ . '/../models/PedidoLevantamento.php';
+require_once __DIR__ . '/../models/Notification.php';
 
 require_once __DIR__ . '/devolucoes/DevolucaoManual.php';
 require_once __DIR__ . '/devolucoes/DevolucaoPorCodigo.php';
@@ -26,6 +27,7 @@ class DevolucaoController
     private Devolucao $devolucoes;
     private Correspondencia $correspondencias;
     private PedidoLevantamento $pedidosLevantamento;
+    private Notification $notificacoes;
 
     public function __construct(PDO $pdo)
     {
@@ -35,6 +37,7 @@ class DevolucaoController
         $this->devolucoes = new Devolucao($pdo);
         $this->correspondencias = new Correspondencia($pdo);
         $this->pedidosLevantamento = new PedidoLevantamento($pdo);
+        $this->notificacoes = new Notification($pdo);
     }
 
     // Impede outras operações de alterarem os artigos enquanto prepara a entrega.

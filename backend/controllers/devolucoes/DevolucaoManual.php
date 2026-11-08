@@ -168,6 +168,9 @@ trait DevolucaoManual
                 $perdidoId
             );
 
+            // O objeto foi entregue: as notificações das reclamações dele passam ao histórico.
+            $this->notificacoes->arquivarPorAchado($achadoId);
+
             $this->pdo->commit();
 
         } catch (DomainException $erro) {

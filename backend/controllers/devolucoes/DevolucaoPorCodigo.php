@@ -126,6 +126,9 @@ trait DevolucaoPorCodigo
                     $pedidoId
                 );
 
+                // O objeto foi entregue: as notificações das reclamações dele passam ao histórico.
+                $this->notificacoes->arquivarPorAchado($achadoId);
+
                 $this->pdo->commit();
 
                 responderJson([

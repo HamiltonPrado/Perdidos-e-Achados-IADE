@@ -101,6 +101,9 @@ trait ReclamacaoReabertura
                 );
             }
 
+            // Avisa o aluno de que pode responder outra vez (arquiva a notificação da recusa).
+            $this->notificacoes->criarDePedido($id, 'pedido_reaberto');
+
             $this->pdo->commit();
 
         } catch (Throwable $erro) {

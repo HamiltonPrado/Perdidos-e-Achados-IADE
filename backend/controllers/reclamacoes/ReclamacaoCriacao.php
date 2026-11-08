@@ -140,6 +140,9 @@ trait ReclamacaoCriacao
                     );
                 }
 
+                // O aluno respondeu outra vez: a notificação «podes responder» deixa de estar ativa.
+                $this->notificacoes->arquivarPorReclamacao($id);
+
                 $codigoHttp = 200;
             }
 

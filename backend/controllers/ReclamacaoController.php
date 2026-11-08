@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../models/Item.php';
 require_once __DIR__ . '/../models/Reclamacao.php';
+require_once __DIR__ . '/../models/Notification.php';
 require_once __DIR__ . '/../validators/ReclamacaoValidator.php';
 require_once __DIR__ . '/../middleware/autenticacao.php';
 require_once __DIR__ . '/../middleware/csrf.php';
@@ -24,12 +25,14 @@ class ReclamacaoController
     private PDO $pdo;
     private Item $artigos;
     private Reclamacao $reclamacoes;
+    private Notification $notificacoes;
 
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
         $this->artigos = new Item($pdo);
         $this->reclamacoes = new Reclamacao($pdo);
+        $this->notificacoes = new Notification($pdo);
     }
 
     // A resposta esperada só é apresentada à equipa administradora.

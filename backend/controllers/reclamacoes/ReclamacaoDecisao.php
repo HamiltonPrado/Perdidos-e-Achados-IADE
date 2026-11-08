@@ -161,6 +161,12 @@ trait ReclamacaoDecisao
                 );
             }
 
+            // Notificação persistente para o aluno, na mesma transação da decisão.
+            $this->notificacoes->criarDePedido(
+                $id,
+                $dados['estado'] === 'aprovada' ? 'pedido_aprovado' : 'pedido_recusado'
+            );
+
             $this->pdo->commit();
 
         } catch (Throwable $erro) {

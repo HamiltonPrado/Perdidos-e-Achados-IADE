@@ -23,8 +23,17 @@ class NotificationController
     {
         $utilizador = exigirAutenticacao($this->pdo);
 
-        $notificacoes = $this->notificacoes->listarPorUtilizador(
-            $utilizador['id']
+        // Correspondências da IA + decisões da receção, das mais recentes para as mais antigas.
+        // O campo `tipo` distingue-as: correspondencia, pedido_aprovado, pedido_recusado, pedido_reaberto.
+        $notificacoes = array_merge(
+            $this->notificacoes->listarPorUtilizador($utilizador['id']),
+            $this->notificacoes->listarPedidosPorUtilizador($utilizador['id'])
+        );
+
+        usort(
+            $notificacoes,
+            fn (array $a, array $b): int =>
+                [$b['criado_em'], (int) $b['id']] <=> [$a['criado_em'], (int) $a['id']]
         );
 
         responderJson([
