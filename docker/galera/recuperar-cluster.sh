@@ -1,8 +1,10 @@
 #!/bin/sh
-# Recupera o cluster Galera depois de um CRASH TOTAL (os 3 nós caíram sem aviso ao mesmo tempo).
+# Recupera o cluster Galera à mão. Normalmente NÃO é preciso: depois de os 3 nós pararem
+# (docker compose stop, fechar o Docker, crash), o arrancar.sh compara a posição de cada um e o
+# mais atualizado refaz o cluster sozinho.
 #
-# Sinal de que é preciso: os nós arrancam mas ficam «health: starting» para sempre e os logs
-# mostram «Non-primary view». O Galera não sabe qual nó tem os dados mais recentes e espera.
+# Sinal de que é preciso: os nós ficam «health: starting» para sempre e os logs dizem
+# «sem resposta de: …» (um nó não consegue voltar) ou «histórias diferentes».
 #
 # O que faz:
 #  1. para os 3 nós;
