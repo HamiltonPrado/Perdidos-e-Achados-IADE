@@ -1,7 +1,8 @@
 # Perdidos & Achados em Docker, com tolerância a falhas.
 #
 #   browser → nginx (8080) → web (Apache + PHP) → galera1 ⇄ galera2 ⇄ galera3   (MariaDB Galera)
-#                                                     └─ backup → ./backups
+#                                                     ├─ backup → ./backups
+#                                                     └─ ia (compara perdidos e achados)
 #   autoheal reinicia qualquer contentor que fique «unhealthy».
 #
 # Galera: os 3 nós têm sempre os mesmos dados (replicação síncrona). Se um cai, os outros dois
@@ -128,6 +129,33 @@ services:
       resources:
         limits:
           memory: 256m
+    logging: *logs
+
+  # A IA (pasta ia/): compara cada objeto perdido com os achados na receção e grava as
+  # sugestões. Só fala com a base de dados; o modelo vem dentro da imagem (sem internet).
+  # Só pode haver UM trabalhador de IA: com este serviço ligado, não lancem outro à mão.
+  # Ver o que está a fazer:  docker compose logs -f ia
+  # Depois de mudar ficheiros em ia/:  docker compose up -d --build ia
+  ia:
+    build: ./ia
+    image: perdidos-achados-ia
+    restart: unless-stopped
+    # Um «init» à frente do Python: sem ele o Python ignora o pedido para parar e o Docker
+    # espera 10 s até o matar. O pedido que estava a meio volta à fila no arranque seguinte.
+    init: true
+    environment:
+      # Tenta os nós por esta ordem; se um estiver em baixo, passa ao seguinte.
+      DB_HOST: galera1,galera2,galera3
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-perdidos_achados}
+      DB_USER: ${DB_USER:-perdidos}
+      DB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD no ficheiro .env}
+    depends_on:
+      - galera1
+    deploy:
+      resources:
+        limits:
+          memory: 1g
     logging: *logs
 
   nginx:

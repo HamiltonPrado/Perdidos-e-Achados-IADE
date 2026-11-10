@@ -39,13 +39,15 @@ def configuracao():
 
 
 # Abre uma ligação ao primeiro nó que responder.
-# Para usar outro servidor (por ex. o MAMP): DB_HOST=127.0.0.1 DB_PORT=8889
+#   No Docker (serviço «ia»):  DB_HOST=galera1,galera2,galera3  (tenta por esta ordem)
+#   Outro servidor (por ex. o MAMP):  DB_HOST=127.0.0.1 DB_PORT=8889
 def ligar():
     cfg = configuracao()
     if not cfg.get("DB_PASSWORD"):
         raise RuntimeError(f"Falta DB_PASSWORD: cria o {FICHEIRO_ENV} (cp .env.example .env).")
 
-    nos = [(cfg["DB_HOST"], int(cfg.get("DB_PORT", 3306)))] if cfg.get("DB_HOST") else NOS
+    porta = int(cfg.get("DB_PORT", 3306))
+    nos = [(h.strip(), porta) for h in cfg.get("DB_HOST", "").split(",") if h.strip()] or NOS
     erro = None
     for host, porta in nos:
         try:
@@ -75,10 +77,12 @@ def executar(bd, sql, valores=()):
 
 # --- A fila ------------------------------------------------------------------
 
-# Só pode estar ligado UM worker de cada vez. Este «cadeado» da base de dados fica com o
-# worker enquanto a ligação estiver aberta; um segundo worker não o consegue e fecha.
-# (Nota: o cadeado vale no nó onde foi pedido. Como os workers se ligam primeiro ao
-# galera1, na prática encontram-se sempre lá.)
+# Só deve estar ligado UM worker de cada vez. Este «cadeado» da base de dados fica com o
+# worker enquanto a ligação estiver aberta; um segundo worker ligado ao MESMO nó não o
+# consegue e fecha. Limitação: o cadeado só vale no nó onde foi pedido, por isso dois
+# workers em nós diferentes (por ex. um arrancou com o galera1 em baixo) não se veem.
+# Não estraga nada: as sugestões e os avisos são únicos por par na base de dados, por isso
+# o pior que acontece é o mesmo pedido ser analisado duas vezes, com o mesmo resultado.
 def apanhar_cadeado(bd):
     return consultar(bd, "SELECT GET_LOCK('perdidos_achados_ia', 0) AS ok")[0]["ok"] == 1
 
@@ -117,13 +121,16 @@ def concluir_sem_analise(bd, pedido):
 # O motivo fica em ultimo_erro, para se perceber o que aconteceu.
 def registar_falha(bd, pedido, mensagem):
     estado = "erro" if pedido["tentativas"] >= 3 else "pendente"
-    executar(bd, """
+    mudou = executar(bd, """
         UPDATE ia_jobs SET estado = %s, ultimo_erro = %s,
                disponivel_em = NOW() + INTERVAL %s SECOND
         WHERE id = %s AND versao_item = %s AND estado = 'em_processamento'""",
              (estado, mensagem[:500], 10 * pedido["tentativas"], pedido["id"], pedido["versao_item"]))
-    executar(bd, "UPDATE items SET ia_estado = %s, ia_erro = %s WHERE id = %s AND versao = %s AND estado = 'ativo'",
-             (estado, mensagem[:500], pedido["item_id"], pedido["versao_item"]))
+    # Só marca o objeto se o pedido ainda estava a ser tratado. Se outro trabalhador já o
+    # concluiu entretanto, o objeto fica «analisado» como está.
+    if mudou:
+        executar(bd, "UPDATE items SET ia_estado = %s, ia_erro = %s WHERE id = %s AND versao = %s AND estado = 'ativo'",
+                 (estado, mensagem[:500], pedido["item_id"], pedido["versao_item"]))
 
 
 # --- Os objetos --------------------------------------------------------------
