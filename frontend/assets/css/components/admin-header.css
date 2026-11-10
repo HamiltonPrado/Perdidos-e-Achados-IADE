@@ -55,8 +55,7 @@
   margin-left: auto;
 }
 
-.admin-header__site,
-.admin-header__sair {
+.admin-header__site {
   color: #d7d7d2;
   background: none;
   border: 0;
@@ -67,11 +66,11 @@
   padding: 0;
 }
 
-.admin-header__site:hover,
-.admin-header__sair:hover {
+.admin-header__site:hover {
   color: #fff;
 }
 
+/* Liga ao perfil da receção (admin/perfil.html), onde está o «Terminar sessão». */
 .admin-header__avatar {
   display: grid;
   place-items: center;
@@ -79,8 +78,23 @@
   height: 38px;
   border-radius: 50%;
   background: var(--cor-marca);
+  color: #fff;
   font-weight: 700;
   font-size: 14px;
+  text-decoration: none;
+  overflow: hidden;
+  border: 2px solid transparent;
+}
+
+.admin-header__avatar:hover,
+.admin-header__avatar.ativo {
+  border-color: #fff;
+}
+
+.admin-header__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (max-width: 900px) {
