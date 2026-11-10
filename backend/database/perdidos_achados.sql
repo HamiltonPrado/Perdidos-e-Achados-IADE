@@ -103,8 +103,6 @@ CREATE TABLE `items` (
   `estado` enum('ativo','resolvido','devolvido','arquivado') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ativo',
   `ia_estado` enum('pendente','analisado','erro') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendente',
   `ia_erro` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `embedding_texto` blob,
-  `embedding_modelo` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `versao` int UNSIGNED NOT NULL DEFAULT '1',
   `chave_pedido` varchar(64) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
   `pedido_hash` binary(32) DEFAULT NULL,
@@ -130,8 +128,6 @@ CREATE TABLE `item_photos` (
   `item_id` int UNSIGNED NOT NULL,
   `mime` enum('image/jpeg','image/png') COLLATE utf8mb4_unicode_ci NOT NULL,
   `dados` mediumblob NOT NULL,
-  `embedding` blob,
-  `embedding_modelo` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `criado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -174,7 +170,6 @@ CREATE TABLE `matches` (
   `matched_item_id` int UNSIGNED NOT NULL,
   `score` decimal(5,4) NOT NULL,
   `score_texto` decimal(5,4) DEFAULT NULL,
-  `score_imagem` decimal(5,4) DEFAULT NULL,
   `modelo_ia` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `versao_perdido` int UNSIGNED NOT NULL,
   `versao_achado` int UNSIGNED NOT NULL,

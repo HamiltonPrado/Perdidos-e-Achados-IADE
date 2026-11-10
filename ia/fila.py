@@ -1,8 +1,6 @@
 import secrets
 
 from database import obter_ligacao
-from artigos import carregar_artigo
-from artigos import carregar_artigo, listar_candidatos
 
 DURACAO_RESERVA = 60
 
@@ -226,75 +224,3 @@ def registar_falha(trabalho, mensagem):
 
     finally:
         ligacao.close()
-
-
-        
-# Executa uma reserva para testar a fila.
-if __name__ == "__main__":
-    from artigos import carregar_artigo, listar_candidatos
-    from comparador_texto import ComparadorTexto, REVISAO_MODELO
-    from recomendacoes import ordenar_candidatos
-    from publicacao import publicar_resultados
-
-    # Valor experimental: será ajustado com os nossos testes.
-    LIMIAR_TEXTO = 0.65
-
-    MODELO_IA = (
-        f"texto-v1:minilm-multilingual-l12-v2@{REVISAO_MODELO}"
-    )
-
-    # Carrega o modelo antes de reservar um trabalho.
-    print("A carregar o modelo…")
-    comparador = ComparadorTexto()
-
-    trabalho = reservar_trabalho()
-
-    if trabalho is None:
-        print("Não há trabalhos disponíveis neste momento.")
-
-    else:
-        artigo = carregar_artigo(trabalho)
-
-        if artigo is None:
-            print("O artigo já não está disponível para esta reserva.")
-
-        else:
-            candidatos = listar_candidatos(artigo)
-
-            resultados = ordenar_candidatos(
-                artigo,
-                candidatos,
-                comparador,
-            )
-
-            print("Artigo analisado:", artigo["id"], artigo["titulo"])
-
-            for resultado in resultados:
-                print(
-                    f"ID {resultado['id']} | "
-                    f"{resultado['titulo']} | "
-                    f"Texto: {resultado['score_texto']:.3f}"
-                )
-
-            # Só publica se ainda conseguir renovar a reserva.
-            if not renovar_reserva(trabalho):
-                print("A reserva expirou. Os resultados não foram guardados.")
-
-            else:
-                total = publicar_resultados(
-                    trabalho,
-                    artigo,
-                    resultados,
-                    MODELO_IA,
-                    LIMIAR_TEXTO,
-                )
-
-                if total is None:
-                    print(
-                        "A reserva ou os artigos mudaram. "
-                        "Os resultados não foram guardados."
-                    )
-
-                else:
-                    print("Correspondências publicadas:", total)
-                    print("Trabalho concluído.")

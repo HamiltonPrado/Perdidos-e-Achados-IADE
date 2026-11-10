@@ -48,7 +48,6 @@ def guardar_correspondencia(
                     matched_item_id,
                     score,
                     score_texto,
-                    score_imagem,
                     modelo_ia,
                     versao_perdido,
                     versao_achado,
@@ -58,7 +57,6 @@ def guardar_correspondencia(
                     %(achado_id)s,
                     %(score_texto)s,
                     %(score_texto)s,
-                    NULL,
                     %(modelo_ia)s,
                     %(versao_perdido)s,
                     %(versao_achado)s,
@@ -88,7 +86,6 @@ def guardar_correspondencia(
             UPDATE matches
             SET score = %(score_texto)s,
                 score_texto = %(score_texto)s,
-                score_imagem = NULL,
                 modelo_ia = %(modelo_ia)s,
                 versao_perdido = %(versao_perdido)s,
                 versao_achado = %(versao_achado)s,

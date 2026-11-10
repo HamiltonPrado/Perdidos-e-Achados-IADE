@@ -52,9 +52,7 @@ trait ItemGestao
             "UPDATE items
          SET versao = versao + 1,
              ia_estado = 'pendente',
-             ia_erro = NULL,
-             embedding_texto = NULL,
-             embedding_modelo = NULL
+             ia_erro = NULL
          WHERE id = :id
            AND estado = 'ativo'"
         );
@@ -111,9 +109,7 @@ trait ItemGestao
                 recebido_em = CURRENT_TIMESTAMP,
                 versao = versao + 1,
                 ia_estado = 'pendente',
-                ia_erro = NULL,
-                embedding_texto = NULL,
-                embedding_modelo = NULL
+                ia_erro = NULL
             WHERE id = :id
               AND tipo = 'found'
               AND estado = 'ativo'
@@ -267,8 +263,6 @@ trait ItemGestao
                 'versao = versao + 1',
                 "ia_estado = 'pendente'",
                 'ia_erro = NULL',
-                'embedding_texto = NULL',
-                'embedding_modelo = NULL',
             ]);
         }
 
