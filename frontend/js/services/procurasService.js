@@ -1,5 +1,6 @@
-import { api } from './api.js';
+import { api, BASE_URL } from './api.js';
 import { Procura } from '../models/Procura.js';
+import { Item } from '../models/Item.js';
 import { prepararFoto } from '../utilities/tools.js';
 
 export const procurasService = {
@@ -36,5 +37,18 @@ export const procurasService = {
       new Procura({ id: item.id, titulo: dados.titulo, categoriaId: dados.categoriaId, localId: dados.localId }),
       { referencia: item.referencia }
     );
+  },
+
+  // GET /api/items/:id/matches  →  { ia_estado: 'pendente'|'analisado'|'erro', sugestoes: [...] }
+  // Achados na receção que a IA achou parecidos com esta procura, do mais parecido para o menos.
+  async sugestoes(id) {
+    const { ia_estado, sugestoes } = await api.get(`/items/${encodeURIComponent(id)}/matches`);
+    return {
+      estadoIa: ia_estado,
+      itens: sugestoes.map((a) => Object.assign(
+        Item.doBackend(a, a.foto_id ? [`${BASE_URL}/photos/${a.foto_id}`] : []),
+        { semelhanca: Number(a.score) }
+      )),
+    };
   },
 };

@@ -266,6 +266,57 @@ trait ItemConsultas
         return (int) $consulta->fetchColumn();
     }
 
+    // Achados que a IA sugeriu para um perdido, do mais parecido para o menos.
+    // Só os que continuam disponíveis na receção e cuja sugestão não foi descartada.
+    public function listarSugestoesIa(int $perdidoId, int $limite = 6): array
+    {
+        $consulta = $this->pdo->prepare("
+            SELECT
+                i.id,
+                i.tipo,
+                i.titulo,
+                i.descricao,
+                i.category_id,
+                c.nome AS categoria,
+                i.location_id,
+                l.nome AS local,
+                i.ponto_recolha_id,
+                p.nome AS ponto_recolha,
+                i.data_ocorrencia,
+                i.estado,
+                i.estado_recepcao,
+                i.criado_em,
+                m.score,
+                (
+                    SELECT MIN(f.id)
+                    FROM item_photos AS f
+                    WHERE f.item_id = i.id
+                ) AS foto_id
+            FROM matches AS m
+            INNER JOIN items AS i
+                ON i.id = m.matched_item_id
+            INNER JOIN categories AS c
+                ON c.id = i.category_id
+            INNER JOIN locations AS l
+                ON l.id = i.location_id
+            INNER JOIN pontos_recolha AS p
+                ON p.id = i.ponto_recolha_id
+            WHERE m.item_id = :perdido
+              AND m.estado = 'sugerido'
+              AND i.tipo = 'found'
+              AND i.estado = 'ativo'
+              AND i.estado_recepcao = 'na_recepcao'
+            ORDER BY m.score DESC, i.id DESC
+            LIMIT :limite
+        ");
+
+        $consulta->bindValue(':perdido', $perdidoId, PDO::PARAM_INT);
+        $consulta->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $consulta->execute();
+
+        return array_map([$this, 'adicionarReferencia'], $consulta->fetchAll());
+    }
+
     // Filtros opcionais da lista de achados → [condições SQL, valores para os marcadores].
     private function condicoesAchados(array $filtros): array
     {

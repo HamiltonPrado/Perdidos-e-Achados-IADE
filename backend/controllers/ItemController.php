@@ -224,6 +224,35 @@ class ItemController
         ]);
     }
 
+    // Devolve os achados que a IA sugeriu para um perdido do próprio utilizador.
+    // ia_estado diz se a análise ainda decorre ('pendente'), terminou ('analisado') ou falhou ('erro'),
+    // para o ecrã de «Encontrar» saber se deve esperar mais um pouco.
+    public function sugestoes(int $id): void
+    {
+        $utilizador = exigirAutenticacao($this->pdo);
+
+        $artigo = $this->artigos->procurarPorId($id);
+
+        $podeVer = $artigo !== null
+            && $artigo['tipo'] === 'lost'
+            && (
+                (int) $artigo['user_id'] === (int) $utilizador['id']
+                || $utilizador['role'] === 'admin'
+            );
+
+        if (!$podeVer) {
+            responderJson([
+                'erro' => 'Artigo não encontrado.'
+            ], 404);
+        }
+
+        responderJson([
+            'estado' => 'ok',
+            'ia_estado' => $artigo['ia_estado'],
+            'sugestoes' => $this->artigos->listarSugestoesIa($id),
+        ]);
+    }
+
     // Permite aos utilizadores autenticados consultar os perdidos ativos.
     public function listarPerdidos(): void
     {

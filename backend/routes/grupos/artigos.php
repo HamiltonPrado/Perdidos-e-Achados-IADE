@@ -82,6 +82,32 @@ if (
     $controller->resolver($id);
 }
 
+// Achados que a IA sugeriu para um perdido do utilizador (ecrã «Encontrar»).
+if (
+    $metodo === 'GET'
+    && preg_match(
+        '#\A/api/items/([1-9][0-9]*)/matches\z#',
+        $caminho,
+        $parametros
+    ) === 1
+) {
+    $id = filter_var(
+        $parametros[1],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($id === false) {
+        responderJson([
+            'erro' => 'Artigo não encontrado.'
+        ], 404);
+    }
+
+    $controller = new ItemController(obterLigacao());
+
+    $controller->sugestoes($id);
+}
+
 // Lista os perdidos ativos para todos os utilizadores autenticados.
 if ($metodo === 'GET' && $caminho === '/api/items/lost') {
     $controller = new ItemController(obterLigacao());

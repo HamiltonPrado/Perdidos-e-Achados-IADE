@@ -3,7 +3,6 @@ import { montarNavBar } from '../components/navbar.js';
 import { montarFooter } from '../components/footer.js';
 import { cartaoItem } from '../components/itemCard.js';
 import { procurasService } from '../services/procurasService.js';
-import { itemsService } from '../services/itemsService.js';
 import { categoriasService } from '../services/categoriasService.js';
 import { locaisService } from '../services/locaisService.js';
 import { esc, seletorDeFotos, dataParaApi } from '../utilities/tools.js';
@@ -69,17 +68,43 @@ async function iniciar() {
   });
 }
 
+// A IA corre à parte (ia/worker.py) e demora alguns segundos a comparar a procura com os
+// achados da receção. O ecrã aparece logo e vai perguntando ao backend até a análise acabar.
+const ESPERA_ENTRE_PEDIDOS = 2000;
+const ESPERA_MAXIMA = 30000;
+
 async function mostrarParecidos(procura) {
-  const parecidos = await itemsService.getAll({ categoria: procura.categoriaId });
-
-  $('parecidos').innerHTML = parecidos.slice(0, 6).map(cartaoItem).join('');
-  $('parecidos').hidden = parecidos.length === 0;
-  $('parecidos-titulo').hidden = parecidos.length === 0;
-  $('sem-parecidos').hidden = parecidos.length > 0;
-
   $('referencia-procura').textContent = procura.referencia ? `Referência do teu registo: ${procura.referencia}` : '';
+  $('parecidos-titulo').textContent = 'A comparar com os objetos na receção…';
+  $('parecidos').innerHTML = '';
+  $('sem-parecidos').hidden = true;
 
   $('ecra-formulario').hidden = true;
   $('ecra-enviado').hidden = false;
   window.scrollTo(0, 0);
+
+  const limite = Date.now() + ESPERA_MAXIMA;
+  let resultado = { estadoIa: 'pendente', itens: [] };
+  try {
+    do {
+      await new Promise((r) => setTimeout(r, ESPERA_ENTRE_PEDIDOS));
+      resultado = await procurasService.sugestoes(procura.id);
+    } while (resultado.estadoIa === 'pendente' && Date.now() < limite);
+  } catch {
+    resultado = { estadoIa: 'erro', itens: [] };
+  }
+
+  if (resultado.itens.length > 0) {
+    $('parecidos-titulo').textContent = resultado.itens.length === 1
+      ? 'Encontrámos um objeto parecido na receção'
+      : `Encontrámos ${resultado.itens.length} objetos parecidos na receção`;
+    $('parecidos').innerHTML = resultado.itens.map(cartaoItem).join('');
+    return;
+  }
+
+  $('parecidos-titulo').textContent = 'Objetos parecidos já na receção';
+  $('sem-parecidos').textContent = resultado.estadoIa === 'analisado'
+    ? 'Ainda não há objetos parecidos na receção. Vamos avisar-te quando chegar um.'
+    : 'A comparação está a demorar mais do que o normal. Vamos avisar-te quando houver um objeto parecido.';
+  $('sem-parecidos').hidden = false;
 }
