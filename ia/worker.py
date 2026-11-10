@@ -2,7 +2,9 @@
 #  O «TRABALHADOR» DA IA  —  é este o ficheiro que se põe a correr
 # =============================================================================
 #
-#  Lançar (na pasta ia/):   .venv-ai/bin/python worker.py        Parar:  Ctrl + C
+#  No Docker arranca sozinho com o resto (serviço «ia»):  docker compose logs -f ia
+#  À mão, sem Docker (na pasta ia/):  .venv-ai/bin/python worker.py    Parar: Ctrl + C
+#  (Com o serviço «ia» ligado, não lancem outro à mão: ver «cadeado» em base_dados.py.)
 #
 #  Quando alguém regista um objeto perdido, ou a receção confirma que recebeu um achado,
 #  o site deixa um pedido de análise numa fila (a tabela ia_jobs). Este programa fica
@@ -53,19 +55,23 @@ def tratar_pedido(bd, modelo, pedido):
 # Se a base de dados não responder, tenta de 5 em 5 segundos até conseguir.
 def ligar_ao_trabalho():
     while True:
+        bd = None
         try:
             bd = ligar()
+            tem_cadeado = apanhar_cadeado(bd)
+            if tem_cadeado:
+                devolver_pedidos_a_meio(bd)
+                return bd
         except Exception as erro:
+            # Inclui um nó que ainda está a sincronizar («WSREP has not yet prepared node»).
             log.warning("Base de dados indisponível (%s). Nova tentativa dentro de 5 s.", erro)
+            if bd:
+                bd.close()
             time.sleep(5)
             continue
 
-        if not apanhar_cadeado(bd):
-            bd.close()
-            raise SystemExit("Já está outro worker da IA ligado. Só pode haver um de cada vez.")
-
-        devolver_pedidos_a_meio(bd)
-        return bd
+        bd.close()
+        raise SystemExit("Já está outro worker da IA ligado. Só pode haver um de cada vez.")
 
 
 def main():
