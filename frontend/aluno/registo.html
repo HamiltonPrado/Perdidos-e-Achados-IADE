@@ -26,30 +26,32 @@
     </div>
 
     <div id="conteudo" hidden>
-      <div class="sucesso__icone registo__icone" aria-hidden="true">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
-      </div>
+      <section class="registo__topo">
+        <div class="sucesso__icone registo__icone" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+        </div>
+        <p class="sobretitulo registo__sobretitulo" id="sobretitulo">Objeto registado</p>
+        <h1 class="registo__titulo" id="titulo">Agora entrega-o na receção.</h1>
+        <p class="registo__texto" id="texto" hidden></p>
+      </section>
 
-      <p class="sobretitulo registo__sobretitulo" id="sobretitulo">Objeto registado</p>
-      <h1 class="registo__titulo" id="titulo">Agora entrega-o na receção.</h1>
-      <p class="registo__texto" id="texto"></p>
+      <section class="registo__cartao">
+        <div class="registo__referencia">
+          <span class="registo__rotulo">Referência</span>
+          <strong id="referencia"></strong>
+          <span class="ajuda" id="referencia-ajuda">Indica esta referência quando entregares o objeto.</span>
+        </div>
 
-      <div class="registo__referencia">
-        <span class="ajuda">Referência</span>
-        <strong id="referencia"></strong>
-      </div>
+        <div class="resumo-objeto registo__objeto" id="resumo"></div>
 
-      <div class="resumo-objeto" id="resumo"></div>
+        <dl class="registo__info">
+          <div><dt>Entregar a</dt><dd id="info-responsavel"></dd></div>
+          <div><dt>Onde</dt><dd id="info-local"></dd></div>
+          <div><dt>Horário</dt><dd id="info-horario"></dd></div>
+        </dl>
+      </section>
 
-      <dl class="registo__info">
-        <div><dt>Entregar a</dt><dd id="info-responsavel"></dd></div>
-        <div><dt>Onde</dt><dd id="info-local"></dd></div>
-        <div><dt>Horário</dt><dd id="info-horario"></dd></div>
-      </dl>
-
-      <p class="ajuda registo__nota">Na entrega, a receção guarda o objeto e define a pergunta secreta para validar o dono. Tu não precisas de fazer mais nada.</p>
-
-      <div class="acoes registo__acoes">
+      <div class="registo__acoes">
         <a href="publicar.html" class="botao botao--contorno">Registar outro objeto</a>
         <a href="meus-anuncios.html" class="botao botao--preto">Ver os meus anúncios</a>
       </div>
