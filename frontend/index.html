@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Perdidos &amp; Achados</title>
 
+  <!-- Corre antes de a página ser desenhada, para não aparecer o «Explorar» por um instante:
+       sem ninguém guardado no browser vai logo para o login; com alguém guardado, a página fica
+       escondida até o servidor confirmar a sessão (home.js). -->
+  <style>.a-verificar body { visibility: hidden; }</style>
+  <script>
+    (function () {
+      var guardado = null;
+      try { guardado = localStorage.getItem('user'); } catch (e) {}
+      if (!guardado) { location.replace('aluno/entrar.html'); return; }
+      document.documentElement.classList.add('a-verificar');
+    })();
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
