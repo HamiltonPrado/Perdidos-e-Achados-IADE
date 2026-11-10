@@ -129,3 +129,87 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+/* Separador «As minhas procuras»: perdidos do aluno e achados sugeridos pela IA */
+.separador--novidade::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--cor-ok);
+  vertical-align: middle;
+}
+
+.procura-sugestoes {
+  grid-column: 2 / -1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.procura-sugestao {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--cor-ok-borda);
+  background: var(--cor-ok-fundo);
+  color: inherit;
+  text-decoration: none;
+}
+
+.procura-sugestao:hover,
+.procura-sugestao:focus-visible {
+  border-color: var(--cor-ok);
+}
+
+.procura-sugestao__foto {
+  position: relative;
+  width: 56px;
+  height: 42px;
+  overflow: hidden;
+  background: var(--cor-cinza-suave);
+}
+
+.procura-sugestao__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.procura-sugestao__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.procura-sugestao__texto .ajuda {
+  margin: 0;
+}
+
+.procura-sugestao__ver {
+  font-weight: 700;
+  color: var(--cor-ok);
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .procura-sugestoes {
+    grid-column: 1 / -1;
+  }
+
+  .procura-sugestao {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .procura-sugestao__ver {
+    grid-column: 2;
+  }
+}

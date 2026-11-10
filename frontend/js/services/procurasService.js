@@ -39,6 +39,30 @@ export const procurasService = {
     );
   },
 
+  // GET /api/items/mine  →  { artigos: [...] }; aqui só interessam os perdidos ainda ativos.
+  async getMinhas() {
+    const { artigos } = await api.get('/items/mine');
+    return artigos
+      .filter((a) => a.tipo === 'lost' && a.estado === 'ativo')
+      .map((a) => Object.assign(
+        new Procura({
+          id: String(a.id),
+          titulo: a.titulo,
+          descricao: a.descricao,
+          categoria: a.categoria,
+          local: a.local,
+          dataPerdido: a.data_ocorrencia,
+          criadoEm: a.criado_em,
+        }),
+        { referencia: a.referencia }
+      ));
+  },
+
+  // PATCH /api/items/:id/resolve  →  o perdido deixa de estar ativo e sai das comparações da IA.
+  async resolver(id) {
+    await api.patch(`/items/${encodeURIComponent(id)}/resolve`);
+  },
+
   // GET /api/items/:id/matches  →  { ia_estado: 'pendente'|'analisado'|'erro', sugestoes: [...] }
   // Achados na receção que a IA achou parecidos com esta procura, do mais parecido para o menos.
   async sugestoes(id) {
