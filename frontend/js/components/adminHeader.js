@@ -1,6 +1,5 @@
 import { url } from '../utilities/caminhos.js';
 import { getUser } from '../utilities/auth.js';
-import { authService } from '../services/authService.js';
 import { esc, iniciais } from '../utilities/tools.js';
 import { logoHtml } from './logo.js';
 
@@ -13,6 +12,7 @@ const LINKS = [
 
 export function montarAdminHeader(pagina) {
   const user = getUser();
+  const avatar = user?.foto ? `<img src="${esc(user.foto)}" alt="">` : esc(iniciais(user?.nome));
   const links = LINKS.map(([nome, href, texto]) =>
     `<a href="${href}" class="admin-header__link${nome === pagina ? ' ativo' : ''}"${nome === pagina ? ' aria-current="page"' : ''}>${texto}</a>`
   ).join('');
@@ -22,13 +22,7 @@ export function montarAdminHeader(pagina) {
       <a href="${url('admin/index.html')}" class="admin-header__marca" aria-label="Painel da receção">${logoHtml()}</a>
       <nav class="admin-header__nav" aria-label="Área da receção">${links}</nav>
       <div class="admin-header__conta">
-        <button type="button" class="admin-header__sair" id="admin-sair">Terminar sessão</button>
-        <span class="admin-header__avatar" title="${esc(user?.nome)}">${esc(iniciais(user?.nome))}</span>
+        <a href="${url('admin/perfil.html')}" class="admin-header__avatar${pagina === 'perfil' ? ' ativo' : ''}" title="${esc(user?.nome)}" aria-label="O meu perfil"${pagina === 'perfil' ? ' aria-current="page"' : ''}>${avatar}</a>
       </div>
     </div>`;
-
-  document.getElementById('admin-sair').addEventListener('click', async () => {
-    await authService.sair();
-    window.location.href = url('aluno/entrar.html?perfil=admin');
-  });
 }

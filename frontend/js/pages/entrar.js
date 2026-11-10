@@ -1,5 +1,6 @@
 import { url } from '../utilities/caminhos.js';
 import { authService } from '../services/authService.js';
+import { api } from '../services/api.js';
 import { isLoggedIn, isAdmin, logout, EMAIL_IADE } from '../utilities/auth.js';
 import { lerParametro } from '../utilities/tools.js';
 import { logoHtml } from '../components/logo.js';
@@ -18,8 +19,15 @@ function destino() {
   return url(valido && !voltar.startsWith('admin/') ? voltar : 'index.html');
 }
 
+// O browser pode ter guardado um utilizador cuja sessão no servidor já acabou.
+// Só salta o login se o servidor confirmar a sessão (GET /api/me).
 if (isLoggedIn()) {
-  window.location.replace(destino());
+  try {
+    await api.get('/me');
+    window.location.replace(destino());
+  } catch {
+    logout();
+  }
 }
 
 function mostrarPerfil() {

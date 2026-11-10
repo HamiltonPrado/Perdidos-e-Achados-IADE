@@ -29,7 +29,7 @@ async function iniciar() {
     por_receber: {
       sobretitulo: lerParametro('novo') ? 'Objeto registado' : 'Por entregar',
       titulo: 'Agora entrega-o na receção.',
-      texto: `Leva o objeto à receção (${RECECAO.local}) e indica a referência ${referencia}. O anúncio fica disponível depois da entrega.`,
+      
     },
     por_reclamar: {
       sobretitulo: 'Na receção',
@@ -51,23 +51,26 @@ async function iniciar() {
 
   $('sobretitulo').textContent = t.sobretitulo;
   $('titulo').textContent = t.titulo;
-  $('texto').textContent = t.texto;
+  $('texto').textContent = t.texto ?? '';
+  $('texto').hidden = !t.texto;
   $('referencia').textContent = referencia;
 
   $('resumo').innerHTML = `
     <div class="resumo-objeto__foto">${item.fotos[0] ? `<img src="${esc(item.fotos[0])}" alt="">` : fotoVazia()}</div>
     <div class="resumo-objeto__texto">
-      <strong>${esc(item.titulo)}</strong>
-      <span class="ajuda">${esc(item.local)} · ${esc(formatarData(item.dataEncontrado))}</span>
+      <small>OBJETO</small>
+      <b>${esc(item.titulo)}</b>
+      <span>${esc(item.local)} · ${esc(formatarData(item.dataEncontrado))}</span>
     </div>`;
 
   $('info-responsavel').textContent = RECECAO.responsavel;
   $('info-local').textContent = RECECAO.local;
   $('info-horario').textContent = RECECAO.horario;
 
+  // As instruções de entrega só interessam enquanto o objeto ainda não chegou à receção.
   if (item.estado !== 'por_receber') {
     document.querySelector('.registo__info').hidden = true;
-    document.querySelector('.registo__nota').hidden = true;
+    $('referencia-ajuda').hidden = true;
   }
 
   $('conteudo').hidden = false;

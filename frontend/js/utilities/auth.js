@@ -39,7 +39,9 @@ export function isAdmin() {
 
 export function requerLogin() {
   if (isLoggedIn()) return true;
-  window.location.replace(`${url('aluno/entrar.html')}?voltar=${encodeURIComponent(caminhoAtual())}`);
+  const atual = caminhoAtual();
+  const voltar = atual && atual !== 'index.html' ? `?voltar=${encodeURIComponent(atual)}` : '';
+  window.location.replace(`${url('aluno/entrar.html')}${voltar}`);
   return false;
 }
 
