@@ -7,6 +7,7 @@ import { categoriasService } from '../services/categoriasService.js';
 import { locaisService } from '../services/locaisService.js';
 import { esc } from '../utilities/tools.js';
 import { requerLogin } from '../utilities/auth.js';
+import { authService } from '../services/authService.js';
 
 const formPesquisa = document.getElementById('form-pesquisa');
 const campoPesquisa = document.getElementById('pesquisa');
@@ -76,7 +77,7 @@ async function carregarMais() {
 }
 
 // A lista e o detalhe dos objetos só estão disponíveis com sessão iniciada.
-if (requerLogin()) {
+if (requerLogin() && await authService.confirmarSessao()) {
   montarNavBar('inicio');
   montarFooter();
 

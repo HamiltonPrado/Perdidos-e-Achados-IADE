@@ -25,7 +25,6 @@ const ETIQUETA = {
 };
 
 const VAZIO = {
-  procuras: 'Não tens procuras ativas. Quando registares um objeto perdido em «Encontrar», a IA compara-o com o que chega à receção e as sugestões aparecem aqui.',
   por_entregar: 'Não tens objetos por entregar.',
   na_rececao: 'Nenhum objeto teu está na receção.',
   por_levantar: 'Não tens objetos por levantar. Quando a receção validar um pedido teu, o objeto aparece aqui.',
@@ -91,14 +90,14 @@ async function iniciar() {
     const aviso = document.getElementById('aviso-entregar');
     aviso.hidden = !(separador === 'por_entregar' && contagem.por_entregar > 0);
     aviso.innerHTML = `<span class="aviso__rotulo">Entrega pendente</span>
-      Leva os objetos à receção (${esc(RECECAO.local)}, ${esc(RECECAO.horario)}) e indica a referência de cada um.`;
+      Leva os objetos à receção (${esc(RECECAO.local)}, ${esc(RECECAO.horario)}).`;
 
     document.getElementById('aviso-levantar').hidden = !(separador === 'por_levantar' && contagem.por_levantar > 0);
 
     if (separador === 'procuras') {
       lista.innerHTML = procuras.length
         ? procuras.map(linhaProcuraHtml).join('')
-        : `<div class="vazio"><p>${VAZIO.procuras}</p><a href="procurar.html" class="botao botao--contorno">Encontrar um objeto</a></div>`;
+        : `<div class="vazio"><a href="procurar.html" class="botao botao--contorno">Encontrar um objeto</a></div>`;
       return;
     }
 
