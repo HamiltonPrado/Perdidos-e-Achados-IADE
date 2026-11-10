@@ -237,7 +237,7 @@ if __name__ == "__main__":
     from publicacao import publicar_resultados
 
     # Valor experimental: será ajustado com os nossos testes.
-    LIMIAR_TEXTO = 0.75
+    LIMIAR_TEXTO = 0.65
 
     MODELO_IA = (
         f"texto-v1:minilm-multilingual-l12-v2@{REVISAO_MODELO}"

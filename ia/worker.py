@@ -14,8 +14,8 @@ from publicacao import publicar_resultados
 from recomendacoes import ordenar_candidatos
 
 
-# Valor experimental para os nossos testes.
-LIMIAR_TEXTO = 0.75
+# Valor experimental: 0,75 deixava de fora pares óbvios (~0,67) e 0,6 juntava objetos diferentes da mesma cor (~0,64).
+LIMIAR_TEXTO = 0.65
 
 MODELO_IA = (
     f"texto-v1:minilm-multilingual-l12-v2@{REVISAO_MODELO}"
