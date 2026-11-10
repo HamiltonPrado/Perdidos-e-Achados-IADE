@@ -1,178 +1,108 @@
+# =============================================================================
+#  O «TRABALHADOR» DA IA  —  é este o ficheiro que se põe a correr
+# =============================================================================
+#
+#  Lançar (na pasta ia/):   .venv-ai/bin/python worker.py        Parar:  Ctrl + C
+#
+#  Quando alguém regista um objeto perdido, ou a receção confirma que recebeu um achado,
+#  o site deixa um pedido de análise numa fila (a tabela ia_jobs). Este programa fica
+#  sempre ligado e trata esses pedidos, um de cada vez, em 5 passos:
+#
+#    1. pega no pedido mais antigo da fila;
+#    2. lê o objeto e os candidatos do tipo contrário (perdido ↔ achados na receção);
+#    3. o modelo dá uma nota de 0 a 1 a cada candidato (semelhança do título + descrição);
+#    4. grava como sugestão os que têm nota ≥ LIMIAR e avisa o dono do objeto perdido;
+#    5. marca o pedido como concluído. Se algo falhar, tenta outra vez (até 3 vezes).
+#
+#  Os outros dois ficheiros:
+#    modelo.py       → o modelo de IA (transforma texto em notas de semelhança)
+#    base_dados.py   → tudo o que se lê e grava na base de dados
+# =============================================================================
+
 import logging
-import threading
 import time
-from contextlib import contextmanager
 
-from artigos import carregar_artigo, listar_candidatos
-from comparador_texto import ComparadorTexto, REVISAO_MODELO
-from fila import (
-    reservar_trabalho,
-    renovar_reserva,
-    registar_falha,
-)
-from publicacao import publicar_resultados
-from recomendacoes import ordenar_candidatos
+from base_dados import (apanhar_cadeado, concluir_sem_analise, devolver_pedidos_a_meio,
+                        gravar_resultado, ler_candidatos, ler_objeto, ligar, proximo_pedido,
+                        registar_falha)
+from modelo import ID_MODELO, Modelo, texto_do_objeto
 
+# Nota mínima para dois objetos contarem como «parecidos» (0 = nada a ver, 1 = iguais).
+# Afinada com testes: com 0,75 ficavam de fora pares óbvios (~0,67) e com 0,6 apareciam
+# objetos diferentes só por terem a mesma cor (~0,64).
+LIMIAR = 0.65
 
-# Valor experimental: 0,75 deixava de fora pares óbvios (~0,67) e 0,6 juntava objetos diferentes da mesma cor (~0,64).
-LIMIAR_TEXTO = 0.65
-
-MODELO_IA = (
-    f"texto-v1:minilm-multilingual-l12-v2@{REVISAO_MODELO}"
-)
+log = logging.getLogger("ia")
 
 
-# Renova a reserva em segundo plano enquanto a análise decorre.
-@contextmanager
-def manter_reserva(trabalho):
-    parar = threading.Event()
-    perdida = threading.Event()
+# Passos 2 a 5 para um pedido. Devolve quantas sugestões foram gravadas.
+def tratar_pedido(bd, modelo, pedido):
+    objeto = ler_objeto(bd, pedido["item_id"])
+    if objeto is None:                       # foi devolvido, resolvido, … nada a fazer
+        concluir_sem_analise(bd, pedido)
+        return 0
 
-    def renovar():
-        while not parar.wait(15):
-            try:
-                if not renovar_reserva(trabalho):
-                    perdida.set()
-                    return
+    candidatos = ler_candidatos(bd, objeto)
+    notas = modelo.notas(texto_do_objeto(objeto), [texto_do_objeto(c) for c in candidatos])
+    parecidos = [(c, nota) for c, nota in zip(candidatos, notas) if nota >= LIMIAR]
 
-            except Exception:
-                logging.exception("Não foi possível renovar a reserva.")
-                perdida.set()
-                return
-
-    tarefa = threading.Thread(target=renovar, daemon=True)
-    tarefa.start()
-
-    try:
-        yield perdida
-
-    finally:
-        parar.set()
-        tarefa.join()
+    return gravar_resultado(bd, pedido, objeto, parecidos, ID_MODELO)
 
 
-# Analisa e publica um trabalho reservado.
-def processar_trabalho(comparador, trabalho):
-    with manter_reserva(trabalho) as reserva_perdida:
-        try:
-            artigo = carregar_artigo(trabalho)
-
-            if artigo is None:
-                raise RuntimeError(
-                    "O artigo ou a reserva já não estão disponíveis."
-                )
-
-            candidatos = listar_candidatos(artigo)
-
-            resultados = ordenar_candidatos(
-                artigo,
-                candidatos,
-                comparador,
-            )
-
-            if reserva_perdida.is_set():
-                logging.warning(
-                    "Trabalho %s: reserva perdida; resultados descartados.",
-                    trabalho["id"],
-                )
-                return
-
-            # Renova novamente antes de iniciar a publicação.
-            if not renovar_reserva(trabalho):
-                logging.warning(
-                    "Trabalho %s: a reserva deixou de estar válida.",
-                    trabalho["id"],
-                )
-                return
-
-            total = publicar_resultados(
-                trabalho,
-                artigo,
-                resultados,
-                MODELO_IA,
-                LIMIAR_TEXTO,
-            )
-
-            if total is None:
-                registar_falha(
-                    trabalho,
-                    "A reserva ou os artigos mudaram durante a análise.",
-                )
-
-                logging.warning(
-                    "Trabalho %s: os resultados não foram publicados.",
-                    trabalho["id"],
-                )
-                return
-
-            logging.info(
-                "Trabalho %s concluído | artigo %s | correspondências: %s",
-                trabalho["id"],
-                artigo["id"],
-                total,
-            )
-
-        except Exception as erro:
-            logging.exception(
-                "Erro ao processar o trabalho %s.",
-                trabalho["id"],
-            )
-
-            if not reserva_perdida.is_set():
-                try:
-                    registar_falha(
-                        trabalho,
-                        f"{type(erro).__name__}: {erro}",
-                    )
-
-                except Exception:
-                    logging.exception(
-                        "Não foi possível registar a falha. "
-                        "A reserva ficará disponível após expirar."
-                    )
-
-
-# Procura trabalhos continuamente, reutilizando o modelo carregado.
-def executar():
-    logging.info("A carregar o modelo…")
-    comparador = ComparadorTexto()
-
-    logging.info("Trabalhador iniciado. À espera de trabalhos…")
-
+# Liga à base de dados e fica com o «cadeado» (só pode haver um worker ligado).
+# Se a base de dados não responder, tenta de 5 em 5 segundos até conseguir.
+def ligar_ao_trabalho():
     while True:
         try:
-            trabalho = reservar_trabalho()
-
-        except Exception:
-            logging.exception(
-                "Não foi possível consultar a fila. "
-                "Nova tentativa dentro de 5 segundos."
-            )
-
+            bd = ligar()
+        except Exception as erro:
+            log.warning("Base de dados indisponível (%s). Nova tentativa dentro de 5 s.", erro)
             time.sleep(5)
             continue
 
-        if trabalho is None:
+        if not apanhar_cadeado(bd):
+            bd.close()
+            raise SystemExit("Já está outro worker da IA ligado. Só pode haver um de cada vez.")
+
+        devolver_pedidos_a_meio(bd)
+        return bd
+
+
+def main():
+    log.info("A carregar o modelo…")
+    modelo = Modelo()
+    bd = ligar_ao_trabalho()
+    log.info("Pronto. À espera de pedidos…")
+
+    while True:
+        try:
+            pedido = proximo_pedido(bd)                                   # passo 1
+        except Exception as erro:
+            log.warning("Perdi a ligação à base de dados (%s). A voltar a ligar…", erro)
+            bd.close()
+            bd = ligar_ao_trabalho()
+            continue
+
+        if pedido is None:                   # fila vazia: espera um pouco e volta a ver
             time.sleep(3)
             continue
 
-        logging.info(
-            "Trabalho %s reservado | tentativa %s",
-            trabalho["id"],
-            trabalho["tentativas"],
-        )
-
-        processar_trabalho(comparador, trabalho)
+        log.info("Pedido %s (objeto %s), tentativa %s", pedido["id"], pedido["item_id"], pedido["tentativas"])
+        try:
+            total = tratar_pedido(bd, modelo, pedido)                     # passos 2 a 5
+            log.info("Pedido %s concluído: %s sugestão(ões)", pedido["id"], total)
+        except Exception as erro:
+            log.exception("Pedido %s falhou.", pedido["id"])
+            try:
+                registar_falha(bd, pedido, f"{type(erro).__name__}: {erro}")
+            except Exception:                # a ligação caiu: ao voltar, o pedido regressa à fila
+                bd.close()
+                bd = ligar_ao_trabalho()
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s | %(levelname)s | %(message)s",
-    )
-
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(message)s")
     try:
-        executar()
-
+        main()
     except KeyboardInterrupt:
-        logging.info("Trabalhador terminado.")
+        log.info("Worker terminado.")
