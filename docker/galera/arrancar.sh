@@ -1,19 +1,6 @@
 #!/bin/bash
-# Arranque de um nó Galera: decide se ENTRA num cluster que já existe ou se o FUNDA.
-#
-# Regra de ouro: só se funda um cluster quando nenhum outro nó está a funcionar (Primary).
-# Fundar um segundo cluster ao lado do primeiro dividia os dados em dois (split-brain).
-#
-#  - instalação nova (volume vazio): o nó fundador (galera1) funda; os outros entram;
-#  - nenhum nó está a funcionar mas um foi marcado pelo Galera como seguro (safe_to_bootstrap: 1,
-#    o último a parar quando param um a um): esse funda e os outros entram;
-#  - nenhum nó está a funcionar e nenhum está marcado (docker compose stop pára os 3 ao mesmo
-#    tempo; fechar o Docker Desktop ou desligar o PC é um crash): cada nó escreve a sua última
-#    transação no volume partilhado /galera-estado; quando os 3 responderam, o mais atualizado
-#    funda (em empate, o primeiro de GALERA_NOS) e os outros entram e recebem o que lhes falta.
-#    Se algum nó não responde, ninguém funda: podia ser precisamente o que tem os dados mais
-#    recentes. Nesse caso: sh docker/galera/recuperar-cluster.sh;
-#  - em qualquer outro caso: entra no cluster que está a funcionar.
+# Arranque de um nó Galera: entra no cluster ativo ou, se não houver, decide quem o refunda
+# (o nó marcado como seguro, ou o mais atualizado por votação em /galera-estado).
 set -euo pipefail
 
 NO="${GALERA_NO:?Define GALERA_NO (ex.: galera1)}"
@@ -26,17 +13,14 @@ VALIDADE_VOTO=20                            # um voto mais antigo é de um nó q
 
 log() { echo "[galera:${NO}] $*"; }
 
-# Windows: os ficheiros montados chegam com permissões 777 (o MariaDB IGNORA configurações que
-# todos podem alterar) e às vezes com fins de linha CRLF. Por isso a configuração e os scripts
-# de criação são copiados para dentro do contentor, sem «\r» e com permissões normais.
+# Windows: copia a configuração e os scripts sem «\r» e com permissões normais.
 tr -d '\r' < /galera/galera.cnf > /etc/mysql/conf.d/galera.cnf
 chmod 644 /etc/mysql/conf.d/galera.cnf
 if [ "${NO}" = "${FUNDADOR}" ]; then
     for SCRIPT in /galera/initdb/*.sh; do
         DESTINO="/docker-entrypoint-initdb.d/$(basename "${SCRIPT}")"
         tr -d '\r' < "${SCRIPT}" > "${DESTINO}"
-        # Executável: o MariaDB corre-o à parte. Sem isto, «carregava-o» no próprio shell e o
-        # set -eu do script fazia rebentar o arranque.
+        # Executável: assim corre à parte e o seu «set -eu» não afeta este script.
         chmod 755 "${DESTINO}"
     done
 fi
@@ -58,10 +42,7 @@ cluster_ativo() {
 
 NULO=00000000-0000-0000-0000-000000000000
 
-# Posição deste nó: «história:transação» (uuid:seqno). Cada vez que um cluster é FUNDADO de
-# raiz nasce uma história nova; só faz sentido comparar transações da mesma história.
-# Numa paragem ordenada a posição está no grastate.dat; depois de um crash (ou de uma paragem
-# que o Docker teve de forçar) o seqno fica -1 e é preciso perguntá-la ao InnoDB.
+# Posição do nó, «história:transação» (uuid:seqno): do grastate.dat ou, após um crash, do InnoDB.
 posicao_local() {
     local uuid seqno posicao
     uuid="$(sed -n 's/^uuid: *//p' "${DADOS}/grastate.dat" 2>/dev/null || true)"
@@ -77,8 +58,7 @@ posicao_local() {
     [[ "${posicao}" =~ ^[0-9a-f-]{36}:-?[0-9]+$ ]] && echo "${posicao}" || echo "${NULO}:-1"
 }
 
-# Todos os nós votam com a sua posição; devolve 0 se ESTE nó deve refundar o cluster.
-# Os que não fundam esperam que o fundador fique pronto e devolvem 1 (entram no cluster).
+# Votação: devolve 0 se este nó deve refundar o cluster, 1 se deve entrar nele.
 decidir_fundador() {
     local limite agora par valor idade uuid seq historia diferentes melhor melhor_seqno faltam
     mkdir -p "${ESTADO}"
@@ -142,9 +122,7 @@ ARGS=(
     --wsrep-sst-auth="mariabackup:${GALERA_SST_PASSWORD:?Define GALERA_SST_PASSWORD}"
 )
 
-# Sem esta posição o MariaDB do Docker arrancava depois de um crash como se não tivesse história
-# (00000000…:-1): o fundador criava uma história nova e os outros tinham de receber uma cópia
-# completa (SST) em vez de só o que lhes falta (IST). Fora do Docker é o mysqld_safe que faz isto.
+# Passa a posição recuperada ao MariaDB, para não começar uma história nova após um crash.
 POSICAO=""
 if [ -d "${DADOS}/mysql" ]; then
     POSICAO="$(posicao_local)"
@@ -155,9 +133,7 @@ if [ -d "${DADOS}/mysql" ]; then
 fi
 
 if cluster_ativo; then
-    # Depois de um crash (SIGKILL) o tc.log pode ficar inconsistente e o MariaDB recusa arrancar
-    # («Can't init tc log»), ficando em ciclo de reinícios. Um nó que entra num cluster ativo
-    # recebe os dados dos outros (IST/SST), por isso pode descartá-lo com segurança.
+    # Após um crash o tc.log pode impedir o arranque; quem entra num cluster ativo pode descartá-lo.
     if [ -f "${DADOS}/tc.log" ]; then
         log "a entrar num cluster ativo: descarto o tc.log local (os dados vêm do cluster)."
         rm -f "${DADOS}/tc.log"
@@ -176,8 +152,7 @@ elif decidir_fundador; then
     ARGS+=(--wsrep-new-cluster)
 fi
 
-# Sai da votação: o voto só serve enquanto o nó está à espera (um voto esquecido podia
-# enganar os outros no próximo arranque).
+# Sai da votação (um voto esquecido enganaria o próximo arranque).
 rm -f "${ESTADO}/${NO}" 2>/dev/null || true
 
 exec docker-entrypoint.sh mariadbd "${ARGS[@]}" "$@"

@@ -1,19 +1,7 @@
 #!/bin/sh
-# Recupera o cluster Galera à mão. Normalmente NÃO é preciso: depois de os 3 nós pararem
-# (docker compose stop, fechar o Docker, crash), o arrancar.sh compara a posição de cada um e o
-# mais atualizado refaz o cluster sozinho.
-#
-# Sinal de que é preciso: os nós ficam «health: starting» para sempre e os logs dizem
-# «sem resposta de: …» (um nó não consegue voltar) ou «histórias diferentes».
-#
-# O que faz:
-#  1. para os 3 nós;
-#  2. pergunta a cada um a última transação que gravou (mariadbd --wsrep-recover);
-#  3. marca o mais avançado como seguro para fundar (safe_to_bootstrap: 1);
-#  4. arranca os 3: o mais avançado refunda o cluster e os outros entram e recebem o que falta.
-# Assim nenhuma transação confirmada se perde.
-#
-# Uso (na raiz do projeto):  sh docker/galera/recuperar-cluster.sh
+# Recupera o cluster Galera à mão (raro: o arrancar.sh já o faz sozinho).
+# Usar se os nós ficarem em «starting» e os logs disserem «sem resposta de» ou «histórias diferentes».
+# Uso (na raiz do projeto): sh docker/galera/recuperar-cluster.sh
 set -eu
 cd "$(dirname "$0")/../.."
 

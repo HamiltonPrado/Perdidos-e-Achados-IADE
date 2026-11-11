@@ -1,25 +1,5 @@
-# =============================================================================
-#  O «TRABALHADOR» DA IA  —  é este o ficheiro que se põe a correr
-# =============================================================================
-#
-#  No Docker arranca sozinho com o resto (serviço «ia»):  docker compose logs -f ia
-#  À mão, sem Docker (na pasta ia/):  .venv-ai/bin/python worker.py    Parar: Ctrl + C
-#  (Com o serviço «ia» ligado, não lancem outro à mão: ver «cadeado» em base_dados.py.)
-#
-#  Quando alguém regista um objeto perdido, ou a receção confirma que recebeu um achado,
-#  o site deixa um pedido de análise numa fila (a tabela ia_jobs). Este programa fica
-#  sempre ligado e trata esses pedidos, um de cada vez, em 5 passos:
-#
-#    1. pega no pedido mais antigo da fila;
-#    2. lê o objeto e os candidatos do tipo contrário (perdido ↔ achados na receção);
-#    3. o modelo dá uma nota de 0 a 1 a cada candidato (semelhança do título + descrição);
-#    4. grava como sugestão os que têm nota ≥ LIMIAR e avisa o dono do objeto perdido;
-#    5. marca o pedido como concluído. Se algo falhar, tenta outra vez (até 3 vezes).
-#
-#  Os outros dois ficheiros:
-#    modelo.py       → o modelo de IA (transforma texto em notas de semelhança)
-#    base_dados.py   → tudo o que se lê e grava na base de dados
-# =============================================================================
+# Trabalhador da IA: trata a fila ia_jobs, compara cada objeto com os do tipo contrário e grava as sugestões.
+# No Docker é o serviço «ia» (docker compose logs -f ia). À mão: .venv-ai/bin/python worker.py
 
 import logging
 import time
@@ -29,9 +9,7 @@ from base_dados import (apanhar_cadeado, concluir_sem_analise, devolver_pedidos_
                         registar_falha)
 from modelo import ID_MODELO, Modelo, texto_do_objeto
 
-# Nota mínima para dois objetos contarem como «parecidos» (0 = nada a ver, 1 = iguais).
-# Afinada com testes: com 0,75 ficavam de fora pares óbvios (~0,67) e com 0,6 apareciam
-# objetos diferentes só por terem a mesma cor (~0,64).
+# Nota mínima (0 a 1) para dois objetos serem «parecidos». Escolhida com testes.
 LIMIAR = 0.65
 
 log = logging.getLogger("ia")
@@ -51,8 +29,7 @@ def tratar_pedido(bd, modelo, pedido):
     return gravar_resultado(bd, pedido, objeto, parecidos, ID_MODELO)
 
 
-# Liga à base de dados e fica com o «cadeado» (só pode haver um worker ligado).
-# Se a base de dados não responder, tenta de 5 em 5 segundos até conseguir.
+# Liga à base de dados e apanha o cadeado (só um worker); se falhar, tenta de 5 em 5 s.
 def ligar_ao_trabalho():
     while True:
         bd = None

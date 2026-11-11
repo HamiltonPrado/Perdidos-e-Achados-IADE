@@ -1,25 +1,9 @@
-"""Contentor «controlo»: deixa o laboratório da API (testar-api.html) ver e controlar os
-contentores DESTE projeto, para demonstrar a tolerância a falhas a partir do browser.
+"""Contentor «controlo»: painel de contentores do testar-api.html e árbitro do cluster Galera.
 
-Só para desenvolvimento. Tem acesso ao Docker, por isso é deliberadamente limitado:
-  - só vê os contentores deste projeto (etiqueta com.docker.compose.project);
-  - só age nos serviços de CONTROLO_SERVICOS (por omissão: os nós Galera, o web e o backup);
-  - só faz quatro ações: parar, arrancar, crash (SIGKILL) e reiniciar;
-  - as ações exigem o cabeçalho X-Controlo: 1, que um formulário de outro site não consegue
-    enviar sem autorização do browser;
-  - o nginx só está publicado em 127.0.0.1 (docker-compose.yml): ninguém da rede lhe chega.
-
-Árbitro do cluster Galera (corre em segundo plano):
-  Se 2 dos 3 nós caem de repente, o que sobra fica sem maioria e recusa escritas, porque não
-  sabe se os outros morreram ou se só deixou de os ver (uma falha de rede). Aqui os 3 nós correm
-  no mesmo Docker, por isso o árbitro PODE confirmar: se os nós ligados estão sem maioria há
-  ARBITRO_ESPERA segundos e o Docker confirma que os restantes nós estão PARADOS, reativa o
-  cluster no nó ligado mais atualizado (pc.bootstrap). Os outros, quando voltarem, entram nesse
-  cluster e recebem o que perderam. Nunca age se algum nó estiver ligado mas incontactável.
-
-Rotas (atrás do nginx, em /controlo/):
-  GET  /estado  → estado de cada serviço do projeto
-  POST /acao    → {"servico": "galera1", "acao": "parar" | "arrancar" | "crash" | "reiniciar"}
+Só desenvolvimento: só vê este projeto, só age em CONTROLO_SERVICOS e só faz 4 ações
+(parar, arrancar, crash, reiniciar), sempre com o cabeçalho X-Controlo: 1.
+Árbitro: se 2 nós Galera caírem e o Docker confirmar que estão parados, reativa o cluster no que sobrou.
+Rotas (em /controlo/): GET /estado · POST /acao {"servico", "acao"}
 """
 import http.client
 import json

@@ -1,19 +1,5 @@
-# =============================================================================
-#  TUDO O QUE A IA LÊ E GRAVA NA BASE DE DADOS
-# =============================================================================
-#
-#  Não é preciso configurar nada: usa o mesmo ficheiro .env que o Docker (na raiz do
-#  projeto) e liga-se aos nós da base de dados publicados no computador (portas 3307,
-#  3308 e 3309). Se o primeiro estiver em baixo, tenta o seguinte.
-#
-#  As tabelas usadas:
-#    ia_jobs        a fila de pedidos de análise (o site acrescenta, a IA trata)
-#    items          os objetos perdidos ('lost') e achados ('found')
-#    matches        as sugestões «este perdido pode ser este achado»
-#    notifications  os avisos ao dono do objeto perdido
-#
-#  Para testar a ligação (na pasta ia/):   .venv-ai/bin/python base_dados.py
-# =============================================================================
+# Leituras e gravações da IA na base de dados (ia_jobs, items, matches, notifications).
+# Usa o .env da raiz. Testar a ligação: .venv-ai/bin/python base_dados.py
 
 import os
 from pathlib import Path
@@ -38,9 +24,7 @@ def configuracao():
     return valores
 
 
-# Abre uma ligação ao primeiro nó que responder.
-#   No Docker (serviço «ia»):  DB_HOST=galera1,galera2,galera3  (tenta por esta ordem)
-#   Outro servidor (por ex. o MAMP):  DB_HOST=127.0.0.1 DB_PORT=8889
+# Liga ao primeiro nó que responder (DB_HOST pode ser "galera1,galera2,galera3").
 def ligar():
     cfg = configuracao()
     if not cfg.get("DB_PASSWORD"):
@@ -77,18 +61,13 @@ def executar(bd, sql, valores=()):
 
 # --- A fila ------------------------------------------------------------------
 
-# Só deve estar ligado UM worker de cada vez. Este «cadeado» da base de dados fica com o
-# worker enquanto a ligação estiver aberta; um segundo worker ligado ao MESMO nó não o
-# consegue e fecha. Limitação: o cadeado só vale no nó onde foi pedido, por isso dois
-# workers em nós diferentes (por ex. um arrancou com o galera1 em baixo) não se veem.
-# Não estraga nada: as sugestões e os avisos são únicos por par na base de dados, por isso
-# o pior que acontece é o mesmo pedido ser analisado duas vezes, com o mesmo resultado.
+# Cadeado para haver só um worker. Só vale no nó onde foi pedido; dois workers em nós
+# diferentes apenas repetem trabalho (sugestões e avisos são únicos por par).
 def apanhar_cadeado(bd):
     return consultar(bd, "SELECT GET_LOCK('perdidos_achados_ia', 0) AS ok")[0]["ok"] == 1
 
 
-# Pedidos que ficaram «em_processamento» porque o worker foi fechado a meio voltam à fila.
-# É seguro porque só há um worker e ele não está a meio de nada quando chama isto.
+# Pedidos que ficaram a meio voltam à fila (seguro: só há um worker).
 def devolver_pedidos_a_meio(bd):
     executar(bd, "UPDATE ia_jobs SET estado = 'pendente' WHERE estado = 'em_processamento'")
 
@@ -117,8 +96,7 @@ def concluir_sem_analise(bd, pedido):
              (pedido["id"], pedido["versao_item"]))
 
 
-# Falhou: tenta outra vez daqui a 10 s × tentativa, ou desiste à 3.ª vez (estado «erro»).
-# O motivo fica em ultimo_erro, para se perceber o que aconteceu.
+# Falhou: nova tentativa daqui a 10 s × tentativa; à 3.ª fica «erro».
 def registar_falha(bd, pedido, mensagem):
     estado = "erro" if pedido["tentativas"] >= 3 else "pendente"
     mudou = executar(bd, """
@@ -126,8 +104,7 @@ def registar_falha(bd, pedido, mensagem):
                disponivel_em = NOW() + INTERVAL %s SECOND
         WHERE id = %s AND versao_item = %s AND estado = 'em_processamento'""",
              (estado, mensagem[:500], 10 * pedido["tentativas"], pedido["id"], pedido["versao_item"]))
-    # Só marca o objeto se o pedido ainda estava a ser tratado. Se outro trabalhador já o
-    # concluiu entretanto, o objeto fica «analisado» como está.
+    # Só marca o objeto se o pedido ainda estava em tratamento.
     if mudou:
         executar(bd, "UPDATE items SET ia_estado = %s, ia_erro = %s WHERE id = %s AND versao = %s AND estado = 'ativo'",
                  (estado, mensagem[:500], pedido["item_id"], pedido["versao_item"]))
@@ -135,8 +112,7 @@ def registar_falha(bd, pedido, mensagem):
 
 # --- Os objetos --------------------------------------------------------------
 
-# Condição de um objeto que pode entrar na comparação: ativo e, se for achado, já
-# entregue na receção (não faz sentido sugerir um objeto que ainda lá não está).
+# Pode ser comparado: ativo e, se for achado, já na receção.
 PODE_SER_COMPARADO = """
     estado = 'ativo'
     AND (tipo = 'lost' OR (estado_recepcao = 'na_recepcao' AND ponto_recolha_id IS NOT NULL))"""
@@ -159,11 +135,7 @@ def ler_candidatos(bd, objeto):
 
 # --- Gravar o resultado ------------------------------------------------------
 
-# Grava tudo numa TRANSAÇÃO (ou fica tudo gravado, ou nada):
-#   1. cada par parecido fica como sugestão e o dono do perdido recebe um aviso;
-#   2. sugestões antigas deste objeto que desta vez não passaram ficam «descartadas»;
-#   3. o pedido fica «concluido» e o objeto «analisado».
-# «parecidos» é uma lista de (candidato, nota) com nota acima do limiar.
+# Numa transação: grava sugestões e avisos, descarta as antigas e conclui o pedido.
 def gravar_resultado(bd, pedido, objeto, parecidos, id_modelo):
     bd.begin()
     try:
@@ -178,9 +150,7 @@ def gravar_resultado(bd, pedido, objeto, parecidos, id_modelo):
                 executar(bd, "UPDATE notifications SET invalidada_em = NOW() WHERE match_id = %s AND invalidada_em IS NULL",
                          (antiga["id"],))
 
-        # Se o objeto foi alterado durante a análise, o site já pôs o pedido outra vez em
-        # «pendente» com a versão nova: nesse caso não o marcamos como concluído, e ele é
-        # analisado de novo logo a seguir.
+        # Se o objeto mudou durante a análise, o pedido já voltou a «pendente» e não é concluído aqui.
         executar(bd, """
             UPDATE ia_jobs SET estado = 'concluido', ultimo_erro = NULL
             WHERE id = %s AND versao_item = %s AND estado = 'em_processamento'""",
@@ -194,8 +164,7 @@ def gravar_resultado(bd, pedido, objeto, parecidos, id_modelo):
     return len([g for g in guardadas if g])
 
 
-# Grava (ou atualiza) a sugestão «perdido ↔ achado» e o aviso ao dono do perdido.
-# Devolve o número da sugestão, ou None se o par já resultou numa devolução (não se mexe).
+# Grava ou atualiza a sugestão e o aviso; None se o par já levou a uma devolução.
 def guardar_sugestao(bd, objeto, candidato, nota, id_modelo):
     perdido, achado = (objeto, candidato) if objeto["tipo"] == "lost" else (candidato, objeto)
 
@@ -222,8 +191,7 @@ def guardar_sugestao(bd, objeto, candidato, nota, id_modelo):
                 VALUES (%s, %s, %s, %s, %s, %s, %s, 'sugerido')""", valores + (perdido["id"], achado["id"]))
             sugestao = cursor.lastrowid
 
-    # Volta a mostrar o aviso como «não lido» se a sugestão é nova, estava descartada, ou
-    # se algum dos objetos mudou desde o último aviso. Se nada mudou, não incomoda o aluno.
+    # O aviso volta a «não lido» só se a sugestão é nova, estava descartada ou algo mudou.
     avisar_de_novo = (
         existente is None
         or existente["estado"] != "sugerido"

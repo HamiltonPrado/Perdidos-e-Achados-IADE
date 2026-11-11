@@ -1,16 +1,8 @@
 import { api } from './api.js';
 import { reclamacoesService } from './reclamacoesService.js';
 
-// As notificações do aluno vêm do backend e ficam guardadas na base de dados, por conta:
-// sobrevivem a um refresh e aparecem iguais noutro browser ou dispositivo.
-//  - GET /api/notifications devolve dois tipos de registo (campo `tipo`):
-//      correspondencia                                   → a IA encontrou um objeto parecido com uma procura
-//      pedido_aprovado · pedido_recusado · pedido_reaberto → decisão da receção sobre uma reclamação
-//    O backend cria as de pedido quando a receção decide e arquiva-as quando o objeto é entregue
-//    (ficam no histórico, com `arquivada_em`).
-//  - PATCH /api/notifications/:id/read marca qualquer uma como lida.
-//  - GET /api/claims/mine só serve para os pedidos ainda em análise (sem decisão, sem notificação)
-//    e para saber se um objeto aprovado já foi levantado.
+// Notificações do aluno, guardadas na base de dados (GET /api/notifications, PATCH /api/notifications/:id/read).
+// Tipos: correspondencia (sugestão da IA) e pedido_aprovado / pedido_recusado / pedido_reaberto (decisão da receção).
 
 function daDecisao(n, estadoArtigo) {
   const base = {

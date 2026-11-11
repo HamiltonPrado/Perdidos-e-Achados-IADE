@@ -1,29 +1,6 @@
--- Notificações persistentes para as decisões da receção sobre reclamações.
---
--- Antes: a tabela `notifications` só guardava correspondências da IA
--- («encontrámos um achado parecido com o teu perdido»), com `match_id` obrigatório.
---
--- Depois: cada notificação tem um `tipo`:
---   correspondencia  → como até agora: match_id + item_id (o perdido do aluno) obrigatórios
---   pedido_aprovado  → a receção validou o proprietário
---   pedido_recusado  → a receção recusou
---   pedido_reaberto  → a receção reabriu um pedido recusado; o aluno pode responder outra vez
--- As de pedido ligam à reclamação (`reclamacao_id`) e deixam `item_id` vazio: a chave
--- `fk_notifications_dono` exige que o artigo seja do utilizador, e o achado reclamado é de
--- quem o encontrou. O achado chega-se pela reclamação (`reclamacoes.item_achado_id`).
---
--- `arquivada_em` marca o fim do ciclo sem apagar (fica no histórico):
---   - uma nova decisão sobre a mesma reclamação arquiva a anterior;
---   - o aluno reenviar a resposta arquiva o «pedido reaberto»;
---   - a entrega do objeto (por código ou manual) arquiva as notificações desse achado.
--- É diferente de `invalidada_em`, que a IA usa para esconder correspondências inválidas.
---
--- As inserções já existentes (ia/persistencia.py) continuam a funcionar sem alterações:
--- não indicam o tipo e recebem o valor por defeito `correspondencia`.
---
--- Aplicar UMA vez em cada base de dados (MySQL 8.0.16 ou mais recente, por causa do CHECK):
---   phpMyAdmin → base de dados perdidos_achados → separador SQL → colar e executar
---   ou: mysql -u <utilizador> -p perdidos_achados < backend/database/migracoes/2026-11-08_notificacoes_pedidos.sql
+-- Notificações das decisões da receção: campo `tipo` (correspondencia, pedido_aprovado, pedido_recusado, pedido_reaberto).
+-- `arquivada_em` fecha o ciclo sem apagar; `invalidada_em` é usado pela IA.
+-- Aplicar uma vez (MySQL 8.0.16+): mysql -u <utilizador> -p perdidos_achados < backend/database/migracoes/2026-11-08_notificacoes_pedidos.sql
 
 SET NAMES utf8mb4;
 

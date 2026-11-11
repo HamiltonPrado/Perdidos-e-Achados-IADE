@@ -1,8 +1,4 @@
-# Imagem do trabalhador de IA (serviço «ia» do docker-compose.yml).
-#
-# O modelo é descarregado AQUI, ao construir a imagem: ao arrancar, a IA já não precisa de
-# internet e fica pronta mais depressa. Depois de mudar ficheiros desta pasta:
-#   docker compose up -d --build ia
+# Imagem da IA (serviço «ia»), com o modelo lá dentro. Depois de mudar ia/: docker compose up -d --build ia
 
 FROM python:3.13-slim
 
@@ -13,8 +9,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# PyTorch só para CPU: a versão normal traz as bibliotecas das placas gráficas NVIDIA
-# (vários GB) que aqui não servem para nada.
+# PyTorch só para CPU (a versão normal traz vários GB de bibliotecas NVIDIA).
 RUN pip install --index-url https://download.pytorch.org/whl/cpu torch
 
 COPY requirements.txt .

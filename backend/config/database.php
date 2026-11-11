@@ -2,17 +2,8 @@
 
 declare(strict_types=1);
 
-// Credenciais: variáveis de ambiente em Docker, credenciais.php no MAMP (configuracao_bd.php).
-//
-// DB_HOST pode ter várias bases de dados separadas por vírgulas (ex.: "galera1,galera2,galera3"),
-// para tolerância a falhas. Liga-se à primeira que:
-//  - responde (uma BD em baixo é saltada ao fim de 2 s);
-//  - num cluster Galera, está sincronizada (wsrep_ready = ON): um nó isolado da maioria
-//    aceita ligações mas recusa consultas, por isso é saltado;
-//  - aceita escritas (read_only = 0).
-// Como todos tentam pela mesma ordem, as escritas vão sempre para o mesmo nó enquanto ele
-// estiver bem, o que evita conflitos entre nós. Se nenhuma aceitar escritas, usa a primeira
-// que responder, em modo só-leitura: as escritas falham com erro e o site responde 503.
+// Credenciais: variáveis de ambiente (Docker) ou credenciais.php (MAMP).
+// DB_HOST aceita vários nós ("galera1,galera2,galera3"): usa o primeiro que responde, está sincronizado e aceita escritas.
 $config = require __DIR__ . '/configuracao_bd.php';
 $hosts = $config['hosts'];
 

@@ -1,24 +1,6 @@
-# Perdidos & Achados em Docker, com tolerância a falhas.
-#
-#   browser → nginx (8080) → web (Apache + PHP) → galera1 ⇄ galera2 ⇄ galera3   (MariaDB Galera)
-#                                                     ├─ backup → ./backups
-#                                                     └─ ia (compara perdidos e achados)
-#   autoheal reinicia qualquer contentor que fique «unhealthy».
-#
-# Galera: os 3 nós têm sempre os mesmos dados (replicação síncrona). Se um cai, os outros dois
-# continuam sem parar nem perder nada; quando ele volta, recebe sozinho o que perdeu.
-# Quórum: um nó que PARA de forma ordenada sai do cluster e os outros continuam (até 1 nó).
-# Se 2 nós CAEM de repente (crash, rede), o que sobra fica sem maioria e recusa escritas até
-# outro voltar: assim nunca há dois «clusters» com dados diferentes.
-# Se os 3 pararem ao mesmo tempo (docker compose stop, fechar o Docker, desligar o PC), no
-# arranque seguinte comparam a última transação de cada um e o mais atualizado refaz o cluster.
-# Só se algum nó não voltar é que é preciso: sh docker/galera/recuperar-cluster.sh
-#
-# Arrancar:   cp .env.example .env   (e mudar as palavras-passe)
-#             docker compose up -d --build
-# Abrir:      http://localhost:8080
-# Ver estado: docker compose ps
-# Ver o cluster: docker compose exec galera1 bash -c 'mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SHOW STATUS LIKE \"wsrep_cluster_size\""'
+# Perdidos & Achados em Docker: nginx → web (PHP) → MariaDB Galera (3 nós), mais backup, ia, controlo e autoheal.
+# Arrancar: cp .env.example .env  e  docker compose up -d --build   ·   Abrir: http://localhost:8080
+# Se o cluster não voltar sozinho: sh docker/galera/recuperar-cluster.sh
 
 x-logs: &logs
   driver: json-file
@@ -31,8 +13,7 @@ x-galera: &galera
   restart: unless-stopped
   # Tempo para o MariaDB parar bem e gravar a posição no grastate.dat (o Docker só dá 10 s).
   stop_grace_period: 60s
-  # Os scripts correm a partir de uma cópia sem «\r»: no Windows o Git pode convertê-los para
-  # CRLF e o bash recusava-os (o nó ficava em «Restarting»).
+  # Corre uma cópia do script sem «\r» (CRLF do Windows).
   entrypoint: ["bash", "-c", "tr -d '\\r' < /galera/arrancar.sh > /tmp/arrancar.sh && exec bash /tmp/arrancar.sh"]
   environment: &galera-env
     MARIADB_DATABASE: ${DB_NAME:-perdidos_achados}
@@ -49,9 +30,7 @@ x-galera: &galera
     timeout: 5s
     retries: 3
     start_period: 120s
-  # Sem autoheal nos nós Galera: reiniciar um nó que perdeu a maioria não ajuda e apaga o
-  # estado (gvwstate.dat) que o Galera usa para se refazer sozinho depois de um crash total.
-  # Um crash do processo é tratado pelo restart acima.
+  # Sem autoheal: reiniciar um nó sem maioria apaga o estado que o Galera usa para se refazer.
   deploy:
     resources:
       limits:
@@ -70,8 +49,7 @@ services:
       - dados_galera1:/var/lib/mysql
       - ./docker/galera:/galera:ro
       - estado_galera:/galera-estado
-      # Só no PRIMEIRO arranque (volume vazio): tabelas, contas e dados de referência.
-      # (A conta do SST, docker/galera/initdb/, é copiada pelo arrancar.sh.)
+      # Só no primeiro arranque (volume vazio): tabelas, contas e dados de referência.
       - ./backend/database/perdidos_achados.sql:/docker-entrypoint-initdb.d/01-perdidos_achados.sql:ro
     ports:
       # Para abrir a BD com o phpMyAdmin/DBeaver em localhost:3307 (a 3306 é do MAMP).
@@ -104,8 +82,7 @@ services:
     ports:
       - "3309:3306"
 
-  # A aplicação. As sessões e as fotos estão na base de dados, por isso para escalar basta
-  # acrescentar outro serviço igual e outra linha «server» no nginx.conf.
+  # A aplicação (PHP). Sessões e fotos estão na base de dados, por isso pode ter várias réplicas.
   web:
     build: ./docker/web
     image: perdidos-achados-web
@@ -131,17 +108,13 @@ services:
           memory: 256m
     logging: *logs
 
-  # A IA (pasta ia/): compara cada objeto perdido com os achados na receção e grava as
-  # sugestões. Só fala com a base de dados; o modelo vem dentro da imagem (sem internet).
-  # Só pode haver UM trabalhador de IA: com este serviço ligado, não lancem outro à mão.
-  # Ver o que está a fazer:  docker compose logs -f ia
-  # Depois de mudar ficheiros em ia/:  docker compose up -d --build ia
+  # A IA: compara perdidos e achados e grava as sugestões (logs: docker compose logs -f ia).
+  # Depois de mudar ia/: docker compose up -d --build ia
   ia:
     build: ./ia
     image: perdidos-achados-ia
     restart: unless-stopped
-    # Um «init» à frente do Python: sem ele o Python ignora o pedido para parar e o Docker
-    # espera 10 s até o matar. O pedido que estava a meio volta à fila no arranque seguinte.
+    # «init»: faz o Python parar logo com docker compose stop.
     init: true
     environment:
       # Tenta os nós por esta ordem; se um estiver em baixo, passa ao seguinte.
@@ -162,8 +135,7 @@ services:
     image: nginx:1.28-alpine
     restart: unless-stopped
     ports:
-      # Só neste computador (127.0.0.1): o painel de testes pode parar contentores, por isso
-      # o site não fica acessível a outras máquinas da rede.
+      # Só neste computador: o painel de testes pode parar contentores.
       - "127.0.0.1:8080:80"
     volumes:
       # A pasta inteira (e não só o ficheiro): editar o nginx.conf não quebra a montagem.
@@ -183,8 +155,7 @@ services:
           memory: 64m
     logging: *logs
 
-  # Backups de hora a hora a partir de um nó que não é o que recebe as escritas (galera3,
-  # ou o seguinte disponível): todos têm os mesmos dados.
+  # Backups de hora a hora (lê do galera3 ou do seguinte disponível).
   backup:
     image: mariadb:11.4
     restart: unless-stopped
@@ -208,17 +179,14 @@ services:
           memory: 128m
     logging: *logs
 
-  # Para o laboratório da API (testar-api.html → vista Docker): mostra o estado dos contentores
-  # e permite parar / arrancar / provocar um crash nos nós Galera, no web e no backup.
-  # Só desenvolvimento: tem acesso ao Docker, mas só aceita essas ações nesses serviços.
+  # Painel do testar-api.html (ver, parar e arrancar contentores) e árbitro do Galera. Só desenvolvimento.
   controlo:
     image: python:3.12-alpine
     restart: unless-stopped
     command: ["python", "-u", "/app/servidor.py"]
     environment:
       CONTROLO_SERVICOS: galera1,galera2,galera3,web,backup
-      # Árbitro: se os nós ligados ficarem sem maioria e o Docker confirmar que os outros estão
-      # parados, reativa o cluster no que sobrou ao fim deste tempo (segundos).
+      # Árbitro: reativa o cluster no nó que sobrou se os outros estiverem parados há este tempo (s).
       ARBITRO_NOS: galera1,galera2,galera3
       ARBITRO_ESPERA: 15
     volumes:
@@ -235,8 +203,7 @@ services:
           memory: 64m
     logging: *logs
 
-  # O Docker só reinicia sozinho um contentor que TERMINA. O autoheal trata dos que ficam
-  # de pé mas «unhealthy» (ex.: um nó Galera que perdeu a sincronização).
+  # Reinicia contentores que ficam «unhealthy» (o Docker só reinicia os que terminam).
   autoheal:
     image: willfarrell/autoheal:1.2.0
     restart: unless-stopped
@@ -256,6 +223,5 @@ volumes:
   dados_galera1:
   dados_galera2:
   dados_galera3:
-  # Partilhado pelos 3 nós: cada um deixa aqui a sua última transação para decidirem, sem
-  # ajuda, quem refunda o cluster depois de pararem todos (docker/galera/arrancar.sh).
+  # Partilhado pelos 3 nós Galera: votação de quem refunda o cluster (arrancar.sh).
   estado_galera:
