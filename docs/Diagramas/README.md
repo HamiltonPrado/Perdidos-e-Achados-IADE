@@ -1,9 +1,7 @@
 # Diagramas — Perdidos & Achados IADE
 
-Cinco vistas do sistema, uma por ficheiro. O GitHub desenha os diagramas Mermaid diretamente em cada página.
+Três vistas do sistema, uma por ficheiro. O GitHub desenha os diagramas Mermaid diretamente em cada página.
 
-1. [Arquitetura](01-arquitetura.md)
-2. [Componentes](02-componentes.md)
-3. [Sequência: registar procura → reclamar → levantar](03-sequencia.md)
-4. [Implantação (Docker)](04-implantacao.md)
-5. [Infraestrutura distribuída, redundância e tolerância a faltas](05-tolerancia-a-faltas.md)
+1. [Infraestrutura distribuída](01-infraestrutura-distribuida.md)
+2. [Mecanismos de redundância](02-mecanismos-de-redundancia.md)
+3. [Tolerância a faltas](03-tolerancia-a-faltas.md)
