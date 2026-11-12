@@ -474,12 +474,6 @@ legend {
   color: var(--cor-destaque-texto);
 }
 
-.etiqueta--categoria {
-  background: var(--cor-etiqueta);
-  border-color: var(--cor-etiqueta);
-  color: var(--cor-texto);
-}
-
 .resumo-objeto {
   display: flex;
   align-items: center;
