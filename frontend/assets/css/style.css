@@ -231,13 +231,6 @@ legend {
   padding: 0 6px;
 }
 
-.opcao {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  min-height: 32px;
-}
-
 .confirmar {
   display: flex;
   gap: 10px;
