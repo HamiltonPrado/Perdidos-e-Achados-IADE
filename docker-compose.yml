@@ -110,8 +110,10 @@ services:
     logging: *logs
 
   # A IA: compara perdidos e achados e grava as sugestões (logs: docker compose logs -f ia).
-  # Depois de mudar ia/: docker compose up -d --build ia
+  # Desligada por omissão. Ligar: docker compose --profile ia up -d --build ia
+  # (e IA_ATIVA = true em frontend/js/services/procurasService.js)
   ia:
+    profiles: ["ia"]
     build: ./ia
     image: perdidos-achados-ia
     restart: unless-stopped

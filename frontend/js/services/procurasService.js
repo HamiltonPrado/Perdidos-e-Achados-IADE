@@ -3,6 +3,9 @@ import { Procura } from '../models/Procura.js';
 import { Item } from '../models/Item.js';
 import { prepararFoto } from '../utilities/tools.js';
 
+// Sugestões da IA no site. Desligadas: o serviço «ia» do Docker também está desligado.
+export const IA_ATIVA = false;
+
 export const procurasService = {
   // POST /api/items/lost (JSON)  →  { item: { id, referencia: 'PER-000037', … } }
   // depois, para cada foto: POST /api/items/:id/photos (multipart, campo "foto").
@@ -66,6 +69,7 @@ export const procurasService = {
   // GET /api/items/:id/matches  →  { ia_estado: 'pendente'|'analisado'|'erro', sugestoes: [...] }
   // Achados na receção que a IA achou parecidos com esta procura, do mais parecido para o menos.
   async sugestoes(id) {
+    if (!IA_ATIVA) return { estadoIa: 'desativada', itens: [] };
     const { ia_estado, sugestoes } = await api.get(`/items/${encodeURIComponent(id)}/matches`);
     return {
       estadoIa: ia_estado,

@@ -2,7 +2,8 @@ import { requerLogin } from '../utilities/auth.js';
 import { montarNavBar } from '../components/navbar.js';
 import { montarFooter } from '../components/footer.js';
 import { cartaoItem } from '../components/itemCard.js';
-import { procurasService } from '../services/procurasService.js';
+import { procurasService, IA_ATIVA } from '../services/procurasService.js';
+import { itemsService } from '../services/itemsService.js';
 import { categoriasService } from '../services/categoriasService.js';
 import { locaisService } from '../services/locaisService.js';
 import { esc, seletorDeFotos, dataParaApi } from '../utilities/tools.js';
@@ -83,6 +84,11 @@ async function mostrarParecidos(procura) {
   $('ecra-enviado').hidden = false;
   window.scrollTo(0, 0);
 
+  if (!IA_ATIVA) {
+    await mostrarMesmaCategoria(procura);
+    return;
+  }
+
   const limite = Date.now() + ESPERA_MAXIMA;
   let resultado = { estadoIa: 'pendente', itens: [] };
   try {
@@ -107,4 +113,14 @@ async function mostrarParecidos(procura) {
     ? 'Ainda não há objetos parecidos na receção. Vamos avisar-te quando chegar um.'
     : 'A comparação está a demorar mais do que o normal. Vamos avisar-te quando houver um objeto parecido.';
   $('sem-parecidos').hidden = false;
+}
+
+// Sem IA: mostra os objetos da mesma categoria que já estão na receção.
+async function mostrarMesmaCategoria(procura) {
+  const itens = await itemsService.getAll({ categoria: procura.categoriaId }).catch(() => []);
+
+  $('parecidos-titulo').textContent = 'Objetos da mesma categoria já na receção';
+  $('parecidos').innerHTML = itens.slice(0, 6).map(cartaoItem).join('');
+  $('sem-parecidos').textContent = 'Ainda não há objetos desta categoria na receção.';
+  $('sem-parecidos').hidden = itens.length > 0;
 }
