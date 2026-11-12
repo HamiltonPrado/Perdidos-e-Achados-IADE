@@ -26,6 +26,9 @@ ACOES = {
     "crash": "/kill?signal=SIGKILL",
     "reiniciar": "/restart?t=10",
 }
+# Nestes serviços o «crash» termina o processo principal por dentro, como uma avaria real:
+# assim o restart: unless-stopped volta a arrancá-lo (um docker kill conta como paragem manual).
+CRASH_INTERNO = {"web"}
 
 
 class LigacaoUnix(http.client.HTTPConnection):
@@ -191,6 +194,14 @@ class Pedido(BaseHTTPRequestHandler):
         alvo = contentores().get(servico)
         if not alvo:
             return self.responder(404, {"erro": f"O contentor do serviço «{servico}» não existe."})
+
+        if acao == "crash" and servico in CRASH_INTERNO:
+            if alvo["estado"] != "running":
+                return self.responder(409, {"erro": f"O «{servico}» não está a correr."})
+            executar_em(alvo["id"], "kill -TERM 1")
+            print(f"[controlo] crash interno {servico}", flush=True)
+            return self.responder(200, {"estado": "ok", "servico": servico, "acao": acao,
+                                        "mensagem": "O processo principal terminou; o Docker volta a arrancá-lo."})
 
         codigo, dados = docker("POST", f"/containers/{alvo['id']}{ACOES[acao]}")
         print(f"[controlo] {acao} {servico} → HTTP {codigo}", flush=True)
