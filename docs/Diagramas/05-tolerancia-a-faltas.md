@@ -1,49 +1,54 @@
 # 5. Infraestrutura distribuída e tolerância a faltas
 
-A verde estão os mecanismos que recuperam o sistema sozinhos. Os números ligam o diagrama à tabela.
+A base de dados tem três cópias iguais e só aceita escritas com maioria (2 de 3). A verde estão os
+mecanismos que recuperam o sistema sozinhos; os números ligam o diagrama à tabela
+(o ⑤ vale para todos os contentores e não está desenhado).
 Modelo de faltas: paragem com recuperação (crash-recovery); não consideramos faltas bizantinas.
 
 ```mermaid
 flowchart TB
-    U["Aluno / Receção<br/>(browser)"]
+    U(["Browser"]) --> NG["nginx"] --> WB["web"]
+    AH["④ autoheal"] -.-> WB
 
-    subgraph PC["Um computador"]
-        RS["⑤ todos os contentores<br/>restart: unless-stopped"]:::apoio
-        AH["④ autoheal<br/>reinicia se «unhealthy»"]:::apoio
-        NG["nginx<br/>porta de entrada · healthcheck"]
-        WB["web · Apache + PHP<br/>liga ao 1.º nó sincronizado"]
-        BK["⑥ backup<br/>de hora a hora · 24 cópias"]:::apoio
-        AR["② controlo · árbitro<br/>reativa o cluster (15 s)"]:::apoio
+    WB -- "① 1.º nó disponível" --> CL
 
-        subgraph CL["Galera · quórum 2/3"]
-            direction TB
-            subgraph NOS[" "]
-                direction LR
-                G1[("① galera1")] <-. "replicação<br/>síncrona" .-> G2[("galera2")] <-. "replicação<br/>síncrona" .-> G3[("galera3")]
-            end
-            VE["③ estado_galera<br/>votação: quem tem a última transação refunda o cluster"]:::apoio
-            NOS --- VE
-        end
+    subgraph CL["Galera · maioria 2 de 3"]
+        direction LR
+        G1[("galera1")]
+        G2[("galera2")]
+        G3[("galera3")]
+        G1 ~~~ G2 ~~~ G3
     end
 
-    U -- HTTP --> NG
-    NG --> WB
-    AH -.-> NG
-    AH -.-> WB
-    WB -- SQL --> CL
-    BK -- dump --> CL
-    AR -.-> CL
+    subgraph REC["Recuperação automática"]
+        direction LR
+        AR["② árbitro"]
+        VE["③ votação de arranque"]
+        BK["⑥ backup"]
+        AR ~~~ VE ~~~ BK
+    end
 
-    classDef apoio fill:#f0fdf4,stroke:#16a34a,color:#14532d;
+    REC -.-> CL
+
+    classDef entrada fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef app fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef apoio fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef dados fill:#fef3c7,stroke:#d97706,color:#78350f
+    class U,NG entrada
+    class WB app
+    class AH,AR,VE,BK apoio
+    class G1,G2,G3 dados
+    style CL fill:#f9fafb,stroke:#d1d5db,color:#374151
+    style REC fill:#f9fafb,stroke:#d1d5db,color:#374151
 ```
 
 | # | Falta | Como o sistema reage |
 |---|---|---|
-| 1 | Cai 1 nó da BD | Os 2 restantes têm quórum e continuam. O PHP passa ao nó seguinte (desiste em 2 s). Ao voltar, o nó recebe o que perdeu. |
-| 2 | Caem 2 nós | O nó que sobra fica sem quórum (não escreve). O árbitro reativa-o ao fim de 15 s. |
+| 1 | Cai 1 nó da BD | Os 2 restantes têm maioria e continuam. O PHP passa ao nó seguinte (desiste em 2 s). Ao voltar, o nó recebe o que perdeu. |
+| 2 | Caem 2 nós | O nó que sobra fica sem maioria e não escreve. O árbitro reativa-o ao fim de 15 s. |
 | 3 | Param os 3 nós (ex.: desligar o PC) | Votação no volume `estado_galera`: o nó com a última transação refunda o cluster. Plano B manual: `recuperar-cluster.sh`. |
 | 4 | web ou nginx doente | O healthcheck falha 3 vezes e o autoheal reinicia o contentor. |
-| 5 | Contentor termina | `restart: unless-stopped` volta a arrancá-lo. A BD tem 60 s para parar sem perder o estado. |
+| 5 | Contentor termina | `restart: unless-stopped` volta a arrancá-lo (todos os contentores). A BD tem 60 s para parar sem perder o estado. |
 | 6 | Dados apagados ou corrompidos | Cópia (`mariadb-dump`) de hora a hora, 24 guardadas; o `repor.sh` restaura. |
 
 **Partição de rede:** só o lado com maioria aceita escritas (evita *split-brain*).

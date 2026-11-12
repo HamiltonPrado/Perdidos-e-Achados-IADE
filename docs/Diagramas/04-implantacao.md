@@ -1,49 +1,53 @@
 # 4. Implantação (Docker)
 
-Tudo corre com `docker compose up -d --build`. Só o nginx (127.0.0.1:8080) e os três nós da base de dados
-(3307–3309, para ferramentas de administração) ficam acessíveis no computador.
+Tudo arranca com `docker compose up -d --build`. Para fora do Docker só ficam abertos o nginx
+(127.0.0.1:8080) e os três nós da base de dados (3307–3309, para ferramentas de administração).
 
 ```mermaid
 flowchart TB
-    subgraph HOST["Computador (Docker Desktop)"]
-        subgraph NET["Rede interna do Docker Compose"]
-            NG["nginx<br/>imagem nginx:1.28-alpine<br/>127.0.0.1:8080 → 80"]
-            WB["web<br/>imagem perdidos-achados-web<br/>(php:8.4-apache)"]
-            G1["galera1<br/>mariadb:11.4<br/>porta 3307"]
-            G2["galera2<br/>mariadb:11.4<br/>porta 3308"]
-            G3["galera3<br/>mariadb:11.4<br/>porta 3309"]
-            IA["ia<br/>imagem perdidos-achados-ia<br/>(python:3.13-slim + modelo)"]
-            BK["backup<br/>mariadb:11.4"]
-            CT["controlo<br/>python:3.12-alpine"]
-            AH["autoheal<br/>willfarrell/autoheal:1.2.0"]
-        end
+    PC(["Computador · 127.0.0.1:8080"]) --> NG["nginx<br/>nginx:1.28-alpine"]
 
-        V1[("dados_galera1")]
-        V2[("dados_galera2")]
-        V3[("dados_galera3")]
-        VE[("estado_galera<br/>votação de arranque")]
-        PF["./frontend e ./backend<br/>(montados no web)"]
-        PB["./backups"]
-        SOCK["docker.sock"]
+    subgraph APP["Aplicação"]
+        direction LR
+        WB["web<br/>php:8.4-apache"]
+        IA["ia<br/>python:3.13-slim + modelo"]
+        WB ~~~ IA
     end
 
-    NG --> WB
-    NG --> CT
-    WB --> G1
-    WB --> G2
-    WB --> G3
-    IA --> G1
-    IA --> G2
-    IA --> G3
-    BK --> G3
-    G1 --- V1
-    G2 --- V2
-    G3 --- V3
-    G1 --- VE
-    G2 --- VE
-    G3 --- VE
-    WB --- PF
-    BK --- PB
-    CT --- SOCK
-    AH --- SOCK
+    subgraph APOIO["Apoio"]
+        direction LR
+        BK["backup"]
+        CT["controlo"]
+        AH["autoheal"]
+        BK ~~~ CT ~~~ AH
+    end
+
+    subgraph GAL["MariaDB 11.4"]
+        direction LR
+        G1[("galera1 · 3307")]
+        G2[("galera2 · 3308")]
+        G3[("galera3 · 3309")]
+        G1 ~~~ G2 ~~~ G3
+    end
+
+    VOL[("Volumes · dados de cada nó · ./backups")]
+
+    NG --> APP
+    APP --> GAL
+    APOIO -.-> GAL
+    GAL --- VOL
+
+    classDef entrada fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef app fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef dados fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef ia fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef apoio fill:#f3f4f6,stroke:#9ca3af,color:#374151
+    class PC,NG entrada
+    class WB app
+    class G1,G2,G3,VOL dados
+    class IA ia
+    class BK,CT,AH apoio
+    style APP fill:#f9fafb,stroke:#d1d5db,color:#374151
+    style APOIO fill:#f9fafb,stroke:#d1d5db,color:#374151
+    style GAL fill:#f9fafb,stroke:#d1d5db,color:#374151
 ```

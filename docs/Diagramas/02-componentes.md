@@ -1,39 +1,39 @@
 # 2. Componentes
 
+Cada camada só fala com a de baixo. O frontend chama a API por HTTP + JSON; a API e a IA partilham a base de dados.
+
 ```mermaid
 flowchart TB
-    subgraph FE["Frontend (HTML + JavaScript)"]
+    subgraph FE["Frontend · HTML + JS"]
         direction LR
-        P1["Páginas do aluno<br/>Explorar · Encontrar · Publicar<br/>Meus anúncios · Reclamar · Levantamento"]
-        P2["Páginas da receção<br/>Painel · Objetos · Pedidos · Entrada"]
-        SV["Serviços JS<br/>api.js · authService · itemsService<br/>procurasService · reclamacoesService · adminService"]
-        P1 --> SV
-        P2 --> SV
+        PG["Páginas<br/>aluno · receção"] --> SV["Serviços JS<br/>api.js · itemsService · …"]
     end
 
-    subgraph BE["Backend (API REST em PHP)"]
-        direction TB
-        IDX["public/index.php"] --> RT["routes/api.php<br/>+ grupos de rotas"]
-        RT --> MW["middleware<br/>autenticação · CSRF · administrador"]
-        MW --> CT["controllers<br/>Auth · Item · Photo · Reclamacao<br/>PedidoLevantamento · Devolucao · Notificacao"]
-        CT --> MD["models<br/>Item · User · Reclamacao · PedidoLevantamento<br/>IaJob · Correspondencia · Notification"]
-        MD --> DB_PHP["config/database.php<br/>escolhe o 1.º nó sincronizado"]
+    subgraph BE["Backend · API REST em PHP"]
+        direction LR
+        RT["Rotas"] --> MW["Middleware<br/>sessão · CSRF · admin"] --> CT["Controllers"] --> MD["Models"]
     end
 
-    subgraph BD["Base de dados (MariaDB Galera)"]
-        T1[("users · sessions")]
-        T2[("items · item_photos<br/>categories · locations")]
-        T3[("reclamacoes · pedidos_levantamento<br/>devolucoes · notifications")]
-        T4[("ia_jobs · matches")]
+    subgraph IA["IA · Python"]
+        direction LR
+        WK["worker.py<br/>lê a fila"] --> MO["modelo.py<br/>nota 0 a 1"]
     end
 
-    subgraph IAG["Inteligência artificial"]
-        MOD["modelo.py<br/>texto → vetor → nota 0 a 1 · LIMIAR"]
-        WRK["worker.py<br/>fila → notas → sugestões"]
-    end
+    BD[("Base de dados<br/>utilizadores · objetos · reclamações<br/>levantamentos · fila da IA · sugestões")]
 
-    SV -- "HTTP + JSON<br/>cookie de sessão + X-CSRF-Token" --> IDX
-    DB_PHP --> BD
-    WRK --> T4
-    WRK -- "usa" --> MOD
+    FE -- "HTTP + JSON" --> BE
+    BE --> BD
+    IA --> BD
+
+    classDef app fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef entrada fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef dados fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef ia fill:#dcfce7,stroke:#16a34a,color:#14532d
+    class PG,SV entrada
+    class RT,MW,CT,MD app
+    class WK,MO ia
+    class BD dados
+    style FE fill:#f9fafb,stroke:#d1d5db,color:#374151
+    style BE fill:#f9fafb,stroke:#d1d5db,color:#374151
+    style IA fill:#f9fafb,stroke:#d1d5db,color:#374151
 ```
