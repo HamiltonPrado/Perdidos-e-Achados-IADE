@@ -1,5 +1,5 @@
 # Modelo de IA (paraphrase-multilingual-MiniLM-L12-v2): transforma texto em vetores e compara-os (nota de 0 a 1).
-# Testar: .venv-ai/bin/python modelo.py
+# Testar sem base de dados: .venv-ai/bin/python modelo.py
 
 from sentence_transformers import SentenceTransformer
 
@@ -7,6 +7,9 @@ NOME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
 # Versão fixa do modelo, para as notas não mudarem com atualizações.
 REVISAO = "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"
+
+# Nome gravado em cada sugestão, para se saber que modelo a encontrou.
+ID_MODELO = f"texto-v1:minilm-multilingual-l12-v2@{REVISAO}"
 
 # Nota mínima (0 a 1) para dois objetos serem «parecidos». Escolhida com testes.
 LIMIAR = 0.65
