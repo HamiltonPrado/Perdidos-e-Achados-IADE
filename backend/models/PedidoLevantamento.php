@@ -25,6 +25,30 @@ class PedidoLevantamento
         return $codigo;
     }
 
+    // O código nunca é guardado: guarda-se só o seu HMAC-SHA256 com a chave secreta do servidor
+    // (CODIGO_SEGREDO). Sem a chave, quem lesse a base de dados não conseguiria descobrir os códigos.
+    public function hashCodigo(string $codigo): string
+    {
+        return hash_hmac('sha256', $codigo, self::segredo());
+    }
+
+    // A chave vem do .env (Docker) ou do credenciais.php (MAMP).
+    private static function segredo(): string
+    {
+        $segredo = getenv('CODIGO_SEGREDO') ?: '';
+
+        if ($segredo === '' && is_file(__DIR__ . '/../config/credenciais.php')) {
+            $credenciais = require __DIR__ . '/../config/credenciais.php';
+            $segredo = (string) ($credenciais['codigo_segredo'] ?? '');
+        }
+
+        if (strlen($segredo) < 16) {
+            throw new RuntimeException('Falta CODIGO_SEGREDO (pelo menos 16 caracteres) no .env ou no credenciais.php.');
+        }
+
+        return $segredo;
+    }
+
     // Guarda um pedido de levantamento com um código válido durante 24 horas.
     // Liga o código à reclamação aprovada que permite levantar este objeto.
     public function criar(
@@ -48,7 +72,7 @@ class PedidoLevantamento
             item_perdido_id,
             match_id,
             reclamacao_id,
-            codigo,
+            codigo_hash,
             expira_em
         ) VALUES (
             :user_id,
@@ -56,7 +80,7 @@ class PedidoLevantamento
             :item_perdido_id,
             :match_id,
             :reclamacao_id,
-            :codigo,
+            :codigo_hash,
             DATE_ADD(NOW(), INTERVAL 24 HOUR)
         )"
         );
@@ -67,7 +91,7 @@ class PedidoLevantamento
             'item_perdido_id' => $itemPerdidoId,
             'match_id' => $matchId,
             'reclamacao_id' => $reclamacaoId,
-            'codigo' => $codigo,
+            'codigo_hash' => $this->hashCodigo($codigo),
         ]);
 
         return (int) $this->pdo->lastInsertId();
@@ -105,12 +129,12 @@ class PedidoLevantamento
                 p.*,
                 (p.expira_em <= NOW()) AS prazo_expirado
              FROM pedidos_levantamento AS p
-             WHERE p.codigo = :codigo
+             WHERE p.codigo_hash = :codigo_hash
              LIMIT 1'
         );
 
         $consulta->execute([
-            'codigo' => $codigo,
+            'codigo_hash' => $this->hashCodigo($codigo),
         ]);
 
         $pedido = $consulta->fetch();
@@ -183,7 +207,7 @@ class PedidoLevantamento
 
         $consulta = $this->pdo->prepare(
             "UPDATE pedidos_levantamento
-             SET codigo = :codigo,
+             SET codigo_hash = :codigo_hash,
                  reclamacao_id = :reclamacao_id,
                  item_perdido_id = :item_perdido_id,
                  match_id = :match_id,
@@ -197,7 +221,7 @@ class PedidoLevantamento
 
         $consulta->execute([
             'id' => $id,
-            'codigo' => $codigo,
+            'codigo_hash' => $this->hashCodigo($codigo),
             'reclamacao_id' => $reclamacaoId,
             'item_perdido_id' => $itemPerdidoId,
             'match_id' => $matchId,
@@ -226,7 +250,6 @@ class PedidoLevantamento
                 p.item_perdido_id,
                 p.match_id,
                 p.reclamacao_id,
-                p.codigo,
                 p.estado,
                 p.expira_em,
                 aluno.nome AS aluno_nome,
@@ -256,7 +279,7 @@ class PedidoLevantamento
                 ON perdido.id = p.item_perdido_id
             LEFT JOIN matches AS m
                 ON m.id = p.match_id
-            WHERE p.codigo = :codigo
+            WHERE p.codigo_hash = :codigo_hash
               AND p.estado = 'pendente'
               AND p.utilizado_em IS NULL
               AND p.expira_em > NOW()
@@ -295,7 +318,7 @@ class PedidoLevantamento
         $consulta = $this->pdo->prepare($sql);
 
         $consulta->execute([
-            'codigo' => $codigo,
+            'codigo_hash' => $this->hashCodigo($codigo),
         ]);
 
         $pedido = $consulta->fetch();

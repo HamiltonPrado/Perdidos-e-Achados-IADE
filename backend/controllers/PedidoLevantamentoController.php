@@ -72,7 +72,7 @@ class PedidoLevantamentoController
             'pedido' => [
                 'id' => (int) $pedido['id'],
                 'reclamacao_id' => (int) $pedido['reclamacao_id'],
-                'codigo' => $pedido['codigo'],
+                'codigo' => $codigo,
                 'estado' => $pedido['estado'],
                 'expira_em' => $pedido['expira_em'],
                 'aluno' => [
@@ -98,7 +98,8 @@ class PedidoLevantamentoController
         ]);
     }
 
-    // Emite ou recupera o código de uma reclamação aprovada.
+    // Emite um código novo para uma reclamação aprovada. O código só é guardado como hash, por
+    // isso não pode ser mostrado outra vez: cada pedido gera um novo e o anterior deixa de valer.
     public function criarPorReclamacao(int $reclamacaoId): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
@@ -211,41 +212,31 @@ class PedidoLevantamentoController
                 );
             }
 
-            $reutilizavel =
-                $pedido !== null
-                && $pedido['estado'] === 'pendente'
-                && (int) $pedido['prazo_expirado'] === 0
-                && (int) $pedido['reclamacao_id'] === $reclamacaoId;
+            $codigo = $this->pedidos->gerarCodigo();
 
-            if ($reutilizavel) {
-                $codigo = $pedido['codigo'];
+            if ($pedido === null) {
+                $this->pedidos->criar(
+                    $userId,
+                    $achadoId,
+                    $codigo,
+                    $reclamacaoId,
+                    $perdidoId,
+                    $matchId
+                );
             } else {
-                $codigo = $this->pedidos->gerarCodigo();
+                $renovado = $this->pedidos->renovar(
+                    (int) $pedido['id'],
+                    $codigo,
+                    $reclamacaoId,
+                    $perdidoId,
+                    $matchId
+                );
 
-                if ($pedido === null) {
-                    $this->pedidos->criar(
-                        $userId,
-                        $achadoId,
-                        $codigo,
-                        $reclamacaoId,
-                        $perdidoId,
-                        $matchId
+                if (!$renovado) {
+                    throw new DomainException(
+                        'Não foi possível renovar o código.',
+                        409
                     );
-                } else {
-                    $renovado = $this->pedidos->renovar(
-                        (int) $pedido['id'],
-                        $codigo,
-                        $reclamacaoId,
-                        $perdidoId,
-                        $matchId
-                    );
-
-                    if (!$renovado) {
-                        throw new DomainException(
-                            'Não foi possível renovar o código.',
-                            409
-                        );
-                    }
                 }
             }
 
@@ -304,7 +295,7 @@ class PedidoLevantamentoController
             'pedido' => [
                 'id' => (int) $pedido['id'],
                 'reclamacao_id' => $reclamacaoId,
-                'codigo' => $pedido['codigo'],
+                'codigo' => $codigo,
                 'estado' => $pedido['estado'],
                 'expira_em' => $pedido['expira_em'],
                 'item_achado_id' => $achadoId,

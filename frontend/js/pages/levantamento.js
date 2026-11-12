@@ -92,7 +92,8 @@ function resumoHtml(item) {
     </div>`;
 }
 
-// POST /api/claims/:id/collection-request devolve o código (o mesmo enquanto for válido).
+// POST /api/claims/:id/collection-request devolve um código novo (o servidor só guarda o hash,
+// por isso cada vez que a página abre há um código novo e o anterior deixa de valer).
 async function mostrarCodigo(reclamacaoId) {
   try {
     const pedido = await reclamacoesService.pedirCodigo(reclamacaoId);
@@ -107,7 +108,7 @@ async function mostrarCodigo(reclamacaoId) {
         ? `Faltam cerca de ${horas} ${horas === 1 ? 'hora' : 'horas'}`
         : 'Expira em menos de uma hora';
     }
-    $('codigo-ajuda').textContent = 'Mostra este código na receção. Se expirar, volta a abrir esta página para receberes outro.';
+    $('codigo-ajuda').textContent = 'Mostra este código na receção. Se voltares a abrir esta página, recebes um código novo e este deixa de valer.';
   } catch (erro) {
     $('codigo-ajuda').textContent = 'Código indisponível';
     $('erro-codigo').textContent = erro.message;

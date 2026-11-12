@@ -9,4 +9,6 @@ return [
     'database' => 'perdidos_achados',
     'username' => 'UTILIZADOR_MYSQL',
     'password' => 'PALAVRA_PASSE_MYSQL',
+    // Chave secreta dos códigos de levantamento (pelo menos 16 caracteres).
+    'codigo_segredo' => 'MUDA_ESTA_CHAVE_SECRETA',
 ];

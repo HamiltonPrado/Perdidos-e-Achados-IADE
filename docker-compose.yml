@@ -95,6 +95,7 @@ services:
       DB_NAME: ${DB_NAME:-perdidos_achados}
       DB_USER: ${DB_USER:-perdidos}
       DB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD no ficheiro .env}
+      CODIGO_SEGREDO: ${CODIGO_SEGREDO:?Define CODIGO_SEGREDO no ficheiro .env}
     volumes:
       - ./frontend:/var/www/frontend:ro
       - ./backend:/var/www/backend:ro

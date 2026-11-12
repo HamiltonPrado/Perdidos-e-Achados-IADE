@@ -212,7 +212,7 @@ CREATE TABLE `pedidos_levantamento` (
   `item_achado_id` int UNSIGNED NOT NULL,
   `item_perdido_id` int UNSIGNED DEFAULT NULL,
   `match_id` int UNSIGNED DEFAULT NULL,
-  `codigo` char(8) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `codigo_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `estado` enum('pendente','utilizado','cancelado','expirado') NOT NULL DEFAULT 'pendente',
   `expira_em` datetime NOT NULL,
   `utilizado_em` datetime DEFAULT NULL,
@@ -398,7 +398,7 @@ ALTER TABLE `notifications`
 --
 ALTER TABLE `pedidos_levantamento`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_levantamento_codigo` (`codigo`),
+  ADD UNIQUE KEY `uq_levantamento_codigo` (`codigo_hash`),
   ADD UNIQUE KEY `uq_levantamento_aluno_achado` (`user_id`,`item_achado_id`),
   ADD UNIQUE KEY `uq_levantamento_reclamacao` (`reclamacao_id`),
   ADD KEY `fk_levantamento_achado` (`item_achado_id`),
