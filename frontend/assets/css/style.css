@@ -28,6 +28,7 @@ h1,
 h2,
 h3 {
   font-family: var(--fonte-titulos);
+  letter-spacing: -0.03em;
   margin: 0;
 }
 
@@ -398,12 +399,6 @@ legend {
   .acoes .botao {
     flex: 1 1 auto;
   }
-}
-
-h1,
-h2,
-h3 {
-  letter-spacing: -0.03em;
 }
 
 .sobretitulo {
