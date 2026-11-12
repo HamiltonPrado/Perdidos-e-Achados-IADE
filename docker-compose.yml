@@ -1,4 +1,4 @@
-# Perdidos & Achados em Docker: nginx → web (PHP) → MariaDB Galera (3 nós), mais backup, ia, controlo e autoheal.
+# Perdidos & Achados em Docker: nginx → web (PHP) → MariaDB Galera (3 nós), mais backup, controlo e autoheal.
 # Arrancar: cp .env.example .env  e  docker compose up -d --build   ·   Abrir: http://localhost:8080
 # Se o cluster não voltar sozinho: sh docker/galera/recuperar-cluster.sh
 
@@ -106,29 +106,6 @@ services:
       resources:
         limits:
           memory: 256m
-    logging: *logs
-
-  # A IA: compara perdidos e achados e grava as sugestões (logs: docker compose logs -f ia).
-  # Depois de mudar ia/: docker compose up -d --build ia
-  ia:
-    build: ./ia
-    image: perdidos-achados-ia
-    restart: unless-stopped
-    # «init»: faz o Python parar logo com docker compose stop.
-    init: true
-    environment:
-      # Tenta os nós por esta ordem; se um estiver em baixo, passa ao seguinte.
-      DB_HOST: galera1,galera2,galera3
-      DB_PORT: "3306"
-      DB_NAME: ${DB_NAME:-perdidos_achados}
-      DB_USER: ${DB_USER:-perdidos}
-      DB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD no ficheiro .env}
-    depends_on:
-      - galera1
-    deploy:
-      resources:
-        limits:
-          memory: 1g
     logging: *logs
 
   nginx:

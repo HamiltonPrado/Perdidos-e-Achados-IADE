@@ -1,5 +1,0 @@
-# O ambiente Python local (1 GB) e a cache não entram na imagem: a imagem instala os seus.
-.venv-ai/
-.venv/
-__pycache__/
-*.pyc
