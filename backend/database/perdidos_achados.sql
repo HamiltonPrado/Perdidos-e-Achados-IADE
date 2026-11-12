@@ -44,8 +44,7 @@ INSERT INTO `categories` (`id`, `nome`) VALUES
 (8, 'Material escolar'),
 (4, 'Mochila'),
 (9, 'Outro'),
-(5, 'Roupa'),
-(2, 'Telemóvel');
+(5, 'Roupa');
 
 -- --------------------------------------------------------
 
