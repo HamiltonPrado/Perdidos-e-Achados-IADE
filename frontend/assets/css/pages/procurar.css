@@ -4,10 +4,6 @@
   padding-bottom: 72px;
 }
 
-.procurar__sobretitulo {
-  margin: 28px 0 0;
-}
-
 .procurar__titulo {
   font-size: clamp(32px, 5vw, 48px);
   font-weight: 800;

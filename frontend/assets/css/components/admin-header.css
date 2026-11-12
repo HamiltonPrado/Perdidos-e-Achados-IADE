@@ -16,16 +16,6 @@
   text-decoration: none;
 }
 
-.admin-header__rotulo {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--cor-marca);
-  border: 1px solid var(--cor-marca);
-  padding: 4px 8px;
-}
-
 .admin-header__nav {
   display: flex;
   gap: 4px;
@@ -53,21 +43,6 @@
   align-items: center;
   gap: 16px;
   margin-left: auto;
-}
-
-.admin-header__site {
-  color: #d7d7d2;
-  background: none;
-  border: 0;
-  font: inherit;
-  font-size: 14px;
-  text-decoration: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.admin-header__site:hover {
-  color: #fff;
 }
 
 /* Liga ao perfil da receção (admin/perfil.html), onde está o «Terminar sessão». */
@@ -113,9 +88,5 @@
 
   .admin-header__link {
     padding: 10px 12px;
-  }
-
-  .admin-header__site {
-    display: none;
   }
 }

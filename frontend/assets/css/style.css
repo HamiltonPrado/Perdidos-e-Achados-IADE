@@ -231,13 +231,6 @@ legend {
   padding: 0 6px;
 }
 
-.opcao {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  min-height: 32px;
-}
-
 .confirmar {
   display: flex;
   gap: 10px;
@@ -472,12 +465,6 @@ legend {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--cor-destaque-texto);
-}
-
-.etiqueta--categoria {
-  background: var(--cor-etiqueta);
-  border-color: var(--cor-etiqueta);
-  color: var(--cor-texto);
 }
 
 .resumo-objeto {

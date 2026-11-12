@@ -58,12 +58,6 @@
   margin: 32px 0 8px;
 }
 
-.entrar__texto {
-  margin: 0 0 28px;
-  color: var(--cor-texto-secundario);
-  line-height: 1.5;
-}
-
 .entrar__botao {
   width: 100%;
   min-height: 56px;
