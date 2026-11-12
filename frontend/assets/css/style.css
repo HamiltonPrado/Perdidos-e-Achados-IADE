@@ -453,11 +453,6 @@ legend {
   margin-top: 2px;
 }
 
-.botao--preto {
-  background: var(--cor-preto);
-  color: #fff;
-}
-
 .aviso {
   background: var(--cor-aviso-fundo);
   border-left: 3px solid var(--cor-aviso-borda);
