@@ -92,8 +92,6 @@ async function iniciar() {
     aviso.innerHTML = `<span class="aviso__rotulo">Entrega pendente</span>
       Leva os objetos à receção (${esc(RECECAO.local)}, ${esc(RECECAO.horario)}).`;
 
-    document.getElementById('aviso-levantar').hidden = !(separador === 'por_levantar' && contagem.por_levantar > 0);
-
     if (separador === 'procuras') {
       lista.innerHTML = procuras.length
         ? procuras.map(linhaProcuraHtml).join('')
