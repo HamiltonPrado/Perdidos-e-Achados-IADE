@@ -3,7 +3,7 @@ import { montarAdminHeader } from '../components/adminHeader.js';
 import { montarFooter } from '../components/footer.js';
 import { adminService } from '../services/adminService.js';
 import { esc, fotoVazia, formatarData, iniciais } from '../utilities/tools.js';
-import { etiquetaPedido, saudacao } from '../utilities/adminTools.js';
+import { etiquetaPedido } from '../utilities/adminTools.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -14,7 +14,6 @@ if (requerAdmin()) {
 }
 
 async function iniciar() {
-  $('saudacao').textContent = `${saudacao()}.`;
   ligarReceber();
   ligarLevantamento();
 

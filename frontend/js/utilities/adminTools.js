@@ -21,10 +21,3 @@ export function etiquetaPedido(pedido) {
     ? '<span class="etiqueta etiqueta--ok">Resposta coincide</span>'
     : '<span class="etiqueta etiqueta--aviso">Resposta difere</span>';
 }
-
-export function saudacao() {
-  const hora = new Date().getHours();
-  if (hora < 13) return 'Bom dia';
-  if (hora < 20) return 'Boa tarde';
-  return 'Boa noite';
-}
