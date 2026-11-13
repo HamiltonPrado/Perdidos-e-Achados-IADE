@@ -3,7 +3,7 @@
 Só desenvolvimento: só vê este projeto, só age em CONTROLO_SERVICOS e só faz 4 ações
 (parar, arrancar, crash, reiniciar), sempre com o cabeçalho X-Controlo: 1.
 Árbitro: se 2 nós Galera caírem e o Docker confirmar que estão parados, reativa o cluster no que sobrou.
-Rotas (em /controlo/): GET /estado · POST /acao {"servico", "acao"}
+Rotas (em /controlo/): GET /estado · GET /logs?servico=&linhas= · POST /acao {"servico", "acao"}
 """
 import http.client
 import json
@@ -94,12 +94,25 @@ def executar_em(id_contentor, comando):
     _, criado = docker("POST", f"/containers/{id_contentor}/exec",
                        {"AttachStdout": True, "AttachStderr": False, "Cmd": ["sh", "-c", comando]})
     _, fluxo = docker("POST", f"/exec/{criado['Id']}/start", {"Detach": False, "Tty": False}, bruto=True)
+    return juntar_fluxo(fluxo)
+
+
+def juntar_fluxo(fluxo):
+    """O Docker separa stdout/stderr em blocos com um cabeçalho de 8 bytes; devolve o texto junto."""
     saida, i = b"", 0
-    while i + 8 <= len(fluxo):  # o Docker separa o fluxo em blocos com um cabeçalho de 8 bytes
+    while i + 8 <= len(fluxo):
         tamanho = struct.unpack(">I", fluxo[i + 4:i + 8])[0]
         saida += fluxo[i + 8:i + 8 + tamanho]
         i += 8 + tamanho
     return saida.decode(errors="replace")
+
+
+def logs_de(id_contentor, linhas):
+    """Últimas linhas do log de um contentor (stdout e stderr), com a hora de cada uma."""
+    codigo, fluxo = docker("GET", f"/containers/{id_contentor}/logs?stdout=1&stderr=1&timestamps=1&tail={linhas}", bruto=True)
+    if codigo != 200:
+        raise RuntimeError(f"O Docker respondeu HTTP {codigo}.")
+    return juntar_fluxo(fluxo).splitlines()
 
 
 SQL_ROOT = 'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" mariadb -u root -N -e '
@@ -167,7 +180,10 @@ class Pedido(BaseHTTPRequestHandler):
         self.wfile.write(corpo)
 
     def do_GET(self):
-        if self.path.rstrip("/") != "/estado":
+        url = urllib.parse.urlparse(self.path)
+        if url.path.rstrip("/") == "/logs":
+            return self.logs(urllib.parse.parse_qs(url.query))
+        if url.path.rstrip("/") != "/estado":
             return self.responder(404, {"erro": "Rota não encontrada."})
         servicos = sorted(contentores().values(), key=lambda s: s["servico"])
         for s in servicos:
@@ -210,6 +226,22 @@ class Pedido(BaseHTTPRequestHandler):
             return self.responder(200, {"estado": "ok", "servico": servico, "acao": acao, "mensagem": mensagem})
         erro = dados.get("message") if isinstance(dados, dict) else str(dados)
         return self.responder(409, {"erro": f"O Docker recusou: {erro}"})
+
+    # GET /logs?servico=web&linhas=200 — só lê; qualquer serviço deste projeto.
+    def logs(self, parametros):
+        servico = (parametros.get("servico") or [""])[0]
+        try:
+            linhas = max(10, min(int((parametros.get("linhas") or ["200"])[0]), 1000))
+        except ValueError:
+            linhas = 200
+        alvo = contentores().get(servico)
+        if not alvo:
+            return self.responder(404, {"erro": f"O serviço «{servico}» não existe neste projeto."})
+        try:
+            texto = logs_de(alvo["id"], linhas)
+        except Exception as erro:
+            return self.responder(502, {"erro": str(erro)})
+        self.responder(200, {"estado": "ok", "servico": servico, "linhas": texto})
 
     def log_message(self, formato, *args):
         pass  # os GET /estado de 2 em 2 segundos não enchem o log

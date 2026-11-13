@@ -35,6 +35,13 @@
 .nav .nav-grupo span{width:auto;flex:none;opacity:1;font-size:11px;transition:transform .15s}
 .nav .nav-grupo[aria-expanded="true"] span{transform:rotate(90deg)}
 #navApi[hidden]{display:none}
+.logs-filtros{display:grid;grid-template-columns:160px 100px 1fr auto;gap:12px;align-items:start}
+.logs-filtros label{margin-top:0}
+.logs-caixa{max-height:460px;font-size:11.5px;line-height:1.6}
+.logs-caixa .l-hora{color:#7fa592}
+.logs-caixa .l-erro{color:#ffb4a8}
+.logs-caixa .l-aviso{color:#f3d58a}
+@media(max-width:720px){.logs-filtros{grid-template-columns:1fr 1fr}}
 .login-equipa{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:20px}
 .login-equipa>div{flex:1 1 200px}
 .login-equipa label{margin-top:0}
@@ -70,6 +77,10 @@
 <div class="card space"><div class="row between"><h2>02 / Nós da base de dados</h2><div class="row"><label class="check-inline"><input type="checkbox" id="clusterAuto"> Atualizar a cada 2 s</label><button class="quiet" id="clusterRefresh">Atualizar agora</button></div></div><div id="clusterResumo" class="row space" style="gap:8px"></div><div id="clusterNos" class="nodes space"><p class="hint">Carrega em «Atualizar agora» para ler o estado de cada nó.</p></div></div>
 <div class="grid two space"><div class="card"><div class="row between"><h2>03 / Teste de continuidade</h2><span class="pill" id="contPill">Parado</span></div><p class="hint">Faz um pedido autenticado por segundo (<code>GET /api/me</code>, que lê e grava a sessão na base de dados). Inicia, desliga um nó no terminal e vê se aparece algum vermelho.</p><div class="row space"><button id="contStart">Iniciar teste</button><button class="quiet" id="contStop" disabled>Parar</button></div><div class="grid three space" style="gap:10px"><div class="card stat"><span>Pedidos</span><strong id="contTotal">0</strong></div><div class="card stat"><span>Falhas</span><strong id="contFalhas">0</strong></div><div class="card stat"><span>Maior paragem</span><strong id="contParagem">0 s</strong></div></div><div id="contStrip" class="strip" aria-label="Resultado de cada pedido, do mais antigo para o mais recente"></div><p class="hint" id="contUltimo"></p></div>
 <div class="card"><h2>04 / Simular falhas (no terminal)</h2><p class="hint">Corre na pasta do projeto. Com 3 nós, o cluster aguenta 1 em baixo sem parar; um nó que volta recebe sozinho o que perdeu.</p><div class="cmds" id="dockerCmds"></div></div></div>
+<div class="card space"><div class="row between"><h2>05 / Logs dos contentores</h2><div class="row"><label class="check-inline"><input type="checkbox" id="logsAuto"> Atualizar a cada 2 s</label><button class="quiet" id="logsAtualizar">Atualizar agora</button></div></div>
+<p class="hint">O que cada contentor está a escrever: arranques, sincronização do Galera, pedidos ao site e erros. As linhas mais recentes ficam no fim.</p>
+<div class="logs-filtros space"><div><label for="logsServico">Contentor</label><select id="logsServico"><option value="galera1">galera1</option><option value="galera2">galera2</option><option value="galera3">galera3</option><option value="web">web</option><option value="nginx">nginx</option><option value="controlo">controlo (árbitro)</option><option value="autoheal">autoheal</option><option value="backup">backup</option></select></div><div><label for="logsLinhas">Linhas</label><select id="logsLinhas"><option>50</option><option selected>150</option><option>500</option></select></div><div><label for="logsFiltro">Filtrar texto</label><input id="logsFiltro" placeholder="ex.: WSREP, error, POST" autocomplete="off"></div><label class="check-inline" style="align-self:end;padding-bottom:12px"><input type="checkbox" id="logsSemSaude" checked> Esconder verificações de saúde</label></div>
+<pre id="logsCaixa" class="response logs-caixa space">Escolhe um contentor e carrega em «Atualizar agora».</pre><p class="hint" id="logsInfo"></p></div>
 </section>
 </main></div></div><div id="toast" class="hidden" role="status"></div>
 <script>
@@ -436,6 +447,30 @@ function init(){
  $('navApiBotao').onclick=()=>mostrarApi($('navApi').hidden);
  let apiAberta=false;try{apiAberta=localStorage.getItem('painel-api')==='1';}catch{}
  mostrarApi(apiAberta);
+ // Logs dos contentores (GET /controlo/logs): só lê, não precisa de sessão.
+ const SAUDE=/\/api\/health|\/nginx-health|\/controlo\/estado|GET \/estado|GET \/api\/admin\/health/;
+ const hora=iso=>{const d=new Date(iso);return isNaN(d)?'':d.toLocaleTimeString('pt-PT');};
+ let logsTimer=null,logsALer=false;
+ async function lerLogs(){
+  if(logsALer)return;logsALer=true;
+  const caixa=$('logsCaixa'),servico=$('logsServico').value,noFim=caixa.scrollTop+caixa.clientHeight>=caixa.scrollHeight-30;
+  try{
+   const res=await fetch(urlControlo(`/controlo/logs?servico=${encodeURIComponent(servico)}&linhas=${$('logsLinhas').value}`),{cache:'no-store'});
+   const d=await res.json().catch(()=>({erro:'HTTP '+res.status}));
+   if(!res.ok)throw new Error(d.erro||'HTTP '+res.status);
+   const filtro=$('logsFiltro').value.trim().toLowerCase();
+   const linhas=d.linhas.filter(l=>!($('logsSemSaude').checked&&SAUDE.test(l))&&(!filtro||l.toLowerCase().includes(filtro)));
+   caixa.innerHTML=linhas.length?linhas.map(l=>{const m=l.match(/^(\S+Z)\s(.*)$/);const texto=(m?m[2]:l).replace(/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}\S*\s+/,'');const cls=/error|fatal|exception|denied|aborting|\[ERROR\]/i.test(texto)?'l-erro':/warn/i.test(texto)?'l-aviso':'';return `<span class="l-hora">${escapeHtml(m?hora(m[1]):'')}</span> <span class="${cls}">${escapeHtml(texto)}</span>`;}).join('\n'):'Sem linhas para mostrar (experimenta tirar o filtro).';
+   $('logsInfo').textContent=`${servico} · ${linhas.length} de ${d.linhas.length} linhas · atualizado às ${new Date().toLocaleTimeString('pt-PT')}`;
+   if(noFim)caixa.scrollTop=caixa.scrollHeight;
+  }catch(e){caixa.textContent=e.message==='Failed to fetch'?'Sem ligação ao contentor «controlo».':e.message;}
+  finally{logsALer=false;}
+ }
+ $('logsAtualizar').onclick=lerLogs;
+ for(const id of ['logsServico','logsLinhas','logsSemSaude'])$(id).addEventListener('change',()=>{$('logsCaixa').scrollTop=1e9;lerLogs();});
+ $('logsFiltro').addEventListener('input',lerLogs);
+ $('logsAuto').onchange=e=>{clearInterval(logsTimer);logsTimer=e.target.checked?setInterval(lerLogs,2000):null;if(e.target.checked)lerLogs();};
+ lerLogs();
  definirAoVivo(true);
  $('contStart').onclick=iniciarContinuidade;$('contStop').onclick=pararContinuidade;
  selectEndpoint('health');updateCounts();
