@@ -13,6 +13,9 @@
       try { guardado = localStorage.getItem('user'); } catch (e) {}
       if (!guardado) { location.replace('aluno/entrar.html'); return; }
       document.documentElement.classList.add('a-verificar');
+      // Se o servidor demorar (ex.: um nó da BD em baixo), mostra a página na mesma ao fim de 1,5 s
+      // em vez de a deixar em branco; se a sessão tiver acabado, o login aparece logo a seguir.
+      setTimeout(function () { document.documentElement.classList.remove('a-verificar'); }, 1500);
     })();
   </script>
 
