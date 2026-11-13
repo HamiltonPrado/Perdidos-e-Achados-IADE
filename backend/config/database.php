@@ -32,6 +32,15 @@ if (count($hosts) === 1) {
     return $ligar($hosts[0]);
 }
 
+// Lembra o último nó que funcionou e tenta-o primeiro nos pedidos seguintes.
+// Com um nó parado, o Docker demora mais de 3 s a dizer que o nome dele não existe
+// (o ATTR_TIMEOUT não conta esse tempo); sem isto, todos os pedidos pagavam esse atraso.
+$ficheiroUltimoNo = sys_get_temp_dir() . '/perdidos-achados-ultimo-no-bd';
+$ultimoNo = @file_get_contents($ficheiroUltimoNo);
+if (is_string($ultimoNo) && in_array($ultimoNo, $hosts, true)) {
+    $hosts = array_values(array_unique([$ultimoNo, ...$hosts]));
+}
+
 $soLeitura = null;
 $ultimoErro = null;
 
@@ -52,6 +61,9 @@ foreach ($hosts as $host) {
     }
 
     if (!$soLeituraNo) {
+        if ($host !== $ultimoNo) {
+            @file_put_contents($ficheiroUltimoNo, $host, LOCK_EX);
+        }
         return $pdo;
     }
 
