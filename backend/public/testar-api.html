@@ -267,7 +267,8 @@ const comandosDocker=[
 const docker={auto:null,aLer:false,correr:false,ticks:[]};
 const esperarMs=ms=>new Promise(r=>setTimeout(r,ms));
 async function lerCluster(){
- if(docker.aLer)return;docker.aLer=true;
+ // Durante os testes automáticos não lê o cluster: o login da equipa trocaria a sessão a meio de um teste.
+ if(docker.aLer||state.busy)return;docker.aLer=true;
  try{
   await ensure('admin');
   const res=await fetch(targetUrl('/api/health/cluster'),{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});

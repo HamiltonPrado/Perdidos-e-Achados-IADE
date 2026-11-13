@@ -282,6 +282,22 @@ CREATE TABLE `sessions` (
 -- --------------------------------------------------------
 
 --
+-- Estrutura da tabela `tentativas_login`
+-- Falhas de login recentes de cada email (5 em 15 minutos bloqueiam o email).
+--
+
+CREATE TABLE `tentativas_login` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `email` varchar(150) NOT NULL,
+  `falhou_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_tentativas_email` (`email`, `falhou_em`),
+  KEY `idx_tentativas_data` (`falhou_em`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura da tabela `users`
 --
 

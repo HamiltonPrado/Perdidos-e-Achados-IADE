@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/TentativaLogin.php';
 require_once __DIR__ . '/../helpers/resposta.php';
 require_once __DIR__ . '/../helpers/sessao.php';
 require_once __DIR__ . '/../middleware/autenticacao.php';
@@ -11,11 +12,13 @@ class AuthController
 {
     private PDO $pdo;
     private User $utilizadores;
+    private TentativaLogin $tentativas;
 
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
         $this->utilizadores = new User($pdo);
+        $this->tentativas = new TentativaLogin($pdo);
     }
 
     public function login(): void
@@ -68,14 +71,29 @@ class AuthController
             ], 422);
         }
 
+        // Limite de tentativas: conta por email, quer a conta exista quer não
+        // (assim a resposta não revela que emails estão registados).
+        $emailNormalizado = strtolower($email);
+        $espera = $this->tentativas->segundosBloqueado($emailNormalizado);
+
+        if ($espera > 0) {
+            header('Retry-After: ' . $espera);
+            responderJson([
+                'erro' => 'Demasiadas tentativas falhadas. Tenta outra vez daqui a '
+                    . max(1, (int) ceil($espera / 60)) . ' min.'
+            ], 429);
+        }
+
         $utilizador = $this->autenticar($email, $password);
 
         if ($utilizador === null) {
+            $this->tentativas->registarFalha($emailNormalizado);
             responderJson([
                 'erro' => 'Email ou password incorretos.'
             ], 401);
-
         }
+
+        $this->tentativas->limpar($emailNormalizado);
 
         try {
             iniciarSessao($this->pdo);
