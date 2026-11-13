@@ -8,19 +8,19 @@ require_once __DIR__ . '/../middleware/autenticacao.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../middleware/administrador.php';
 require_once __DIR__ . '/../validators/ItemValidator.php';
-require_once __DIR__ . '/../models/IaJob.php';
+require_once __DIR__ . '/../models/TarefaIa.php';
 class ItemController
 {
     private PDO $pdo;
     private Item $artigos;
 
-    private IaJob $filaIa;
+    private TarefaIa $filaIa;
 
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
         $this->artigos = new Item($pdo);
-        $this->filaIa = new IaJob($pdo);
+        $this->filaIa = new TarefaIa($pdo);
     }
 
     // Devolve os artigos pertencentes ao utilizador autenticado.

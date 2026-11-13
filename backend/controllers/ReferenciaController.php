@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../models/Category.php';
-require_once __DIR__ . '/../models/Location.php';
-require_once __DIR__ . '/../models/pontorecolha.php';
+require_once __DIR__ . '/../models/Categoria.php';
+require_once __DIR__ . '/../models/Local.php';
+require_once __DIR__ . '/../models/PontoRecolha.php';
 require_once __DIR__ . '/../helpers/resposta.php';
 
 class ReferenciaController
 {
-    private Category $categorias;
-    private Location $locais;
+    private Categoria $categorias;
+    private Local $locais;
     private PontoRecolha $pontosRecolha;
 
     public function __construct(PDO $pdo)
     {
-        $this->categorias = new Category($pdo);
-        $this->locais = new Location($pdo);
+        $this->categorias = new Categoria($pdo);
+        $this->locais = new Local($pdo);
         $this->pontosRecolha = new PontoRecolha($pdo);
     }
 

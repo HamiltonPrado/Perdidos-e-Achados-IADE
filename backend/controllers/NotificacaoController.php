@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../models/Notification.php';
+require_once __DIR__ . '/../models/Notificacao.php';
 require_once __DIR__ . '/../helpers/resposta.php';
 require_once __DIR__ . '/../middleware/autenticacao.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 
-class NotificationController
+class NotificacaoController
 {
     private PDO $pdo;
-    private Notification $notificacoes;
+    private Notificacao $notificacoes;
 
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
-        $this->notificacoes = new Notification($pdo);
+        $this->notificacoes = new Notificacao($pdo);
     }
 
     // Devolve apenas as notificações do utilizador autenticado.

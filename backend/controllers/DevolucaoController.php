@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../models/Item.php';
-require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Utilizador.php';
 require_once __DIR__ . '/../models/Devolucao.php';
 require_once __DIR__ . '/../models/Correspondencia.php';
 require_once __DIR__ . '/../validators/DevolucaoValidator.php';
@@ -11,7 +11,7 @@ require_once __DIR__ . '/../middleware/administrador.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../helpers/resposta.php';
 require_once __DIR__ . '/../models/PedidoLevantamento.php';
-require_once __DIR__ . '/../models/Notification.php';
+require_once __DIR__ . '/../models/Notificacao.php';
 
 require_once __DIR__ . '/devolucoes/DevolucaoManual.php';
 require_once __DIR__ . '/devolucoes/DevolucaoPorCodigo.php';
@@ -23,21 +23,21 @@ class DevolucaoController
 
     private PDO $pdo;
     private Item $artigos;
-    private User $utilizadores;
+    private Utilizador $utilizadores;
     private Devolucao $devolucoes;
     private Correspondencia $correspondencias;
     private PedidoLevantamento $pedidosLevantamento;
-    private Notification $notificacoes;
+    private Notificacao $notificacoes;
 
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
         $this->artigos = new Item($pdo);
-        $this->utilizadores = new User($pdo);
+        $this->utilizadores = new Utilizador($pdo);
         $this->devolucoes = new Devolucao($pdo);
         $this->correspondencias = new Correspondencia($pdo);
         $this->pedidosLevantamento = new PedidoLevantamento($pdo);
-        $this->notificacoes = new Notification($pdo);
+        $this->notificacoes = new Notificacao($pdo);
     }
 
     // Impede outras operações de alterarem os artigos enquanto prepara a entrega.

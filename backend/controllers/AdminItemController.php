@@ -7,7 +7,7 @@ require_once __DIR__ . '/../helpers/resposta.php';
 require_once __DIR__ . '/../middleware/administrador.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../validators/ItemValidator.php';
-require_once __DIR__ . '/../models/IaJob.php';
+require_once __DIR__ . '/../models/TarefaIa.php';
 require_once __DIR__ . '/../validators/RecepcaoValidator.php';
 require_once __DIR__ . '/../models/Reclamacao.php';
 require_once __DIR__ . '/artigos/AdminItemRececao.php';
@@ -21,13 +21,13 @@ class AdminItemController
     private PDO $pdo;
     private Item $artigos;
 
-    private IaJob $filaIa;
+    private TarefaIa $filaIa;
 
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
         $this->artigos = new Item($pdo);
-        $this->filaIa = new IaJob($pdo);
+        $this->filaIa = new TarefaIa($pdo);
     }
     // Permite à equipa administradora consultar todos os artigos.
     public function listarTodos(): void

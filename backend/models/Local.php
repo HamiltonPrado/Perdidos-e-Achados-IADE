@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class Location
+class Local
 {
     private PDO $pdo;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class IaJob
+class TarefaIa
 {
     private PDO $pdo;
 

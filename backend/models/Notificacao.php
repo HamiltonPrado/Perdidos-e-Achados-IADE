@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class Notification
+class Notificacao
 {
     private PDO $pdo;
 

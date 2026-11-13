@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers/sessao.php';
 require_once __DIR__ . '/../helpers/resposta.php';
-require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Utilizador.php';
 
 function exigirAutenticacao(PDO $pdo): array
 {
@@ -20,7 +20,7 @@ function exigirAutenticacao(PDO $pdo): array
         ], 401);
     }
 
-    $model = new User($pdo);
+    $model = new Utilizador($pdo);
 
     $utilizador = $model->procurarPorId($userId);
 

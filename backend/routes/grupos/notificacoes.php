@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 // Lista as notificações do utilizador autenticado.
 if ($metodo === 'GET' && $caminho === '/api/notifications') {
-    $controller = new NotificationController(obterLigacao());
+    $controller = new NotificacaoController(obterLigacao());
 
     $controller->listar();
 }
@@ -30,7 +30,7 @@ if (
         ], 404);
     }
 
-    $controller = new NotificationController(obterLigacao());
+    $controller = new NotificacaoController(obterLigacao());
 
     $controller->marcarLida($id);
 }

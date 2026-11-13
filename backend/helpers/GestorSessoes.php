@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class DatabaseSessionHandler implements
+class GestorSessoes implements
     SessionHandlerInterface,
     SessionUpdateTimestampHandlerInterface
 {

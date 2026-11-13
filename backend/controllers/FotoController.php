@@ -3,26 +3,26 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../models/Item.php';
-require_once __DIR__ . '/../models/ItemPhoto.php';
-require_once __DIR__ . '/../validators/PhotoValidator.php';
+require_once __DIR__ . '/../models/FotoItem.php';
+require_once __DIR__ . '/../validators/FotoValidator.php';
 require_once __DIR__ . '/../middleware/autenticacao.php';
 require_once __DIR__ . '/../middleware/csrf.php';
 require_once __DIR__ . '/../helpers/resposta.php';
-require_once __DIR__ . '/../models/IaJob.php';
+require_once __DIR__ . '/../models/TarefaIa.php';
 
-class PhotoController
+class FotoController
 {
     private PDO $pdo;
     private Item $artigos;
-    private ItemPhoto $fotografias;
-    private IaJob $filaIa;
+    private FotoItem $fotografias;
+    private TarefaIa $filaIa;
 
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
         $this->artigos = new Item($pdo);
-        $this->fotografias = new ItemPhoto($pdo);
-        $this->filaIa = new IaJob($pdo);
+        $this->fotografias = new FotoItem($pdo);
+        $this->filaIa = new TarefaIa($pdo);
     }
 
     // Adiciona uma fotografia a um artigo ativo.
@@ -32,7 +32,7 @@ class PhotoController
         exigirCsrf();
 
         // Verifica a fotografia antes de iniciar as alterações na base de dados.
-        $foto = PhotoValidator::lerFotografia();
+        $foto = FotoValidator::lerFotografia();
 
         try {
             $this->pdo->beginTransaction();

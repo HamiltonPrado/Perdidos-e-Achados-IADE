@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/sessionhandler.php';
+require_once __DIR__ . '/GestorSessoes.php';
 
 function iniciarSessao(PDO $pdo): void
 {
@@ -10,7 +10,7 @@ function iniciarSessao(PDO $pdo): void
         return;
     }
 
-    $handler = new DatabaseSessionHandler($pdo, 3600);
+    $handler = new GestorSessoes($pdo, 3600);
 
     session_name('IADESESSID');
 

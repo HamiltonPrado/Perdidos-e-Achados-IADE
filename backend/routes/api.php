@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../controllers/AuthController.php';
+require_once __DIR__ . '/../controllers/AutenticacaoController.php';
 require_once __DIR__ . '/../controllers/ReferenciaController.php';
 require_once __DIR__ . '/../middleware/administrador.php';
 require_once __DIR__ . '/../controllers/ItemController.php';
 require_once __DIR__ . '/../controllers/AdminItemController.php';
-require_once __DIR__ . '/../controllers/PhotoController.php';
+require_once __DIR__ . '/../controllers/FotoController.php';
 require_once __DIR__ . '/../controllers/DevolucaoController.php';
-require_once __DIR__ . '/../controllers/NotificationController.php';
+require_once __DIR__ . '/../controllers/NotificacaoController.php';
 require_once __DIR__ . '/../controllers/PedidoLevantamentoController.php';
 require_once __DIR__ . '/../controllers/ReclamacaoController.php';
 require_once __DIR__ . '/../controllers/EstadoBdController.php';

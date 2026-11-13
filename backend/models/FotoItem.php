@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class ItemPhoto
+class FotoItem
 {
     private PDO $pdo;
 

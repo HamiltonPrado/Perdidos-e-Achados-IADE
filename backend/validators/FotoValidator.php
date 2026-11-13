@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers/resposta.php';
 
-class PhotoValidator
+class FotoValidator
 {
     // Valida a fotografia enviada no campo "foto".
     public static function lerFotografia(): array

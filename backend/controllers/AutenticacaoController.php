@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Utilizador.php';
 require_once __DIR__ . '/../models/TentativaLogin.php';
 require_once __DIR__ . '/../helpers/resposta.php';
 require_once __DIR__ . '/../helpers/sessao.php';
 require_once __DIR__ . '/../middleware/autenticacao.php';
 
-class AuthController
+class AutenticacaoController
 {
     private PDO $pdo;
-    private User $utilizadores;
+    private Utilizador $utilizadores;
     private TentativaLogin $tentativas;
 
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
-        $this->utilizadores = new User($pdo);
+        $this->utilizadores = new Utilizador($pdo);
         $this->tentativas = new TentativaLogin($pdo);
     }
 
-    public function login(): void
+    public function entrar(): void
     {
         $tipoConteudo = strtolower(
             trim(explode(';', $_SERVER['CONTENT_TYPE'] ?? '')[0])
@@ -138,7 +138,7 @@ class AuthController
     }
 
     // Devolve os dados da conta que está com sessão iniciada neste browser.
-    public function me(): void
+    public function utilizadorAtual(): void
     {
         $utilizador = exigirAutenticacao($this->pdo);
 
@@ -149,7 +149,7 @@ class AuthController
     }
 
     // Confirma o código de segurança CSRF recebido e faz logout da conta.
-    public function logout(): void
+    public function sair(): void
     {
         iniciarSessao($this->pdo);
 

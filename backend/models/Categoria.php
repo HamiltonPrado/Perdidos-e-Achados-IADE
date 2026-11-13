@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class Category
+class Categoria
 {
     private PDO $pdo;
 

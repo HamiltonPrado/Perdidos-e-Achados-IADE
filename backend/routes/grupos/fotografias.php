@@ -23,7 +23,7 @@ if (
         ], 404);
     }
 
-    $controller = new PhotoController(obterLigacao());
+    $controller = new FotoController(obterLigacao());
 
     $controller->adicionar($id);
 }
@@ -49,7 +49,7 @@ if (
         ], 404);
     }
 
-    $controller = new PhotoController(obterLigacao());
+    $controller = new FotoController(obterLigacao());
 
     $controller->listar($id);
 }
@@ -75,7 +75,7 @@ if (
         ], 404);
     }
 
-    $controller = new PhotoController(obterLigacao());
+    $controller = new FotoController(obterLigacao());
 
     $controller->mostrar($id);
 }
@@ -101,7 +101,7 @@ if (
         ], 404);
     }
 
-    $controller = new PhotoController(obterLigacao());
+    $controller = new FotoController(obterLigacao());
 
     $controller->apagar($id);
 }

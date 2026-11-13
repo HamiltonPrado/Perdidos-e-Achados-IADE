@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class User
+class Utilizador
 {
     private PDO $pdo;
 
