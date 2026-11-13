@@ -3,13 +3,13 @@ import { getUser, isLoggedIn, isAdmin } from '../utilities/auth.js';
 import { esc, iniciais } from '../utilities/tools.js';
 import { logoHtml } from './logo.js';
 import { itemsService } from '../services/itemsService.js';
-// O sino de notificações (components/notificacoes.js) fica para a 3.ª entrega: não é montado na navbar.
+
 
 const LINKS = [
     ['inicio', url('index.html'), 'Explorar'],
-    ['procurar', url('aluno/procurar.html'), 'Encontrar'],
+    ['procurar', url('aluno/procurar.html'), 'Perdi Um Objecto'],
     ['publicar', url('aluno/publicar.html'), 'Publicar'],
-    ['meus-anuncios', url('aluno/meus-anuncios.html'), 'Meus anúncios'],
+    ['meus-anuncios', url('aluno/meus-anuncios.html'), 'Meus Anúncios'],
 ];
 
 const ICONE_MENU = 'M4 7h16M4 12h16M4 17h16';
