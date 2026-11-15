@@ -70,8 +70,10 @@ O backend atual não configura CORS. Uma interface noutra origem precisa de inte
 | --- | --- | --- | --- |
 | GET | `/api/health` | Público | Estado do PHP, sem abrir a BD |
 | GET | `/api/health/database` | Público | Verifica a ligação à BD |
-| POST | `/api/login` | Público | Inicia sessão e devolve `csrf_token` |
-| GET | `/api/me` | Sessão | `utilizador` autenticado |
+| POST | `/api/login` | Público | Inicia sessão e devolve `csrf_token`; 5 falhas em 15 min bloqueiam o email (429) |
+| GET | `/api/me` | Sessão | `utilizador` autenticado (inclui `foto`: endereço ou `null`) |
+| PATCH | `/api/me` | Sessão | Edita `nome` e a fotografia de perfil (`foto` ou `removerFoto=true`) |
+| GET | `/api/me/photo` | Sessão | Fotografia de perfil da conta |
 | POST | `/api/logout` | Sessão | Termina a sessão |
 | GET | `/api/admin/teste` | Admin | Verifica acesso da equipa |
 | GET | `/api/categories` | Público | Lista `categorias` |
@@ -360,6 +362,7 @@ Erros JSON usam `{"erro": "Mensagem"}`. Verifica o código HTTP antes de tratar 
 | 409 | Estado incompatível, repetição bloqueada ou conflito |
 | 415 | Tipo de conteúdo incorreto |
 | 422 | Campos ou associações inválidos |
+| 429 | Demasiadas tentativas de login falhadas (ver o cabeçalho `Retry-After`) |
 | 500 | Erro interno inesperado |
 | 503 | Falha reportada no acesso à BD ou na criação de sessão |
 

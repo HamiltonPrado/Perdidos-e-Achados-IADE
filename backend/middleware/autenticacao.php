@@ -42,10 +42,5 @@ function exigirAutenticacao(PDO $pdo): array
         );
     }
 
-    return [
-        'id' => (int) $utilizador['id'],
-        'nome' => $utilizador['nome'],
-        'email' => $utilizador['email'],
-        'role' => $utilizador['role'],
-    ];
+    return Utilizador::paraResposta($utilizador);
 }

@@ -308,6 +308,9 @@ CREATE TABLE `users` (
   `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `role` enum('user','admin') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'user',
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
+  `foto` mediumblob DEFAULT NULL,
+  `foto_mime` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `foto_atualizada_em` datetime DEFAULT NULL,
   `criado_em` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

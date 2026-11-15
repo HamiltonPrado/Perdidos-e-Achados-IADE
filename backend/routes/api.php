@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../controllers/AutenticacaoController.php';
+require_once __DIR__ . '/../controllers/PerfilController.php';
 require_once __DIR__ . '/../controllers/ReferenciaController.php';
 require_once __DIR__ . '/../middleware/administrador.php';
 require_once __DIR__ . '/../controllers/ItemController.php';
@@ -17,6 +18,7 @@ require_once __DIR__ . '/../controllers/EstadoBdController.php';
 // Carrega os grupos de rotas: cada grupo trata uma área, como artigos ou reclamações.
 require __DIR__ . '/grupos/saude.php';
 require __DIR__ . '/grupos/autenticacao.php';
+require __DIR__ . '/grupos/perfil.php';
 require __DIR__ . '/grupos/referencias.php';
 require __DIR__ . '/grupos/artigos.php';
 require __DIR__ . '/grupos/administracao.php';
