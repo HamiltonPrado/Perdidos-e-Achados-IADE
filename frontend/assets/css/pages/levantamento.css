@@ -8,7 +8,6 @@
   margin: 0 auto;
 }
 
-/* Ecrã 22 */
 .levantamento__aviso {
   display: flex;
   flex-direction: column;
@@ -44,7 +43,6 @@
   line-height: 1.6;
 }
 
-/* Ecrã 24 */
 .levantamento__cabecalho {
   display: flex;
   align-items: flex-end;

@@ -73,7 +73,7 @@
   }
 }
 
-/* Separador «Por levantar» (ecrã 10 do Figma) */
+/* Separador «Por levantar» */
 .separador--levantar.ativo {
   border-bottom-color: var(--cor-ok);
 }

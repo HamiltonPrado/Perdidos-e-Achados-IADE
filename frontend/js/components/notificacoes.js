@@ -4,7 +4,7 @@ import { RECECAO } from '../utilities/rececao.js';
 import { notificacoesService, paraData } from '../services/notificacoesService.js';
 import { itemsService } from '../services/itemsService.js';
 
-// Sino da navbar + painel lateral de notificações (ecrã 23 do Figma).
+// Sino da navbar + painel lateral de notificações.
 
 const ICONE_SINO = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
   <path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>`;
