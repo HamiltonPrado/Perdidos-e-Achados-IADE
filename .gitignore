@@ -32,3 +32,6 @@ Thumbs.db
 # Ficheiros compilados do Python
 __pycache__/
 *.pyc
+
+# Vídeos da entrega: passam o limite de 100 MB do GitHub (ficam só na pasta, para o zip da entrega)
+/Perdidos_e_Achados_IADE/03_Videos/*.mp4

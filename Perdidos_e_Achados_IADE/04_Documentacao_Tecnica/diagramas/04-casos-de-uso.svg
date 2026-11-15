@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1070" width="1400" height="1070" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M0,0 L10,5 L0,10" fill="none" stroke="#475569" stroke-width="1.5"/>
+    </marker>
+    <style>
+      .uc { fill: #ffffff; stroke: #334155; stroke-width: 1.6; }
+      .uc-aluno { fill: #eff6ff; stroke: #2563eb; }
+      .uc-equipa { fill: #fef3c7; stroke: #d97706; }
+      .uc-comum { fill: #f1f5f9; stroke: #475569; }
+      .uc-ia { fill: #f5f3ff; stroke: #7c3aed; stroke-dasharray: 6 4; }
+      .t { font-size: 15px; fill: #0f172a; text-anchor: middle; dominant-baseline: middle; }
+      .lig { stroke: #64748b; stroke-width: 1.3; fill: none; }
+      .rel { stroke: #475569; stroke-width: 1.3; fill: none; stroke-dasharray: 7 5; }
+      .est { font-size: 12.5px; font-style: italic; fill: #475569; text-anchor: middle; }
+      .ator { stroke: #0f172a; stroke-width: 2.2; fill: none; }
+      .nome { font-size: 16px; font-weight: 700; fill: #0f172a; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="1070" fill="#ffffff"/>
+
+  <!-- Título -->
+  <text x="700" y="34" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">Diagrama de casos de uso — Perdidos &amp; Achados IADE</text>
+
+  <!-- Ator secundário: modelo de IA (fase 2) -->
+  <rect x="610" y="58" width="180" height="46" rx="6" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.6" stroke-dasharray="6 4"/>
+  <text x="700" y="75" class="t" font-size="12">«sistema»</text>
+  <text x="700" y="93" class="t" font-weight="700">Modelo de IA (fase 2)</text>
+  <line x1="700" y1="104" x2="700" y2="158" class="lig"/>
+
+  <!-- Fronteira do sistema -->
+  <rect x="250" y="122" width="900" height="920" rx="10" fill="none" stroke="#0f172a" stroke-width="2"/>
+  <text x="268" y="146" font-size="16" font-weight="700" fill="#0f172a">Perdidos &amp; Achados IADE</text>
+
+  <!-- ===== Ligações dos atores (desenhadas primeiro, ficam por baixo) ===== -->
+  <!-- Aluno -->
+  <g class="lig">
+    <line x1="140" y1="470" x2="275" y2="200"/>
+    <line x1="140" y1="470" x2="275" y2="280"/>
+    <line x1="140" y1="470" x2="275" y2="360"/>
+    <line x1="140" y1="470" x2="275" y2="440"/>
+    <line x1="140" y1="470" x2="275" y2="520"/>
+    <line x1="140" y1="470" x2="315" y2="600"/>
+    <line x1="110" y1="486" x2="580" y2="830"/>
+    <line x1="110" y1="486" x2="580" y2="930"/>
+  </g>
+  <!-- Equipa da receção -->
+  <g class="lig">
+    <line x1="1260" y1="470" x2="1125" y2="200"/>
+    <line x1="1260" y1="470" x2="1125" y2="280"/>
+    <line x1="1260" y1="470" x2="1125" y2="360"/>
+    <line x1="1260" y1="470" x2="1125" y2="440"/>
+    <line x1="1260" y1="470" x2="1125" y2="520"/>
+    <line x1="1290" y1="486" x2="820" y2="830"/>
+    <line x1="1290" y1="486" x2="820" y2="930"/>
+  </g>
+
+  <!-- ===== Relações «include» / «extend» ===== -->
+  <!-- Sugerir objetos parecidos «extend» Registar objeto perdido -->
+  <path d="M590,205 L560,268" class="rel" marker-end="url(#seta)"/>
+  <text x="602" y="250" class="est">«extend»</text>
+  <!-- Confirmar entrada «include» Definir pergunta secreta -->
+  <path d="M845,205 L812,268" class="rel" marker-end="url(#seta)"/>
+  <text x="858" y="250" class="est">«include»</text>
+  <!-- Reclamar objeto «include» Responder à pergunta secreta -->
+  <path d="M566,440 L579,440" class="rel" marker-end="url(#seta)"/>
+  <text x="572" y="424" class="est">«include»</text>
+  <!-- Registar devolução «include» Validar código -->
+  <path d="M834,520 L822,520" class="rel" marker-end="url(#seta)"/>
+  <text x="828" y="504" class="est">«include»</text>
+
+  <!-- ===== Casos de uso do aluno (coluna esquerda) ===== -->
+  <g>
+    <ellipse cx="420" cy="200" rx="145" ry="32" class="uc uc-aluno"/><text x="420" y="200" class="t">Pesquisar e filtrar achados</text>
+    <ellipse cx="420" cy="280" rx="145" ry="32" class="uc uc-aluno"/><text x="420" y="280" class="t">Registar objeto perdido</text>
+    <ellipse cx="420" cy="360" rx="145" ry="32" class="uc uc-aluno"/><text x="420" y="360" class="t">Registar objeto achado</text>
+    <ellipse cx="420" cy="440" rx="145" ry="32" class="uc uc-aluno"/><text x="420" y="440" class="t">Reclamar um objeto</text>
+    <ellipse cx="420" cy="520" rx="145" ry="32" class="uc uc-aluno"/><text x="420" y="520" class="t">Pedir código de levantamento</text>
+    <ellipse cx="460" cy="600" rx="145" ry="32" class="uc uc-aluno"/>
+    <text x="460" y="591" class="t">Acompanhar os meus registos</text>
+    <text x="460" y="611" class="t" font-size="12.5" fill="#475569">(«Meus anúncios», «Já encontrei»)</text>
+  </g>
+
+  <!-- ===== Casos de uso de apoio (coluna central) ===== -->
+  <g>
+    <ellipse cx="700" cy="190" rx="118" ry="32" class="uc uc-ia"/><text x="700" y="190" class="t">Sugerir objetos parecidos</text>
+    <ellipse cx="700" cy="280" rx="118" ry="32" class="uc uc-equipa"/><text x="700" y="280" class="t">Definir pergunta secreta</text>
+    <ellipse cx="700" cy="440" rx="118" ry="32" class="uc uc-aluno"/><text x="700" y="440" class="t">Responder à pergunta secreta</text>
+    <ellipse cx="700" cy="520" rx="118" ry="32" class="uc uc-equipa"/><text x="700" y="520" class="t">Validar código de levantamento</text>
+  </g>
+
+  <!-- ===== Casos de uso da equipa (coluna direita) ===== -->
+  <g>
+    <ellipse cx="980" cy="200" rx="145" ry="32" class="uc uc-equipa"/><text x="980" y="200" class="t">Confirmar entrada de um achado</text>
+    <ellipse cx="980" cy="280" rx="145" ry="32" class="uc uc-equipa"/><text x="980" y="280" class="t">Registar achado na receção</text>
+    <ellipse cx="980" cy="360" rx="145" ry="32" class="uc uc-equipa"/>
+    <text x="980" y="351" class="t">Decidir reclamação</text>
+    <text x="980" y="371" class="t" font-size="12.5" fill="#475569">(aprovar, recusar, reabrir)</text>
+    <ellipse cx="980" cy="440" rx="145" ry="32" class="uc uc-equipa"/>
+    <text x="980" y="431" class="t">Gerir objetos</text>
+    <text x="980" y="451" class="t" font-size="12.5" fill="#475569">(editar, arquivar, inventário)</text>
+    <ellipse cx="980" cy="520" rx="145" ry="32" class="uc uc-equipa"/><text x="980" y="520" class="t">Registar devolução</text>
+  </g>
+
+  <!-- ===== Casos de uso comuns (em baixo) ===== -->
+  <g>
+    <ellipse cx="700" cy="830" rx="120" ry="32" class="uc uc-comum"/><text x="700" y="830" class="t">Iniciar / terminar sessão</text>
+    <ellipse cx="700" cy="930" rx="120" ry="32" class="uc uc-comum"/><text x="700" y="930" class="t">Editar perfil (nome e foto)</text>
+  </g>
+
+  <!-- ===== Atores ===== -->
+  <!-- Aluno -->
+  <g class="ator">
+    <circle cx="110" cy="420" r="16"/>
+    <line x1="110" y1="436" x2="110" y2="486"/>
+    <line x1="80" y1="452" x2="140" y2="452"/>
+    <line x1="110" y1="486" x2="86" y2="522"/>
+    <line x1="110" y1="486" x2="134" y2="522"/>
+  </g>
+  <text x="110" y="548" class="nome">Aluno</text>
+  <text x="110" y="566" class="est">(estudante, docente</text>
+  <text x="110" y="582" class="est">ou colaborador)</text>
+
+  <!-- Equipa da receção -->
+  <g class="ator">
+    <circle cx="1290" cy="420" r="16"/>
+    <line x1="1290" y1="436" x2="1290" y2="486"/>
+    <line x1="1260" y1="452" x2="1320" y2="452"/>
+    <line x1="1290" y1="486" x2="1266" y2="522"/>
+    <line x1="1290" y1="486" x2="1314" y2="522"/>
+  </g>
+  <text x="1290" y="548" class="nome">Equipa da</text>
+  <text x="1290" y="568" class="nome">receção</text>
+
+  <!-- Legenda -->
+  <g font-size="12.5" fill="#334155">
+    <rect x="270" y="1002" width="14" height="14" fill="#eff6ff" stroke="#2563eb"/><text x="290" y="1014">Aluno</text>
+    <rect x="345" y="1002" width="14" height="14" fill="#fef3c7" stroke="#d97706"/><text x="365" y="1014">Equipa da receção</text>
+    <rect x="490" y="1002" width="14" height="14" fill="#f1f5f9" stroke="#475569"/><text x="510" y="1014">Ambos</text>
+    <rect x="1000" y="1002" width="14" height="14" fill="#f5f3ff" stroke="#7c3aed" stroke-dasharray="3 2"/><text x="1020" y="1014">Fase 2 (desligada)</text>
+  </g>
+</svg>
