@@ -212,7 +212,7 @@ function linhaHtml(item) {
     </article>`;
 }
 
-// Ecrã 10 do Figma: objeto validado pela receção, à espera de ser levantado.
+
 function linhaLevantarHtml(reclamacao, item) {
   const foto = item?.fotos[0] ? `<img src="${esc(item.fotos[0])}" alt="">` : fotoVazia();
   const detalhes = [item?.referencia, reclamacao.pontoRecolha || RECECAO.local].filter(Boolean).join(' · ');
